@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: isyours-service
+  namespace: isyours
+spec:
+  selector:
+    app: isyours
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP

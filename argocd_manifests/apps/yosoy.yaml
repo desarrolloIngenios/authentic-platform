@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: yosoy
+  namespace: argocd
+spec:
+  project: authentic-platform
+  source:
+    repoURL: 'https://github.com/desarrolloIngenios/yosoy-deploy.git' # <-- update
+    targetRevision: main
+    path: k8s/yosoy
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: yosoy-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

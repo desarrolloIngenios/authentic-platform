@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authenticfarma-deployment
+  namespace: authenticfarma
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: authenticfarma
+  template:
+    metadata:
+      labels:
+        app: authenticfarma
+    spec:
+      containers:
+      - name: authenticfarma
+        image: gcr.io/authentic-prod-464216/authenticfarma:latest
+        ports:
+        - containerPort: 80

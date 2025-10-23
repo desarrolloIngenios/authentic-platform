@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: authentic-platform
+  namespace: argocd
+spec:
+  description: "Project for Authentic Platform apps (authenticfarma, yosoy, isyours)"
+  sourceRepos:
+    - 'https://github.com/desarrolloIngenios/*'
+  destinations:
+    - namespace: '*'
+      server: 'https://kubernetes.default.svc'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceBlacklist: []
+  orphanedResources:
+    warn: true

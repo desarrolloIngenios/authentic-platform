@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: authenticfarma
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/desarrolloIngenios/authentic-platform.git
+    targetRevision: main
+    path: infra/manifests/authenticfarma
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: authenticfarma
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moodle-elearning-deployment
+  namespace: moodle-elearning
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: moodle-elearning
+  template:
+    metadata:
+      labels:
+        app: moodle-elearning
+    spec:
+      containers:
+      - name: moodle-elearning
+        image: gcr.io/authentic-prod-464216/moodle-elearning:latest
+        ports:
+        - containerPort: 80

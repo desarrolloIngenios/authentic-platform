@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yosoy-deployment
+  namespace: yosoy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: yosoy
+  template:
+    metadata:
+      labels:
+        app: yosoy
+    spec:
+      containers:
+      - name: yosoy
+        image: gcr.io/authentic-prod-464216/yosoy:latest
+        ports:
+        - containerPort: 80
