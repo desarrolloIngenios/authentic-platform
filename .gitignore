@@ -1,0 +1,8 @@
+/vendor
+/node_modules
+.env
+.env.*
+/.vscode
+/.idea
+.DS_Store
+/mnt

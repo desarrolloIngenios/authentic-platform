@@ -1,0 +1,1 @@
+Agents IA skeleton (FastAPI or Python workers).

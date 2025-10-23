@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: authenticfarma
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'REPO_URL' # replace
+    targetRevision: main
+    path: k8s/base
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: authenticfarma-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
