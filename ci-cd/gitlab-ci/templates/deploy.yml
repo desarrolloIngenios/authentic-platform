@@ -1,0 +1,4 @@
+deploy_app:
+  stage: deploy
+  script:
+    - echo "Desplegando aplicación en GKE mediante ArgoCD..."

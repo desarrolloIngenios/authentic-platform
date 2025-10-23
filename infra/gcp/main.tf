@@ -1,24 +1,21 @@
-# GCP Terraform skeleton - modules to be implemented
-module "network" {
-  source = "../modules/network"
-  project_id = var.project_id
-  region = var.region
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 6.0"
+    }
+  }
+  backend "gcs" {
+    bucket = "authentic-tfstate"
+    prefix = "terraform/state"
+  }
+}
+
+provider "google" {
+  project = "authentic-prod-464216"
+  region  = "us-central1"
 }
 
 module "gke" {
-  source = "../modules/gke"
-  project_id = var.project_id
-  region = var.region
-}
-
-module "artifact_registry" {
-  source = "../modules/artifact-registry"
-  project_id = var.project_id
-  region = var.region
-}
-
-module "cloudsql" {
-  source = "../modules/cloudsql"
-  project_id = var.project_id
-  region = var.region
+  source = "../common"
 }

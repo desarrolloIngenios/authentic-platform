@@ -1,0 +1,7 @@
+stages:
+  - build
+  - deploy
+
+include:
+  - local: 'ci-cd/gitlab-ci/templates/build.yml'
+  - local: 'ci-cd/gitlab-ci/templates/deploy.yml'

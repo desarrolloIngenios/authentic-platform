@@ -1,1 +1,1 @@
-Agents IA skeleton (FastAPI or Python workers).
+# Agents - Microservicios IA para reclutamiento inteligente

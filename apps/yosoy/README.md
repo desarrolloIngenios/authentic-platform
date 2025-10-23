@@ -1,1 +1,1 @@
-App YoSoy - coloca aquí tu proyecto Laravel.
+# yosoy - Aplicación Laravel para el dominio correspondiente

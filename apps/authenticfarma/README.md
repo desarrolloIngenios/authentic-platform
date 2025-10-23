@@ -1,1 +1,1 @@
-App AuthenticFarma - coloca aquí tu proyecto Laravel.
+# authenticfarma - Aplicación Laravel para el dominio correspondiente

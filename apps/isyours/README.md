@@ -1,1 +1,1 @@
-App IsYours - coloca aquí tu proyecto Laravel.
+# isyours - Aplicación Laravel para el dominio correspondiente
