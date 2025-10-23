@@ -1,11 +1,10 @@
-# authentic-platform (skeleton)
-Repositorio monorepo base para Authentic: AuthenticFarma, YoSoy, IsYours, Moodle y agentes IA.
-Contiene: apps skeleton, infra (Terraform) para GCP/AWS, k8s manifests, y pipeline GitLab CI + ArgoCD manifests.
+# Authentic Platform
+Ecosistema de soluciones digitales para empleabilidad, salud y turismo, desarrollado por Authentic.
 
-**Placeholders to replace**:
-- PROJECT_ID: authentic-prod
-- REGION: us-central1
-- DOMAIN: empleabilidad.example.com
-- REPO_URL: git@github.com:authentic/authentic-platform.git
+## Estructura
+- **apps/**: Aplicaciones por dominio (Farma, YoSoy, IsYours, eLearning, Agentes IA)
+- **infra/**: Infraestructura como código (Terraform + Kubernetes)
+- **ci-cd/**: Flujos de integración y despliegue (GitLab + ArgoCD)
+- **docs/**: Documentación técnica y de arquitectura
+- **scripts/**: Scripts de build, deploy y migraciones
 
-Sigue la documentación en `docs/` para personalizar cada módulo.
