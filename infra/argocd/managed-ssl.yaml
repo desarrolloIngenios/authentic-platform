@@ -1,0 +1,17 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: argocd-ssl-cert
+  namespace: argocd
+spec:
+  domains:
+    - argo.authenticfarma.com
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeAddress
+metadata:
+  name: argocd-ip
+  namespace: argocd
+spec:
+  location: global
+  description: "Static IP for ArgoCD HTTPS ingress"
