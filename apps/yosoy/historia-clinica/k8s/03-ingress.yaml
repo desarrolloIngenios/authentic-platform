@@ -1,0 +1,52 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: historia-clinicas-ingress
+  namespace: historia-clinicas
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/ingress.global-static-ip-name: "historia-clinicas-ip"
+    networking.gke.io/managed-certificates: "historia-clinicas-ssl"
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  tls:
+  - hosts:
+    - hc.yo-soy.co
+    secretName: historia-clinicas-tls
+  rules:
+  - host: hc.yo-soy.co
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: historia-clinicas-frontend
+            port:
+              number: 8080
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: historia-clinicas-ssl
+  namespace: historia-clinicas
+spec:
+  domains:
+    - hc.yo-soy.co
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: historia-clinicas-ingress-service
+  namespace: historia-clinicas
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: historia-clinicas-frontend

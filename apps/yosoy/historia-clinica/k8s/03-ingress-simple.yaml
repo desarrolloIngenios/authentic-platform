@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: historia-clinicas-ingress
+  namespace: historia-clinicas
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "historia-clinicas-ip"
+    kubernetes.io/ingress.allow-http: "true"
+spec:
+  rules:
+  - host: hc.yo-soy.co
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: historia-clinicas-frontend
+            port:
+              number: 8080

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: historia-clinicas-lb
+  namespace: historia-clinicas
+  annotations:
+    cloud.google.com/load-balancer-type: "External"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: historia-clinicas-frontend

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: historia-clinicas
+  labels:
+    name: historia-clinicas
+    app: historia-clinicas
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: historia-clinicas-config
+  namespace: historia-clinicas
+data:
+  ENVIRONMENT: "production"
+  APP_NAME: "Historia Clinicas"
+  DOMAIN: "hc.yo-soy.co"
