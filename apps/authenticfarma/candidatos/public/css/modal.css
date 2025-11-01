@@ -1,0 +1,469 @@
+/* Variables CSS para consistencia */
+:root {
+  --modal-primary: #2563eb;
+  --modal-primary-hover: #1d4ed8;
+  --modal-success: #10b981;
+  --modal-success-hover: #059669;
+  --modal-danger: #ef4444;
+  --modal-danger-hover: #dc2626;
+  --modal-text: #1f2937;
+  --modal-text-secondary: #6b7280;
+  --modal-bg: #ffffff;
+  --modal-border: #e5e7eb;
+  --modal-shadow: rgba(0, 0, 0, 0.1);
+  --modal-backdrop: rgba(0, 0, 0, 0.5);
+  --modal-radius: 12px;
+  --modal-radius-sm: 8px;
+  /* --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; */
+  font-family: 'Quicksand', sans-serif;
+}
+
+/* Overlay del modal */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--modal-backdrop);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: var(--font-primary);
+  padding: 1rem;
+}
+
+.custom-modal-overlay.show {
+  display: flex;
+}
+
+/* Contenedor del modal */
+.custom-modal {
+  background: var(--modal-bg);
+  border-radius: var(--modal-radius);
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 
+    0 25px 50px -12px var(--modal-shadow),
+    0 0 0 1px var(--modal-border);
+  opacity: 0;
+  transform: scale(0.95) translateY(20px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--font-primary);
+  position: relative;
+}
+
+/* Animación para mostrar modal */
+.custom-modal-overlay.show .custom-modal {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Encabezado mejorado */
+.custom-modal-header {
+  background: white;
+  color: var(--modal-text);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--modal-border);
+  position: relative;
+}
+
+.custom-modal-header h2,
+.custom-modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--modal-text);
+  letter-spacing: -0.025em;
+}
+
+/* Botón cerrar mejorado */
+.custom-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--modal-text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--modal-radius-sm);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-left: 1rem;
+}
+
+.custom-modal-close:hover {
+  background: #f3f4f6;
+  color: var(--modal-text);
+  transform: scale(1.1);
+}
+
+.custom-modal-close:active {
+  transform: scale(0.95);
+}
+
+/* Cuerpo del modal */
+.custom-modal-body {
+  padding: 2rem;
+  font-size: 0.875rem;
+  color: #000;
+  line-height: 1.6;
+  background: var(--modal-bg);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Scrollbar personalizada */
+.custom-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.custom-modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.custom-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Footer del modal */
+.custom-modal-footer {
+  padding: 0.5rem 2rem;
+  background: #f8fafc;
+  border-top: 1px solid var(--modal-border);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Sistema de botones mejorado */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: var(--modal-radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  min-height: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Botón primario */
+.btn-primary {
+  background: var(--modal-primary);
+  color: white;
+  border-color: var(--modal-primary);
+  box-shadow: 0 1px 2px 0 var(--modal-shadow);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--modal-primary-hover);
+  border-color: var(--modal-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px 0 rgba(37, 99, 235, 0.4);
+}
+
+/* Botón secundario */
+.btn-secondary {
+  background: var(--modal-success);
+  color: white;
+  border-color: var(--modal-success);
+  box-shadow: 0 1px 2px 0 var(--modal-shadow);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--modal-success-hover);
+  border-color: var(--modal-success-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px 0 rgba(16, 185, 129, 0.4);
+}
+
+/* Botón de cancelar */
+.btn-outline {
+  background: white;
+  color: var(--modal-text-secondary);
+  border-color: var(--modal-border);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: #f9fafb;
+  color: var(--modal-text);
+  border-color: #d1d5db;
+}
+
+/* Botón de eliminar */
+.btn-danger {
+  background: var(--modal-danger);
+  color: white;
+  border-color: var(--modal-danger);
+  box-shadow: 0 1px 2px 0 var(--modal-shadow);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--modal-danger-hover);
+  border-color: var(--modal-danger-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px 0 rgba(239, 68, 68, 0.4);
+}
+
+/* Formularios mejorados */
+.form-floating-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.form-floating-group input,
+.form-floating-group select {
+  width: 100%;
+  padding: 1rem 0.75rem 0.5rem;
+  border: 2px solid var(--modal-border);
+  border-radius: var(--modal-radius-sm);
+  font-size: 0.875rem;
+  background: white;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.form-floating-group input:focus,
+.form-floating-group select:focus {
+  outline: none;
+  border-color: var(--modal-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-floating-group .floating-label {
+  position: absolute;
+  left: 0.75rem;
+  top: 1rem;
+  color: var(--modal-text-secondary);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  background: white;
+  padding: 0 0.25rem;
+}
+
+.form-floating-group input:focus + .floating-label,
+.form-floating-group input:not(:placeholder-shown) + .floating-label,
+.form-floating-group select:focus + .floating-label,
+.form-floating-group select:valid + .floating-label {
+  top: -0.5rem;
+  left: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--modal-primary);
+  font-weight: 500;
+}
+
+/* Checkbox mejorado */
+.form-floating-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--modal-text);
+  margin-bottom: 0;
+}
+
+.form-floating-group input[type="checkbox"] {
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 2px solid var(--modal-border);
+  border-radius: 4px;
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  appearance: none;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.form-floating-group input[type="checkbox"]:checked {
+  background: var(--modal-primary);
+  border-color: var(--modal-primary);
+}
+
+.form-floating-group input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* Tamaños de modal */
+.custom-modal--small {
+  max-width: 400px;
+}
+
+.custom-modal--medium {
+  max-width: 540px;
+}
+
+.custom-modal--large {
+  max-width: 768px;
+}
+
+.custom-modal--xlarge {
+  max-width: 1024px;
+}
+
+/* Grid responsivo mejorado */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -0.75rem;
+}
+
+.col-12,
+.col-md-6 {
+  padding: 0 0.75rem;
+}
+
+.col-12 {
+  flex: 0 0 100%;
+}
+
+.col-md-6 {
+  flex: 0 0 100%;
+}
+
+@media (min-width: 768px) {
+  .col-md-6 {
+    flex: 0 0 50%;
+  }
+}
+
+/* Responsive design mejorado */
+@media (max-width: 640px) {
+  .custom-modal-overlay {
+    padding: 0.5rem;
+  }
+  
+  .custom-modal {
+    max-width: none;
+    width: 100%;
+    max-height: 95vh;
+    border-radius: var(--modal-radius-sm);
+  }
+
+  .custom-modal-header {
+    padding: 1rem 1.5rem;
+  }
+
+  .custom-modal-header h2,
+  .custom-modal-title {
+    font-size: 1.125rem;
+  }
+
+  .custom-modal-body {
+    padding: 1.5rem;
+    max-height: 50vh;
+  }
+
+  .custom-modal-footer {
+    padding: 0.5rem 1rem;
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+
+  .custom-modal-footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .row {
+    margin: -0.5rem;
+  }
+
+  .col-12,
+  .col-md-6 {
+    padding: 0 0.5rem;
+    flex: 0 0 100%;
+  }
+}
+
+/* Estados de carga */
+.btn.loading {
+  color: transparent;
+  pointer-events: none;
+}
+
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .custom-modal-overlay,
+  .custom-modal,
+  .btn,
+  .form-floating-group input,
+  .form-floating-group select,
+  .floating-label {
+    transition: none;
+  }
+  
+  .btn.loading::after {
+    animation: none;
+  }
+}

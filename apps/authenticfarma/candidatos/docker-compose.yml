@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: dockerfile
+        ports:
+            - "8080:80"
+        environment:
+            APP_KEY: "base64:2B+X3GkxqXKnwALjRyu9vBw2blsnCvNn+zGmAjG5UFo="
+            APP_NAME: "Authentic-candidatos"
+            APP_ENV: "local"
+            APP_DEBUG: "true"
+            APP_URL: "http://localhost:8080"
+            LOG_CHANNEL: "stack"
+            DB_CONNECTION: "mysql"
+            DB_HOST: "host.docker.internal"
+            DB_PORT: "3306"
+            DB_DATABASE: "authentic"
+            DB_USERNAME: "root"
+            DB_PASSWORD: ""
+            BROADCAST_DRIVER: "log"
+            CACHE_DRIVER: "database"
+            QUEUE_CONNECTION: "sync"
+            SESSION_DRIVER: "database"
+            SESSION_LIFETIME: "120"
+            SESSION_DOMAIN: "localhost"
+            SESSION_COOKIE: "authentic_session"
+            SESSION_SECURE_COOKIE: "false"
+            MAIL_MAILER: "smtp"
+            MAIL_HOST: "smtp.gmail.com"
+            MAIL_PORT: "587"
+            MAIL_USERNAME: "stack.dev@authentic.com.co"
+            MAIL_PASSWORD: "jghyucgufeahimyn"
+            MAIL_ENCRYPTION: "tls"
+            MAIL_FROM_ADDRESS: "activacion@authenticfarma.com"
+            MAIL_FROM_NAME: "Authentic Farma"
+            GOOGLE_CLOUD_PROJECT_ID: "authenticfarma-QA"
+            GOOGLE_CLOUD_STORAGE_BUCKET: "backups-qa"
+            GOOGLE_CLOUD_STORAGE_PATH_PREFIX: "null"
+            GOOGLE_CLOUD_STORAGE_API_URI: "null"
+            GOOGLE_CLOUD_KEY_FILE: "keys/gcs-key.json"
+            PUSHER_APP_ID: ""
+            PUSHER_APP_KEY: ""
+            PUSHER_APP_SECRET: ""
+            PUSHER_APP_CLUSTER: "mt1"
+            GOOGLE_CLIENT_ID: "1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com"
+            GOOGLE_CLIENT_SECRET: "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"
+            GOOGLE_REDIRECT: "http://localhost:8080/google-auth/callback"
+        volumes:
+            - ./:/var/www/html
+            - ./keys:/var/www/html/keys

@@ -1,0 +1,383 @@
+.vacantes-container {
+    padding: 30px;
+    background-color: transparent;
+}
+
+.vacantes-header {
+    margin: 0 auto 20px auto;
+    width: 90%;
+    
+}
+
+.vacantes-header h3 {
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+    
+}
+
+/* Filtros */
+.filtros-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.filtro {
+    flex: 1 1 150px;
+    min-width: 150px;
+}
+
+
+.filtro_creacion {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+    transition: border-color 0.2s ease;
+}
+.filtro_creacion:focus {
+    outline: none;
+    border-color: #00a86b;
+    box-shadow: 0 0 5px rgba(0, 168, 107, 0.3);
+}
+
+.filtro input,
+.filtro select {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+    transition: border-color 0.2s ease;
+}
+
+.filtro input:focus,
+.filtro select:focus {
+    outline: none;
+    border-color: #00a86b;
+    box-shadow: 0 0 5px rgba(0, 168, 107, 0.3);
+}
+
+/* Chips de filtros activos */
+#filtros-activos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 25px;
+}
+
+.chip {
+    background: #00a86b;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: default;
+}
+
+.chip span {
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Lista de vacantes */
+.vacantes-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Tarjeta de vacante */
+.vacante-card {
+    width: 100%;
+    max-width: 90%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    box-sizing: border-box;
+    transition: box-shadow 0.2s ease;
+    margin: 0 auto;
+}
+
+.vacante-card:hover {
+    box-shadow: 0 0 10px rgba(0, 168, 107, 0.5);
+}
+
+/* Columna 1 */
+.vacante-col1 {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    min-width: 0;
+}
+
+.vacante-logo {
+    aspect-ratio: 1 / 1;
+    width: 90%;
+    max-width: 100px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vacante-logo img {
+    max-width: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.vacante-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.vacante-info h4 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 5px;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vacante-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Columna 2 */
+.vacante-col2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    flex: 1 1 auto;
+    max-width: 450px;
+    min-width: 0;
+    flex-wrap: nowrap;
+}
+
+.vacante-centro {
+    flex: 1;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #00a86b;
+    white-space: nowrap;
+}
+
+.vacante-botones {
+    display: flex;
+    gap: 12px;
+    flex: 1 1 auto; 
+    min-width: 0; 
+}
+
+.btn-vacante {
+    flex: 1 1 0;
+    min-width: 120px; 
+    max-width: 48%; 
+    padding: 12px 0;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-aplicar {
+    color: #fff;
+    background-color: #00a86b;
+    transition: background-color 0.5s, transform 0.5s;
+}
+
+.btn-aplicar:hover {
+    color: #fff;
+    background-color: #00945e;
+    transform: translateY(-5px);
+    
+}
+
+.btn-ver {
+    color: #fff;
+    background-color: #0057b8;
+    transition: background-color 0.5s, transform 0.5s;
+}
+
+.btn-ver:hover {
+    color: #fff;
+    background-color: #004b9c;
+    transform: translateY(-5px);
+}
+
+/* Responsive para móviles */
+@media (max-width: 576px) {
+    .vacante-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px 10px;
+    }
+
+    .vacante-col1 {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .vacante-info h4,
+    .vacante-info p {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        font-size: 16px;
+    }
+
+    .vacante-col2 {
+        flex-direction: column;
+        align-items: stretch;
+        max-width: 100%;
+        gap: 12px;
+    }
+
+    .vacante-centro {
+        width: 100%;
+        text-align: left;
+        white-space: normal;
+        margin-bottom: 10px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .vacante-botones {
+        width: 100%;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: nowrap;
+    }
+
+    .btn-vacante {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 16px;
+        padding: 14px 0;
+        max-width: none;
+        border-radius: 10px;
+    }
+
+    .vacante-logo {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* Breakpoint para tablets */
+@media (min-width: 577px) and (max-width: 768px) {
+    .vacante-card {
+        max-width: 100%;
+        padding: 18px 15px;
+    }
+
+    .vacante-col1 {
+        flex: 1.2;
+    }
+
+    .vacante-col2 {
+        max-width: 350px;
+        flex-wrap: wrap;
+    }
+
+    .btn-vacante {
+        font-size: 15px;
+        min-width: 130px;
+        max-width: 48%;
+        padding: 12px 0;
+    }
+}
+
+
+.boton-search {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.boton-search input {
+  flex: 1;
+  padding: 10px;
+  font-size: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #fff;
+  font-family: 'Quicksand', sans-serif;
+  color: #101010;
+  transition: all 0.3s ease;
+  height: 44px;
+  margin-bottom: 0;
+  box-sizing: border-box;
+}
+
+.boton-search input:focus {
+  border-color: #00a86b;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.1);
+}
+
+.btn-buscar {
+  padding: 10px 16px;
+  font-size: 18px;
+  border: 2px solid #e0e0e0;
+  border-left: none; /* Eliminar borde izquierdo para unir con el input */
+  background-color: #00a86b;
+  color: white;
+  border-radius: 0 10px 10px 0; /* Bordes redondeados solo en la derecha */
+  font-family: 'Quicksand', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  height: 44px;
+  white-space: nowrap;
+}
+
+.btn-buscar:hover {
+  background-color: #008f5a;
+}
+
+#btn-restaurar-filtros{
+    background-color: #00a86b;
+    color: white;
+}

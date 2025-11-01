@@ -1,0 +1,8 @@
+.env
+node_modules
+vendor
+*.log
+.git
+.gitignore
+.DS_Store
+*.sqlite

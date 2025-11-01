@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+    <!-- Background pattern -->
+    <defs>
+        <pattern id="grid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1" fill="#f0f0f0"/>
+        </pattern>
+    </defs>
+    <rect width="800" height="600" fill="url(#grid)"/>
+    
+    <!-- 404 Text -->
+    <text x="400" y="200" font-family="Quicksand" font-size="120" font-weight="bold" text-anchor="middle" fill="#0057b8">4</text>
+    <text x="400" y="200" font-family="Quicksand" font-size="120" font-weight="bold" text-anchor="middle" fill="#00a86b" transform="translate(80,0)">0</text>
+    <text x="400" y="200" font-family="Quicksand" font-size="120" font-weight="bold" text-anchor="middle" fill="#0057b8" transform="translate(160,0)">4</text>
+    
+    <!-- Decorative Elements -->
+    <circle cx="300" cy="350" r="20" fill="#00a86b" opacity="0.3"/>
+    <circle cx="500" cy="350" r="15" fill="#0057b8" opacity="0.3"/>
+    <circle cx="400" cy="400" r="25" fill="#00a86b" opacity="0.2"/>
+    
+    <!-- Abstract lines -->
+    <path d="M250,300 C300,250 350,350 400,300 S450,250 500,300" stroke="#0057b8" fill="none" stroke-width="3" opacity="0.5"/>
+    <path d="M250,320 C300,270 350,370 400,320 S450,270 500,320" stroke="#00a86b" fill="none" stroke-width="3" opacity="0.5"/>
+</svg>

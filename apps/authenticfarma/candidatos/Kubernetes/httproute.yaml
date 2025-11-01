@@ -1,0 +1,40 @@
+# routes.yaml - Configuración de enrutamiento HTTP
+# 1. HTTPRoute principal - Enruta tráfico HTTPS a la aplicación
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: candidatos-route
+  namespace: authenticfarma
+spec:
+  parentRefs:
+  - name: candidatos-gateway
+    namespace: authenticfarma
+    sectionName: https  # Especificar que va al listener HTTPS
+  hostnames:
+  - candidatos.authenticfarma.com
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: authentic-candidatos-service
+      port: 80
+---
+# 2. HTTPRoute para redirección HTTP -> HTTPS
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: candidatos-http-redirect
+  namespace: authenticfarma
+spec:
+  parentRefs:
+  - name: candidatos-gateway
+    namespace: authenticfarma
+    sectionName: http  # Especificar que va al listener HTTP
+  rules:
+  - filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentic-platform
+  labels:
+    app: authentic-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: authentic-platform
+  template:
+    metadata:
+      labels:
+        app: authentic-platform
+    spec:
+      containers:
+      - name: authentic-platform
+        image: us-central1-docker.pkg.dev/authentic-prod/authentic-platform/authentic-platform:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: APP_ENV
+          value: "production"
+        - name: APP_DEBUG
+          value: "false"
+        - name: APP_KEY
+          valueFrom:
+            secretKeyRef:
+              name: laravel-secret
+              key: app-key

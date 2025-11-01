@@ -1,0 +1,177 @@
+.form-floating-group {
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.form-floating-group input,
+.form-floating-group select,
+.form-floating-group textarea {
+  width: 100%;
+  padding: 16px 12px;
+  font-size: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #fff;
+  font-family: 'Quicksand', sans-serif;
+  color: #101010;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 44px;
+}
+
+.form-floating-group2 {
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.form-floating-group2 input,
+.form-floating-group2 select,
+.form-floating-group2 textarea {
+  width: 90%;
+  padding: 16px 12px;
+  font-size: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #fff;
+  font-family: 'Quicksand', sans-serif;
+  color: #101010;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 44px;
+}
+
+/* Altura mínima más grande para textarea */
+.form-floating-group textarea {
+  min-height: 100px;
+}
+
+/* Estilos al enfocar */
+.form-floating-group input:focus,
+.form-floating-group select:focus,
+.form-floating-group textarea:focus {
+  border-color: #00a86b;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.1);
+}
+
+/* Etiqueta flotante */
+.floating-label {
+  position: absolute;
+  top: 16px;
+  left: 12px;
+  font-size: 15px;
+  color: #777;
+  background: #fff;
+  padding: 0 4px;
+  pointer-events: none;
+  transition: 0.2s ease all;
+}
+
+/* Mover etiqueta si hay foco o contenido */
+.form-floating-group input:focus + .floating-label,
+.form-floating-group input:not(:placeholder-shown) + .floating-label,
+.form-floating-group select:focus + .floating-label,
+.form-floating-group select:valid + .floating-label,
+.form-floating-group textarea:focus + .floating-label,
+.form-floating-group textarea:not(:placeholder-shown) + .floating-label {
+  top: -10px;
+  left: 10px;
+  font-size: 12px;
+  color: #00a86b;
+}
+
+/* Divider de secciones */
+.form-section-divider {
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+  line-height: 0.1em;
+  margin: 40px 0 30px;
+  position: relative;
+}
+
+.form-section-divider span {
+  background: #fff;
+  padding: 0 15px;
+  font-weight: bold;
+  color: #0057b8;
+  font-size: 16px;
+}
+
+/* Checkbox en modales */
+.custom-modal-body label {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.95rem;
+  color: #444;
+  cursor: pointer;
+  user-select: none;
+}
+
+.custom-modal-body input[type="checkbox"] {
+  margin-right: 8px;
+  transform: scale(1.15);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+/* Ajuste para inputs de detalles de producto en modales de planes */
+#modalEditarPlan #detailsContainerEdit .form-floating-group2 input.detail-input,
+#modalCrearPlan #detailsContainer .form-floating-group2 input.detail-input {
+    width: 90%;
+    flex: 1 1 auto;
+    min-width: 120px;
+    max-width: 100%;
+    min-height: 38px;
+    height: 38px;
+    padding: 0.5rem 0.75rem;
+    box-sizing: border-box;
+    margin: 0;
+    display: inline-block;
+}
+#modalEditarPlan #detailsContainerEdit .form-floating-group2 .btn-remove-detail,
+#modalCrearPlan #detailsContainer .form-floating-group2 .btn-remove-detail {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    max-width: 38px;
+    max-height: 38px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 1.2rem;
+    background: #f44336;
+    color: #fff;
+    border: none;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 6px rgba(244,67,54,0.08);
+    flex-shrink: 0;
+    margin: 0;
+}
+@media (max-width: 500px) {
+  #modalEditarPlan #detailsContainerEdit .form-floating-group2,
+  #modalCrearPlan #detailsContainer .form-floating-group2 {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.3rem !important;
+  }
+  #modalEditarPlan #detailsContainerEdit .form-floating-group2 input.detail-input,
+  #modalCrearPlan #detailsContainer .form-floating-group2 input.detail-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  #modalEditarPlan #detailsContainerEdit .form-floating-group2 .btn-remove-detail,
+  #modalCrearPlan #detailsContainer .form-floating-group2 .btn-remove-detail {
+    margin-top: 0.3rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    justify-content: center !important;
+  }
+}
+

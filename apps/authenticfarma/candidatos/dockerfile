@@ -1,0 +1,75 @@
+FROM --platform=linux/amd64 php:8.2-fpm
+
+# Set working directory
+WORKDIR /var/www
+
+# Instalador de extensiones PHP
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
+    install-php-extensions mbstring pdo_mysql zip exif pcntl gd bcmath intl
+
+# Dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    curl \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libz-dev \
+    supervisor \
+    nginx \
+    cron \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Instalar Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Crear usuario Laravel
+RUN groupadd -g 1000 www && useradd -u 1000 -ms /bin/bash -g www www
+
+# Copiar composer.json y composer.lock
+COPY composer.json composer.lock ./
+
+# 🔎 Instalar dependencias Laravel con más detalle y sin límite de memoria
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-plugins --no-scripts --prefer-dist --optimize-autoloader --no-dev || \
+    (cat /var/www/composer.json && cat /var/www/composer.lock && exit 1)
+
+# Copiar el resto del código
+COPY --chown=www:www . /var/www
+
+# Permisos
+RUN chmod -R ug+w /var/www/storage /var/www/bootstrap/cache
+
+# Configuración
+RUN cp docker/supervisor.conf /etc/supervisord.conf
+RUN cp docker/php.ini /usr/local/etc/php/conf.d/app.ini
+RUN cp docker/nginx.conf /etc/nginx/sites-enabled/default
+
+# Logs PHP
+RUN mkdir -p /var/log/php && \
+    touch /var/log/php/errors.log && chmod 777 /var/log/php/errors.log
+
+# Cron Laravel
+RUN echo '* * * * * cd /var/www && php artisan schedule:run >> /dev/null 2>&1' > /etc/cron.d/laravel-cron \
+    && chmod 0644 /etc/cron.d/laravel-cron \
+    && crontab /etc/cron.d/laravel-cron
+
+# Ajustar permisos necesarios para Laravel
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+    # Agrega estas líneas para la optimización de producción
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
+
+# El comando final para iniciar el servidor web
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+
+EXPOSE 80
+
+ENTRYPOINT ["bash", "/var/www/docker/run.sh"]
+
+

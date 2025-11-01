@@ -1,0 +1,75 @@
+/*------------------------------------------------------------------
+Background Color
+-------------------------------------------------------------------*/
+.bg-color,
+.account-popup > form button,
+.layer.color::before,
+.pricetable > a,
+.pricetable.active,
+.bottom-line.style2{
+    background-color: #0057b8 ;
+}
+
+/*------------------------------------------------------------------
+Text Color
+-------------------------------------------------------------------*/
+.text-color,
+.pricetable-head h2,
+.pricetable.active > a{
+    color: #0057b8;
+}
+
+/*------------------------------------------------------------------
+Border Color
+-------------------------------------------------------------------*/
+
+
+/*------------------------------------------------------------------
+COLOR SCHEME 2
+-------------------------------------------------------------------*/
+
+.forsticky.sticky .post-job-btn{
+	border: 2px solid #00a86b;
+	background: transparent; color: #00a86b;
+}
+.post-job-btn{
+    background-color: #00a86b ; border: 2px solid #00a86b;
+}
+
+
+.bg-color,
+.post-job-btn,
+.account-popup .close-popup,
+.blog-metas a::before{
+    background-color: #00a86b ;
+}
+
+/*------------------------------------------------------------------
+Text Color
+-------------------------------------------------------------------*/
+.text-color,
+.menu-sec nav > ul > li > ul li:hover > a,
+.account-popup > form .cfield i,
+.account-popup > form > a,
+.chosen-container-single .chosen-single div::before,
+.job-field i,
+.chosen-container .chosen-results li.highlighted,
+.active-result.result-selected,
+.scroll-to a,
+.p-category > a p,
+.p-category:hover i,.p-category:hover span,
+.job-title-sec span,
+.blog-metas a,
+.blog-details > a{
+    color: #00a86b ;
+}
+
+/*------------------------------------------------------------------
+Border Color
+-------------------------------------------------------------------*/
+.border-color,
+.select-user > span.active,
+.browse-all-cat a{
+    border-color: #00a86b ;
+}
+
