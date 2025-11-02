@@ -1,8 +1,8 @@
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
 metadata:
-  name: historia-clinicas-ssl
-  namespace: historia-clinicas
+  name: yosoy-historia-clinica-ssl
+  namespace: yosoy-historia-clinica
 spec:
   domains:
     - hc.yo-soy.co
@@ -10,17 +10,17 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: historia-clinicas-ingress
-  namespace: historia-clinicas
+  name: yosoy-historia-clinica-ingress
+  namespace: yosoy-historia-clinica
   labels:
-    app.kubernetes.io/name: historia-clinicas
+    app.kubernetes.io/name: yosoy-historia-clinica
     app.kubernetes.io/managed-by: argocd
   annotations:
     kubernetes.io/ingress.class: "gce"
-    kubernetes.io/ingress.global-static-ip-name: "historia-clinicas-ip"
-    networking.gke.io/managed-certificates: "historia-clinicas-ssl"
+    kubernetes.io/ingress.global-static-ip-name: "yosoy-historia-clinica-ip"
+    networking.gke.io/managed-certificates: "yosoy-historia-clinica-ssl"
     kubernetes.io/ingress.allow-http: "false"
-    ingress.gcp.kubernetes.io/backend-protocol: '{"historia-clinicas-service":"HTTP"}'
+    ingress.gcp.kubernetes.io/backend-protocol: '{"yosoy-historia-clinica-service":"HTTP"}'
 spec:
   rules:
   - host: hc.yo-soy.co
@@ -30,6 +30,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: historia-clinicas-service
+            name: yosoy-historia-clinica-service
             port:
               number: 80

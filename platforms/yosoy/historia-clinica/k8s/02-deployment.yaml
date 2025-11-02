@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: historia-clinicas-frontend
-  namespace: historia-clinicas
+  name: yosoy-historia-clinica-frontend
+  namespace: yosoy-historia-clinica
   labels:
-    app: historia-clinicas-frontend
-    app.kubernetes.io/name: historia-clinicas
+    app: yosoy-historia-clinica-frontend
+    app.kubernetes.io/name: yosoy-historia-clinica
     app.kubernetes.io/managed-by: argocd
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: historia-clinicas-frontend
+      app: yosoy-historia-clinica-frontend
   template:
     metadata:
       labels:
-        app: historia-clinicas-frontend
+        app: yosoy-historia-clinica-frontend
     spec:
       containers:
-      - name: historia-clinicas-frontend
+      - name: yosoy-historia-clinica-frontend
         image: gcr.io/authentic-prod-464216/yosoy-historia-clinica:v5
         ports:
         - containerPort: 8080
@@ -50,17 +50,17 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: historia-clinicas-service
-  namespace: historia-clinicas
+  name: yosoy-historia-clinica-service
+  namespace: yosoy-historia-clinica
   labels:
-    app: historia-clinicas-frontend
-    app.kubernetes.io/name: historia-clinicas
+    app: yosoy-historia-clinica-frontend
+    app.kubernetes.io/name: yosoy-historia-clinica
     app.kubernetes.io/managed-by: argocd
   annotations:
-    cloud.google.com/backend-config: '{"default":"historia-clinicas-backendconfig"}'
+    cloud.google.com/backend-config: '{"default":"yosoy-historia-clinica-backendconfig"}'
 spec:
   selector:
-    app: historia-clinicas-frontend
+    app: yosoy-historia-clinica-frontend
   ports:
   - name: http
     port: 80

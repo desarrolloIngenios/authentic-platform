@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: historia-clinicas
+  name: yosoy-historia-clinica
   labels:
-    app.kubernetes.io/name: historia-clinicas
+    app.kubernetes.io/name: yosoy-historia-clinica
     app.kubernetes.io/managed-by: argocd
