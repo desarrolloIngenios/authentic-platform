@@ -20,7 +20,7 @@ spec:
       serviceAccountName: authenticfarma-candidatos-sa
       containers:
         - name: app
-          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
           ports:
             - containerPort: 80
               name: http
@@ -32,15 +32,13 @@ spec:
               cpu: "500m"
               memory: "512Mi"
           readinessProbe:
-            httpGet:
-              path: /
+            tcpSocket:
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
           livenessProbe:
-            httpGet:
-              path: /
+            tcpSocket:
               port: 80
             initialDelaySeconds: 30
             periodSeconds: 30
