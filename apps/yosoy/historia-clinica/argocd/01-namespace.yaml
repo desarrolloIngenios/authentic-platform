@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: historia-clinicas
+  labels:
+    app.kubernetes.io/name: historia-clinicas
+    app.kubernetes.io/managed-by: argocd
