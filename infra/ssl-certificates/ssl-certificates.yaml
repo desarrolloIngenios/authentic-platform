@@ -1,0 +1,39 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: candidatos-authenticfarma-tls
+  namespace: authenticfarma-candidatos
+spec:
+  secretName: candidatos-authenticfarma-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - candidatos.authenticfarma.com
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argo-authenticfarma-tls
+  namespace: argocd
+spec:
+  secretName: argo-authenticfarma-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - argo.authenticfarma.com
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: hc-yo-soy-tls
+  namespace: yosoy-historia-clinica
+spec:
+  secretName: hc-yo-soy-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - hc.yo-soy.co

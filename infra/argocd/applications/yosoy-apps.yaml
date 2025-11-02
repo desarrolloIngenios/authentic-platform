@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: yosoy-app
+  namespace: argocd
+  labels:
+    platform: yosoy
+    app: app
+spec:
+  project: yosoy
+  source:
+    repoURL: https://github.com/ottofonseca/plataforma-agentica.git
+    targetRevision: HEAD
+    path: platforms/yosoy/app/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: yosoy-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: yosoy-web
+  namespace: argocd
+  labels:
+    platform: yosoy
+    app: web
+spec:
+  project: yosoy
+  source:
+    repoURL: https://github.com/ottofonseca/plataforma-agentica.git
+    targetRevision: HEAD
+    path: platforms/yosoy/web/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: yosoy-web
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10

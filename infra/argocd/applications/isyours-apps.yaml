@@ -1,0 +1,95 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: isyours-candidatos
+  namespace: argocd
+  labels:
+    platform: isyours
+    app: candidatos
+spec:
+  project: isyours
+  source:
+    repoURL: https://github.com/ottofonseca/plataforma-agentica.git
+    targetRevision: HEAD
+    path: platforms/isyours/candidatos/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: isyours-candidatos
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: isyours-empresas
+  namespace: argocd
+  labels:
+    platform: isyours
+    app: empresas
+spec:
+  project: isyours
+  source:
+    repoURL: https://github.com/ottofonseca/plataforma-agentica.git
+    targetRevision: HEAD
+    path: platforms/isyours/empresas/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: isyours-empresas
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: isyours-web
+  namespace: argocd
+  labels:
+    platform: isyours
+    app: web
+spec:
+  project: isyours
+  source:
+    repoURL: https://github.com/ottofonseca/plataforma-agentica.git
+    targetRevision: HEAD
+    path: platforms/isyours/web/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: isyours-web
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10

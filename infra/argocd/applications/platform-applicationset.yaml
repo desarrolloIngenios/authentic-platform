@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: authentic-platform
+  namespace: argocd
+spec:
+  generators:
+  - clusters:
+      selector:
+        matchLabels:
+          env: production
+  - list:
+      elements:
+      # AuthenticFarma Applications
+      - app: candidatos
+        namespace: authenticfarma-candidatos
+        path: platforms/authenticfarma/candidatos/k8s
+        domain: candidatos.authenticfarma.com
+      - app: empresas
+        namespace: authenticfarma-empresas  
+        path: platforms/authenticfarma/empresas/k8s
+        domain: empresas.authenticfarma.com
+      - app: web
+        namespace: authenticfarma-web
+        path: platforms/authenticfarma/web/k8s
+        domain: www.authenticfarma.com
+      # YoSoy Applications  
+      - app: historia-clinica
+        namespace: yosoy-historia-clinica
+        path: platforms/yosoy/app/k8s
+        domain: hc.yo-soy.co
+      - app: yosoy-web
+        namespace: yosoy-web
+        path: platforms/yosoy/web/k8s
+        domain: www.yo-soy.co
+      # IsYours Applications
+      - app: isyours-candidatos
+        namespace: isyours-candidatos
+        path: platforms/isyours/candidatos/k8s
+        domain: candidatos.isyours.app
+      - app: isyours-empresas
+        namespace: isyours-empresas
+        path: platforms/isyours/empresas/k8s  
+        domain: empresas.isyours.app
+      - app: isyours-web
+        namespace: isyours-web
+        path: platforms/isyours/web/k8s
+        domain: www.isyours.app
+      # E-Learning Platform
+      - app: elearning
+        namespace: elearning
+        path: platforms/elearning/k8s
+        domain: learn.authenticfarma.com
+  template:
+    metadata:
+      name: '{{app}}'
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/desarrolloIngenios/authentic-platform.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - ApplyOutOfSyncOnly=true
+      ignoreDifferences:
+      - group: apps
+        kind: Deployment
+        jsonPointers:
+        - /spec/replicas

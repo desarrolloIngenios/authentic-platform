@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: authenticfarma-candidatos-ingress-nginx
+  namespace: authenticfarma-candidatos
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - candidatos.authenticfarma.com
+    secretName: candidatos-authenticfarma-tls
+  rules:
+  - host: candidatos.authenticfarma.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: authenticfarma-candidatos-service
+            port:
+              number: 80

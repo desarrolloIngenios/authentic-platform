@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: yosoy-historia-clinica
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/gcp-projects-deployment/authentic-farma-deployment.git
+    targetRevision: HEAD
+    path: platforms/yosoy/historia-clinica
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: yosoy-historia-clinica
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: authenticfarma-candidatos
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/gcp-projects-deployment/authentic-farma-deployment.git
+    targetRevision: HEAD
+    path: platforms/authenticfarma/candidatos
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: authenticfarma-candidatos
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: elearning-moodle
+  namespace: argocd
+  labels:
+    platform: elearning
+    app: moodle
+spec:
+  project: elearning
+  source:
+    repoURL: https://github.com/ottofonseca/plataforma-agentica.git
+    targetRevision: HEAD
+    path: platforms/elearning/moodle/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: elearning-moodle
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10

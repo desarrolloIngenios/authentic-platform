@@ -1,0 +1,93 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: platform-unified-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - argo.authenticfarma.com
+    - candidatos.authenticfarma.com
+    - hc.yo-soy.co
+    secretName: platform-tls-secret
+  rules:
+  # ArgoCD
+  - host: argo.authenticfarma.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              number: 80
+  # AuthenticFarma Candidatos
+  - host: candidatos.authenticfarma.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: authenticfarma-candidatos-service
+            port:
+              number: 80
+  # YoSoy Historia Clínica
+  - host: hc.yo-soy.co
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: yosoy-historia-clinica-service
+            port:
+              number: 80
+
+---
+# Service para ArgoCD (cross-namespace)
+apiVersion: v1
+kind: Service
+metadata:
+  name: argocd-server
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: argocd-server.argocd.svc.cluster.local
+  ports:
+  - port: 80
+    targetPort: 8080
+
+---
+# Service para AuthenticFarma Candidatos (cross-namespace)
+apiVersion: v1
+kind: Service
+metadata:
+  name: authenticfarma-candidatos-service
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: authenticfarma-candidatos-service.authenticfarma-candidatos.svc.cluster.local
+  ports:
+  - port: 80
+    targetPort: 80
+
+---
+# Service para YoSoy Historia Clínica (cross-namespace)
+apiVersion: v1
+kind: Service
+metadata:
+  name: yosoy-historia-clinica-service
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: yosoy-historia-clinica-service.yosoy-historia-clinica.svc.cluster.local
+  ports:
+  - port: 80
+    targetPort: 80
