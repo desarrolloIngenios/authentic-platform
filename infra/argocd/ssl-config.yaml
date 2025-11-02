@@ -29,10 +29,6 @@ metadata:
     # ArgoCD specific annotations
     ingress.gcp.kubernetes.io/backend-protocol: '{"argocd-server":"HTTP"}'
 spec:
-  tls:
-  - hosts:
-    - argo.authenticfarma.com
-    secretName: argocd-server-tls
   rules:
   - host: argo.authenticfarma.com
     http:
