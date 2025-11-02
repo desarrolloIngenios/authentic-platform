@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: authenticfarma
+  namespace: argocd
+  labels:
+    platform: authenticfarma
+spec:
+  description: "AuthenticFarma Platform - Sistema integral farmacéutico"
+  sourceRepos:
+  - https://github.com/desarrolloIngenios/authentic-platform.git
+  destinations:
+  - namespace: 'authenticfarma-*'
+    server: https://kubernetes.default.svc
+  - namespace: 'af-*'
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
+  - group: 'networking.k8s.io'
+    kind: Ingress
+  - group: 'networking.gke.io'
+    kind: ManagedCertificate
+  - group: 'cloud.google.com'
+    kind: BackendConfig
+  namespaceResourceWhitelist:
+  - group: ''
+    kind: Service
+  - group: ''
+    kind: ConfigMap
+  - group: ''
+    kind: Secret
+  - group: 'apps'
+    kind: Deployment
+  - group: 'apps'
+    kind: ReplicaSet
+  roles:
+  - name: authenticfarma-admin
+    policies:
+    - p, proj:authenticfarma:authenticfarma-admin, applications, *, authenticfarma/*, allow
+    - p, proj:authenticfarma:authenticfarma-admin, repositories, *, *, allow
+    groups:
+    - authenticfarma:admin
+  - name: authenticfarma-developer
+    policies:
+    - p, proj:authenticfarma:authenticfarma-developer, applications, get, authenticfarma/*, allow
+    - p, proj:authenticfarma:authenticfarma-developer, applications, sync, authenticfarma/*, allow
+    groups:
+    - authenticfarma:developer

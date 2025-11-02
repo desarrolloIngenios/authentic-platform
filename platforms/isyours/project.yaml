@@ -1,0 +1,86 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: isyours
+  namespace: argocd
+  labels:
+    platform: isyours
+spec:
+  description: "IsYours Platform - E-commerce and Property Management"
+  sourceRepos:
+  - 'https://github.com/desarrolloIngenios/authentic-platform.git'
+  - 'https://github.com/desarrolloIngenios/isyours-*'
+  destinations:
+  - namespace: 'isyours-*'
+    server: https://kubernetes.default.svc
+  - namespace: isyours
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
+  - group: 'networking.k8s.io'
+    kind: Ingress
+  - group: 'cloud.google.com'
+    kind: BackendConfig
+  - group: 'networking.gke.io'
+    kind: ManagedCertificate
+  - group: 'rbac.authorization.k8s.io'
+    kind: ClusterRole
+  - group: 'rbac.authorization.k8s.io'
+    kind: ClusterRoleBinding
+  namespaceResourceWhitelist:
+  - group: ''
+    kind: Service
+  - group: ''
+    kind: ConfigMap
+  - group: ''
+    kind: Secret
+  - group: ''
+    kind: PersistentVolumeClaim
+  - group: 'apps'
+    kind: Deployment
+  - group: 'apps'
+    kind: StatefulSet
+  - group: 'apps'
+    kind: DaemonSet
+  - group: 'apps'
+    kind: ReplicaSet
+  - group: 'batch'
+    kind: Job
+  - group: 'batch'
+    kind: CronJob
+  - group: 'autoscaling'
+    kind: HorizontalPodAutoscaler
+  - group: 'policy'
+    kind: PodDisruptionBudget
+  - group: 'networking.k8s.io'
+    kind: NetworkPolicy
+  roles:
+  - name: isyours-admin
+    description: Admin access to IsYours platform
+    policies:
+    - p, proj:isyours:isyours-admin, applications, *, isyours/*, allow
+    - p, proj:isyours:isyours-admin, repositories, *, *, allow
+    - p, proj:isyours:isyours-admin, clusters, *, *, allow
+    groups:
+    - isyours-admins
+  - name: isyours-developer
+    description: Developer access to IsYours platform
+    policies:
+    - p, proj:isyours:isyours-developer, applications, get, isyours/*, allow
+    - p, proj:isyours:isyours-developer, applications, sync, isyours/*, allow
+    - p, proj:isyours:isyours-developer, repositories, get, *, allow
+    groups:
+    - isyours-developers
+  syncWindows:
+  - kind: allow
+    schedule: '0 3 * * *'
+    duration: 1h
+    applications:
+    - '*'
+  - kind: deny
+    schedule: '0 9-17 * * 1-5'
+    duration: 8h
+    applications:
+    - 'isyours-*'
+    manualSync: false

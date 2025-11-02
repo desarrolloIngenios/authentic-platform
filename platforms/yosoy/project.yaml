@@ -1,0 +1,86 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: yosoy
+  namespace: argocd
+  labels:
+    platform: yosoy
+spec:
+  description: "YoSoy Platform - Health and Wellness Applications"
+  sourceRepos:
+  - 'https://github.com/desarrolloIngenios/authentic-platform.git'
+  - 'https://github.com/desarrolloIngenios/yosoy-*'
+  destinations:
+  - namespace: 'yosoy-*'
+    server: https://kubernetes.default.svc
+  - namespace: yosoy
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
+  - group: 'networking.k8s.io'
+    kind: Ingress
+  - group: 'cloud.google.com'
+    kind: BackendConfig
+  - group: 'networking.gke.io'
+    kind: ManagedCertificate
+  - group: 'rbac.authorization.k8s.io'
+    kind: ClusterRole
+  - group: 'rbac.authorization.k8s.io'
+    kind: ClusterRoleBinding
+  namespaceResourceWhitelist:
+  - group: ''
+    kind: Service
+  - group: ''
+    kind: ConfigMap
+  - group: ''
+    kind: Secret
+  - group: ''
+    kind: PersistentVolumeClaim
+  - group: 'apps'
+    kind: Deployment
+  - group: 'apps'
+    kind: StatefulSet
+  - group: 'apps'
+    kind: DaemonSet
+  - group: 'apps'
+    kind: ReplicaSet
+  - group: 'batch'
+    kind: Job
+  - group: 'batch'
+    kind: CronJob
+  - group: 'autoscaling'
+    kind: HorizontalPodAutoscaler
+  - group: 'policy'
+    kind: PodDisruptionBudget
+  - group: 'networking.k8s.io'
+    kind: NetworkPolicy
+  roles:
+  - name: yosoy-admin
+    description: Admin access to YoSoy platform
+    policies:
+    - p, proj:yosoy:yosoy-admin, applications, *, yosoy/*, allow
+    - p, proj:yosoy:yosoy-admin, repositories, *, *, allow
+    - p, proj:yosoy:yosoy-admin, clusters, *, *, allow
+    groups:
+    - yosoy-admins
+  - name: yosoy-developer
+    description: Developer access to YoSoy platform
+    policies:
+    - p, proj:yosoy:yosoy-developer, applications, get, yosoy/*, allow
+    - p, proj:yosoy:yosoy-developer, applications, sync, yosoy/*, allow
+    - p, proj:yosoy:yosoy-developer, repositories, get, *, allow
+    groups:
+    - yosoy-developers
+  syncWindows:
+  - kind: allow
+    schedule: '0 2 * * *'
+    duration: 1h
+    applications:
+    - '*'
+  - kind: deny
+    schedule: '0 9-17 * * 1-5'
+    duration: 8h
+    applications:
+    - 'yosoy-*'
+    manualSync: false
