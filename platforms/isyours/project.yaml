@@ -18,12 +18,6 @@ spec:
   clusterResourceWhitelist:
   - group: ''
     kind: Namespace
-  - group: 'networking.k8s.io'
-    kind: Ingress
-  - group: 'cloud.google.com'
-    kind: BackendConfig
-  - group: 'networking.gke.io'
-    kind: ManagedCertificate
   - group: 'rbac.authorization.k8s.io'
     kind: ClusterRole
   - group: 'rbac.authorization.k8s.io'
@@ -37,6 +31,12 @@ spec:
     kind: Secret
   - group: ''
     kind: PersistentVolumeClaim
+  - group: 'networking.k8s.io'
+    kind: Ingress
+  - group: 'cloud.google.com'
+    kind: BackendConfig
+  - group: 'networking.gke.io'
+    kind: ManagedCertificate
   - group: 'apps'
     kind: Deployment
   - group: 'apps'

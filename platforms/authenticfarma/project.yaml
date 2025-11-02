@@ -17,12 +17,6 @@ spec:
   clusterResourceWhitelist:
   - group: ''
     kind: Namespace
-  - group: 'networking.k8s.io'
-    kind: Ingress
-  - group: 'networking.gke.io'
-    kind: ManagedCertificate
-  - group: 'cloud.google.com'
-    kind: BackendConfig
   namespaceResourceWhitelist:
   - group: ''
     kind: Service
@@ -30,6 +24,12 @@ spec:
     kind: ConfigMap
   - group: ''
     kind: Secret
+  - group: 'networking.k8s.io'
+    kind: Ingress
+  - group: 'networking.gke.io'
+    kind: ManagedCertificate
+  - group: 'cloud.google.com'
+    kind: BackendConfig
   - group: 'apps'
     kind: Deployment
   - group: 'apps'
