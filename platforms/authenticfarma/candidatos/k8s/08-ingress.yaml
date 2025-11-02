@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: authenticfarma-candidatos-ingress
+  namespace: authenticfarma-candidatos
+  labels:
+    app: authenticfarma-candidatos
+    platform: authenticfarma
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "candidatos-authenticfarma-ip"
+    networking.gke.io/managed-certificates: "authenticfarma-candidatos-ssl"
+    cloud.google.com/backend-config: '{"default": "authenticfarma-candidatos-backendconfig"}'
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  rules:
+  - host: candidatos.authenticfarma.com
+    http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: authenticfarma-candidatos-service
+            port:
+              number: 80

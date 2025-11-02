@@ -1,0 +1,11 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: authenticfarma-candidatos-ssl
+  namespace: authenticfarma-candidatos
+  labels:
+    app: authenticfarma-candidatos
+    platform: authenticfarma
+spec:
+  domains:
+    - candidatos.authenticfarma.com

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: authenticfarma-candidatos-service
+  namespace: authenticfarma-candidatos
+  labels:
+    app: authenticfarma-candidatos
+    platform: authenticfarma
+spec:
+  selector:
+    app: authenticfarma-candidatos
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+  type: ClusterIP

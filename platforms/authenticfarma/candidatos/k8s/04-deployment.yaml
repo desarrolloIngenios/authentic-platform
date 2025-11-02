@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authenticfarma-candidatos
+  namespace: authenticfarma-candidatos
+  labels:
+    app: authenticfarma-candidatos
+    platform: authenticfarma
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: authenticfarma-candidatos
+  template:
+    metadata:
+      labels:
+        app: authenticfarma-candidatos
+        platform: authenticfarma
+    spec:
+      serviceAccountName: authenticfarma-candidatos-sa
+      containers:
+        - name: app
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          env:
+            - name: APP_NAME
+              value: "AuthenticFarma Candidatos"
+            - name: APP_ENV
+              value: "production"
+            - name: APP_DEBUG
+              value: "false"
+            - name: APP_URL
+              value: "https://candidatos.authenticfarma.com"
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: APP_KEY
+            - name: LOG_CHANNEL
+              value: "stack"
+            - name: DB_CONNECTION
+              value: "mysql"
+            - name: DB_HOST
+              value: "127.0.0.1"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_DATABASE
+              value: "authentic"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: DB_PASSWORD
+            - name: BROADCAST_DRIVER
+              value: "log"
+            - name: CACHE_DRIVER
+              value: "database"
+            - name: QUEUE_CONNECTION
+              value: "sync"
+            - name: SESSION_DRIVER
+              value: "database"
+            - name: SESSION_LIFETIME
+              value: "120"
+        - name: cloud-sql-proxy
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+          args:
+            - "--structured-logs"
+            - "--port=3306"
+            - "authentic-prod-464216:us-central1:authentic-mysql"
+          securityContext:
+            runAsNonRoot: true
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
