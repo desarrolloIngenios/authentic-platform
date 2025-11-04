@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: yosoy-historia-clinica-ingress-complete
+  namespace: yosoy-historia-clinica
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "yosoy-historia-clinica-ip"
+    kubernetes.io/ingress.allow-http: "false"
+    networking.gke.io/managed-certificates: "yosoy-historia-clinica-ssl"
+    ingress.gcp.kubernetes.io/backend-protocol: |
+      {
+        "yosoy-historia-clinica-service": "HTTP",
+        "yosoy-historia-clinica-backend-service": "HTTP"
+      }
+spec:
+  rules:
+  - host: hc.yo-soy.co
+    http:
+      paths:
+      # Rutas del backend API
+      - path: /api/*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: yosoy-historia-clinica-backend-service
+            port:
+              number: 3001
+      # Ruta principal para frontend
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: yosoy-historia-clinica-service
+            port:
+              number: 80

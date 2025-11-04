@@ -1,50 +1,1233 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clinical Records AI</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://rsms.me/inter/inter.css');
-    html { font-family: 'Inter', sans-serif; }
-    body {
-      background-color: #f8fafc; /* slate-50 */
-    }
-    /* Custom scrollbar for a more modern look */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9; /* slate-100 */
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #94a3b8; /* slate-400 */
-      border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #64748b; /* slate-500 */
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YoSoy Historia Clínica - Sistema Médico para Mujeres</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            margin: 0; padding: 0; 
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .loading { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(147, 51, 234, 0.15); }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .medical-gradient { background: linear-gradient(135deg, #d63384 0%, #9333ea 100%); }
+        .print-area { background: white; }
+        .no-print { display: block; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-area { margin: 0; padding: 20px; }
+            body { background: white; }
+        }
+    </style>
 </head>
-<body>
-  <div id="root"></div>
-  <script type="importmap">
-  {
-    "imports": {
-      "react": "https://esm.sh/react@18.3.1",
-      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-      "jspdf": "https://esm.sh/jspdf@2.5.1",
-      "html2canvas": "https://esm.sh/html2canvas@1.4.1",
-      "lucide-react": "https://esm.sh/lucide-react@0.395.0",
-      "class-variance-authority": "https://esm.sh/class-variance-authority@0.7.0",
-      "clsx": "https://esm.sh/clsx@2.0.0",
-      "tailwind-merge": "https://esm.sh/tailwind-merge@2.0.0"
-    }
-  }
-  </script>
-  <script type="module" src="/index.tsx"></script>
+<body class="bg-gradient-to-br from-purple-50 to-pink-50">
+    <!-- Header -->
+    <header class="medical-gradient text-white shadow-xl">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-stethoscope text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">YoSoy Historia Clínica</h1>
+                        <p class="text-pink-100 text-sm">Sistema Médico Especializado para Mujeres</p>
+                    </div>
+                </div>
+                <div id="user-info" class="hidden">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <span id="welcome-text" class="block font-medium"></span>
+                            <span id="user-specialty" class="block text-sm text-pink-100"></span>
+                        </div>
+                        <button onclick="logout()" class="bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="flex items-center justify-center min-h-screen">
+        <div class="text-center">
+            <div class="loading w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full mx-auto mb-4"></div>
+            <h2 class="text-xl text-purple-900">Cargando Sistema Médico</h2>
+            <p id="loading-status" class="text-purple-600 mt-2">Inicializando plataforma para salud femenina...</p>
+        </div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" class="hidden min-h-screen flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md fade-in">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 medical-gradient rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-stethoscope text-3xl text-white"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800">Acceso Médico</h2>
+                <p class="text-gray-600 mt-2">Sistema especializado en salud femenina</p>
+            </div>
+            
+            <form id="auth-form" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-user mr-2"></i>Usuario Médico
+                    </label>
+                    <input type="text" id="username" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Ingrese su usuario">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-lock mr-2"></i>Contraseña
+                    </label>
+                    <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Ingrese su contraseña">
+                </div>
+                <button type="submit" class="w-full medical-gradient text-white py-3 rounded-lg hover:opacity-90 transition-opacity">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
+                </button>
+                
+                <div class="text-center text-sm text-gray-500 mt-4 p-4 bg-purple-50 rounded-lg">
+                    <p class="font-medium text-purple-800 mb-2">Usuarios de demo:</p>
+                    <p><strong>admin</strong> / admin123 (Administrador)</p>
+                    <p><strong>dra.sofia</strong> / gine123 (Ginecóloga)</p>
+                    <p><strong>dra.maria</strong> / medico123 (Medicina General)</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="hidden">
+        <div class="container mx-auto px-4 py-6">
+            <!-- Navigation Tabs -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <button onclick="showTab('registro')" class="tab-btn bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
+                        <i class="fas fa-user-plus mr-2"></i>Registro Paciente
+                    </button>
+                    <button onclick="showTab('busqueda')" class="tab-btn bg-gradient-to-r from-purple-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
+                        <i class="fas fa-search mr-2"></i>Buscar Paciente
+                    </button>
+                    <button onclick="showTab('historia')" class="tab-btn bg-gradient-to-r from-blue-500 to-green-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
+                        <i class="fas fa-clipboard-list mr-2"></i>Historia Clínica
+                    </button>
+                    <button onclick="showTab('formula')" class="tab-btn bg-gradient-to-r from-green-500 to-teal-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
+                        <i class="fas fa-prescription-bottle-alt mr-2"></i>Fórmula Médica
+                    </button>
+                    <button onclick="showTab('calendario')" class="tab-btn bg-gradient-to-r from-teal-500 to-cyan-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
+                        <i class="fas fa-calendar-alt mr-2"></i>Calendario
+                    </button>
+                    <button onclick="showTab('dashboard-stats')" class="tab-btn bg-gradient-to-r from-cyan-500 to-indigo-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
+                        <i class="fas fa-chart-bar mr-2"></i>Dashboard
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Sections -->
+            <div id="content-area" class="fade-in">
+                <!-- Registro de Paciente -->
+                <div id="tab-registro" class="hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-venus mr-3 text-pink-500"></i>Registro Nueva Paciente
+                        </h3>
+                        <form id="patient-form" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombres Completos *</label>
+                                    <input type="text" name="nombres" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos Completos *</label>
+                                    <input type="text" name="apellidos" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Número de Identificación *</label>
+                                    <input type="text" name="identificacion" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Nacimiento *</label>
+                                    <input type="date" name="fechaNacimiento" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                                    <input type="tel" name="telefono" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input type="email" name="email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Estado Civil</label>
+                                    <select name="estadoCivil" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                        <option value="">Seleccione...</option>
+                                        <option value="soltera">Soltera</option>
+                                        <option value="casada">Casada</option>
+                                        <option value="union_libre">Unión Libre</option>
+                                        <option value="divorciada">Divorciada</option>
+                                        <option value="viuda">Viuda</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Ocupación</label>
+                                    <input type="text" name="ocupacion" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Dirección Completa</label>
+                                <textarea name="direccion" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"></textarea>
+                            </div>
+
+                            <div class="bg-pink-50 p-6 rounded-lg">
+                                <h4 class="font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-heartbeat mr-2 text-pink-500"></i>Información Ginecológica
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Última Menstruación</label>
+                                        <input type="date" name="ultimaMenstruacion" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Embarazos Previos</label>
+                                        <input type="number" name="embarazosPrevios" min="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Partos</label>
+                                        <input type="number" name="partos" min="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Abortos</label>
+                                        <input type="number" name="abortos" min="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full medical-gradient text-white py-4 rounded-lg hover:opacity-90 transition-opacity font-semibold">
+                                <i class="fas fa-save mr-2"></i>Registrar Paciente
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Búsqueda de Paciente -->
+                <div id="tab-busqueda" class="hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-search mr-3 text-blue-500"></i>Buscar Paciente
+                        </h3>
+                        
+                        <div class="mb-6">
+                            <div class="flex gap-4">
+                                <input type="text" id="search-input" placeholder="Buscar por nombre, apellido o identificación..." 
+                                       class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <button onclick="searchPatients()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
+                                    <i class="fas fa-search mr-2"></i>Buscar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="search-results" class="space-y-4">
+                            <!-- Resultados aparecerán aquí -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historia Clínica -->
+                <div id="tab-historia" class="hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-clipboard-list mr-3 text-green-500"></i>Historia Clínica
+                        </h3>
+                        <div id="historia-content">
+                            <p class="text-gray-600 text-center py-8">Seleccione una paciente para ver o crear su historia clínica</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fórmula Médica -->
+                <div id="tab-formula" class="hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-prescription-bottle-alt mr-3 text-teal-500"></i>Fórmula Médica
+                        </h3>
+                        <div id="formula-content">
+                            <p class="text-gray-600 text-center py-8">Seleccione una paciente para crear una fórmula médica</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendario -->
+                <div id="tab-calendario" class="hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-calendar-alt mr-3 text-cyan-500"></i>Calendario de Citas
+                        </h3>
+                        <div id="calendario-content">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div class="lg:col-span-2">
+                                    <div id="calendar-view" class="bg-gray-50 rounded-lg p-4 min-h-96">
+                                        <p class="text-center text-gray-600 py-16">Vista de calendario en desarrollo</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="bg-blue-50 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-blue-800 mb-3">Próximas Citas</h4>
+                                        <div id="upcoming-appointments" class="space-y-2">
+                                            <!-- Citas próximas aparecerán aquí -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Estadísticas -->
+                <div id="tab-dashboard-stats" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2">
+                            <div class="bg-white rounded-xl shadow-lg p-8">
+                                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                                    <i class="fas fa-chart-bar mr-3 text-indigo-500"></i>Dashboard Médico
+                                </h3>
+                                <div id="dashboard-stats-content">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="bg-pink-50 p-4 rounded-lg text-center">
+                                            <i class="fas fa-female text-3xl text-pink-500 mb-2"></i>
+                                            <h4 class="font-semibold">Total Pacientes</h4>
+                                            <p class="text-2xl font-bold text-pink-600" id="total-patients">0</p>
+                                        </div>
+                                        <div class="bg-purple-50 p-4 rounded-lg text-center">
+                                            <i class="fas fa-heartbeat text-3xl text-purple-500 mb-2"></i>
+                                            <h4 class="font-semibold">Consultas Mes</h4>
+                                            <p class="text-2xl font-bold text-purple-600" id="monthly-consultations">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bg-white rounded-xl shadow-lg p-6">
+                                <h4 class="font-semibold text-gray-800 mb-4">Pacientes por Prioridad</h4>
+                                <div id="priority-patients" class="space-y-3">
+                                    <!-- Prioridades aparecerán aquí -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-4 right-4 space-y-2 z-50"></div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" onclick="closeModal()">
+        <div id="modal-content" class="fixed inset-4 bg-white rounded-lg p-6 overflow-auto" onclick="event.stopPropagation()">
+            <!-- Modal content will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentUser = null;
+        let selectedPatient = null;
+        let patients = [];
+        let historias = [];
+        let formulas = [];
+        let citas = [];
+
+        // API Configuration
+        const API_BASE = '/api';
+
+        // Elementos del DOM
+        const loadingScreen = document.getElementById('loading-screen');
+        const loginForm = document.getElementById('login-form');
+        const dashboard = document.getElementById('dashboard');
+        const userInfo = document.getElementById('user-info');
+        const welcomeText = document.getElementById('welcome-text');
+        const userSpecialty = document.getElementById('user-specialty');
+        const loadingStatus = document.getElementById('loading-status');
+
+        // Función para mostrar notificaciones
+        function showNotification(title, message, type = 'info') {
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            toast.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full opacity-0`;
+            toast.innerHTML = `<strong>${title}</strong><br>${message}`;
+            
+            document.getElementById('toast-container').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Función para mostrar diferentes pantallas
+        function showScreen(screen) {
+            loadingScreen.classList.add('hidden');
+            loginForm.classList.add('hidden');
+            dashboard.classList.add('hidden');
+            
+            document.getElementById(screen).classList.remove('hidden');
+        }
+
+        // Función para cambiar tabs
+        function showTab(tabName) {
+            // Ocultar todas las tabs
+            const tabs = ['registro', 'busqueda', 'historia', 'formula', 'calendario', 'dashboard-stats'];
+            tabs.forEach(tab => {
+                document.getElementById(`tab-${tab}`).classList.add('hidden');
+            });
+            
+            // Mostrar la tab seleccionada
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            
+            // Si es búsqueda, cargar pacientes
+            if (tabName === 'busqueda') {
+                loadPatients();
+            }
+            
+            // Si es dashboard, cargar estadísticas
+            if (tabName === 'dashboard-stats') {
+                loadDashboardStats();
+            }
+        }
+
+        // Función de login
+        async function handleLogin(username, password) {
+            try {
+                loadingStatus.textContent = 'Verificando credenciales...';
+                showScreen('loading-screen');
+                
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Credenciales incorrectas');
+                }
+
+                const data = await response.json();
+                currentUser = data.user;
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('authUser', JSON.stringify(data.user));
+                
+                // Mostrar dashboard
+                loadingStatus.textContent = 'Cargando dashboard...';
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                welcomeText.textContent = `Dra. ${currentUser.name}`;
+                userSpecialty.textContent = currentUser.especialidad || 'Médico General';
+                userInfo.classList.remove('hidden');
+                showScreen('dashboard');
+                showTab('registro');
+                
+                showNotification('Login exitoso', `Bienvenida ${currentUser.name}`, 'success');
+            } catch (error) {
+                showScreen('login-form');
+                showNotification('Error de login', error.message, 'error');
+            }
+        }
+
+        // Función para registrar paciente
+        async function registerPatient(formData) {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE}/patients`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al registrar paciente');
+                }
+
+                const result = await response.json();
+                showNotification('Éxito', 'Paciente registrada exitosamente', 'success');
+                document.getElementById('patient-form').reset();
+                return result;
+            } catch (error) {
+                showNotification('Error', error.message, 'error');
+            }
+        }
+
+        // Función para cargar pacientes
+        async function loadPatients() {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE}/patients`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    patients = await response.json();
+                    displayPatients(patients);
+                }
+            } catch (error) {
+                console.error('Error cargando pacientes:', error);
+            }
+        }
+
+        // Función para mostrar pacientes
+        function displayPatients(patientList) {
+            const resultsContainer = document.getElementById('search-results');
+            
+            if (patientList.length === 0) {
+                resultsContainer.innerHTML = '<p class="text-gray-600 text-center py-8">No se encontraron pacientes</p>';
+                return;
+            }
+
+            resultsContainer.innerHTML = patientList.map(patient => `
+                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-800">${patient.nombres} ${patient.apellidos}</h4>
+                            <p class="text-gray-600">ID: ${patient.identificacion}</p>
+                            <p class="text-gray-600">Edad: ${calculateAge(patient.fechaNacimiento)} años</p>
+                            <p class="text-gray-600">Teléfono: ${patient.telefono || 'No registrado'}</p>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="selectPatient(${patient.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                                Ver Historia
+                            </button>
+                            <button onclick="createFormula(${patient.id})" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
+                                Nueva Fórmula
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Función para buscar pacientes
+        function searchPatients() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const filtered = patients.filter(patient => 
+                patient.nombres.toLowerCase().includes(searchTerm) ||
+                patient.apellidos.toLowerCase().includes(searchTerm) ||
+                patient.identificacion.includes(searchTerm)
+            );
+            displayPatients(filtered);
+        }
+
+        // Función para calcular edad
+        function calculateAge(birthDate) {
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            
+            return age;
+        }
+
+        // Función para seleccionar paciente
+        function selectPatient(patientId) {
+            selectedPatient = patients.find(p => p.id === patientId);
+            showTab('historia');
+            loadPatientHistory(patientId);
+        }
+
+        // Función para cargar historia de paciente
+        async function loadPatientHistory(patientId) {
+            // Implementar carga de historia clínica
+            const historiaContent = document.getElementById('historia-content');
+            historiaContent.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-pink-50 p-6 rounded-lg">
+                        <h4 class="font-semibold text-pink-800 mb-4">Paciente Seleccionada</h4>
+                        <p><strong>Nombre:</strong> ${selectedPatient.nombres} ${selectedPatient.apellidos}</p>
+                        <p><strong>Identificación:</strong> ${selectedPatient.identificacion}</p>
+                        <p><strong>Edad:</strong> ${calculateAge(selectedPatient.fechaNacimiento)} años</p>
+                    </div>
+                    
+                    <div class="flex gap-4 mb-6">
+                        <button onclick="createNewHistory()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-plus mr-2"></i>Nueva Historia Clínica
+                        </button>
+                        <button onclick="viewHistoryList()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-list mr-2"></i>Ver Historias Anteriores
+                        </button>
+                    </div>
+                    
+                    <div id="history-details">
+                        <p class="text-gray-600 text-center py-8">Seleccione una opción para continuar</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Función para crear nueva historia clínica
+        function createNewHistory() {
+            const historyDetails = document.getElementById('history-details');
+            historyDetails.innerHTML = `
+                <form id="history-form" class="space-y-6">
+                    <div class="bg-white border rounded-lg p-6">
+                        <h5 class="font-semibold text-gray-800 mb-4">Nueva Historia Clínica</h5>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Motivo de Consulta *</label>
+                                <textarea name="motivoConsulta" required rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Síntomas Actuales</label>
+                                <textarea name="sintomasActuales" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Examen Físico</label>
+                                <textarea name="examenFisico" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Signos Vitales</label>
+                                <div class="space-y-2">
+                                    <input type="text" name="presionArterial" placeholder="Presión Arterial" class="w-full p-2 border border-gray-300 rounded">
+                                    <input type="text" name="frecuenciaCardiaca" placeholder="Frecuencia Cardíaca" class="w-full p-2 border border-gray-300 rounded">
+                                    <input type="text" name="temperatura" placeholder="Temperatura" class="w-full p-2 border border-gray-300 rounded">
+                                    <input type="text" name="peso" placeholder="Peso (kg)" class="w-full p-2 border border-gray-300 rounded">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Diagnóstico *</label>
+                            <textarea name="diagnostico" required rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Plan de Tratamiento</label>
+                            <textarea name="planTratamiento" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones</label>
+                            <textarea name="observaciones" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
+                        </div>
+                        
+                        <div class="flex gap-4 mt-6">
+                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
+                                <i class="fas fa-save mr-2"></i>Guardar Historia Clínica
+                            </button>
+                            <button type="button" onclick="generateHistoryPDF()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg">
+                                <i class="fas fa-file-pdf mr-2"></i>Generar PDF
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            `;
+            
+            // Event listener para el formulario
+            document.getElementById('history-form').addEventListener('submit', handleHistorySubmit);
+        }
+
+        // Función para manejar envío de historia clínica
+        async function handleHistorySubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const historyData = {
+                pacienteId: selectedPatient.id,
+                motivoConsulta: formData.get('motivoConsulta'),
+                sintomasActuales: formData.get('sintomasActuales'),
+                examenFisico: formData.get('examenFisico'),
+                signos: {
+                    presionArterial: formData.get('presionArterial'),
+                    frecuenciaCardiaca: formData.get('frecuenciaCardiaca'),
+                    temperatura: formData.get('temperatura'),
+                    peso: formData.get('peso')
+                },
+                diagnostico: formData.get('diagnostico'),
+                planTratamiento: formData.get('planTratamiento'),
+                observaciones: formData.get('observaciones')
+            };
+            
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE}/historias`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(historyData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al guardar historia clínica');
+                }
+
+                showNotification('Éxito', 'Historia clínica guardada exitosamente', 'success');
+                viewHistoryList(); // Recargar lista
+            } catch (error) {
+                showNotification('Error', error.message, 'error');
+            }
+        }
+
+        // Función para generar PDF de historia clínica
+        function generateHistoryPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Encabezado
+            doc.setFontSize(18);
+            doc.text('HISTORIA CLÍNICA', 20, 20);
+            doc.setFontSize(12);
+            doc.text(`Paciente: ${selectedPatient.nombres} ${selectedPatient.apellidos}`, 20, 35);
+            doc.text(`Identificación: ${selectedPatient.identificacion}`, 20, 45);
+            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 20, 55);
+            
+            // Contenido del formulario
+            const form = document.getElementById('history-form');
+            const formData = new FormData(form);
+            
+            let yPosition = 70;
+            
+            const addText = (label, value, multiline = false) => {
+                doc.text(`${label}:`, 20, yPosition);
+                yPosition += 10;
+                if (value) {
+                    if (multiline) {
+                        const lines = doc.splitTextToSize(value, 170);
+                        doc.text(lines, 25, yPosition);
+                        yPosition += lines.length * 5;
+                    } else {
+                        doc.text(value, 25, yPosition);
+                        yPosition += 5;
+                    }
+                }
+                yPosition += 5;
+            };
+            
+            addText('Motivo de Consulta', formData.get('motivoConsulta'), true);
+            addText('Síntomas Actuales', formData.get('sintomasActuales'), true);
+            addText('Examen Físico', formData.get('examenFisico'), true);
+            addText('Diagnóstico', formData.get('diagnostico'), true);
+            addText('Plan de Tratamiento', formData.get('planTratamiento'), true);
+            
+            // Firma
+            doc.text(`Médico: ${currentUser.name}`, 20, yPosition + 20);
+            doc.text(`Especialidad: ${currentUser.especialidad || 'Medicina General'}`, 20, yPosition + 30);
+            
+            doc.save(`historia-clinica-${selectedPatient.identificacion}-${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        // Función para ver lista de historias (IMPLEMENTACIÓN CORREGIDA)
+        function viewHistoryList() {
+            if (!selectedPatient) {
+                showNotification('Error', 'Seleccione una paciente primero', 'error');
+                return;
+            }
+
+            const historyDetails = document.getElementById('history-details');
+            historyDetails.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i><p>Cargando historial médico...</p></div>';
+            
+            console.log('=== DEBUG CARGA DE HISTORIAS (Frontend Completo) ===');
+            console.log('Paciente seleccionada:', selectedPatient);
+            console.log('Token disponible:', localStorage.getItem('authToken') ? 'SÍ' : 'NO');
+            console.log('URL que se va a consultar:', `/api/patients/${selectedPatient.id}/historias`);
+            
+            // Obtener historias clínicas de la paciente
+            fetch(`/api/patients/${selectedPatient.id}/historias`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+            })
+            .then(response => {
+                console.log('Estado de respuesta:', response.status);
+                console.log('URL llamada:', response.url);
+                
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.log('Error del servidor (texto):', text);
+                        throw new Error(`HTTP ${response.status}: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(historias => {
+                console.log('Historias recibidas del servidor:', historias);
+                console.log('Tipo de datos recibidos:', typeof historias);
+                console.log('Es array?:', Array.isArray(historias));
+                console.log('Número de historias:', historias.length);
+                
+                if (historias.length === 0) {
+                    console.log('No hay historias para mostrar');
+                    historyDetails.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-clipboard-list text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-gray-600">No hay historias clínicas registradas para esta paciente</p>
+                            <button onclick="createNewHistory()" class="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                                <i class="fas fa-plus mr-2"></i>Crear Primera Historia
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                console.log('Mostrando historias en la interfaz...');
+                // Mostrar las historias clínicas encontradas
+                displayHistoriasComplete(historias);
+            })
+            .catch(error => {
+                console.error('ERROR completo cargando historias:', error);
+                console.error('Stack trace:', error.stack);
+                historyDetails.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
+                        <p class="text-red-600">Error al cargar el historial médico:</p>
+                        <p class="text-sm text-gray-600 mt-2">${error.message}</p>
+                        <button onclick="viewHistoryList()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-redo mr-2"></i>Reintentar
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        // Función para mostrar historias de manera completa en el dashboard
+        function displayHistoriasComplete(historias) {
+            console.log('=== MOSTRANDO HISTORIAS EN UI COMPLETA ===');
+            console.log('Historias a mostrar:', historias);
+            
+            const historyDetails = document.getElementById('history-details');
+            
+            historyDetails.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Resumen -->
+                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 border border-blue-200">
+                        <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
+                            <i class="fas fa-chart-line mr-2"></i>Resumen del Historial Médico
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-2xl font-bold text-blue-600">${historias.length}</p>
+                                        <p class="text-sm text-gray-600">Consultas Totales</p>
+                                    </div>
+                                    <i class="fas fa-file-medical text-2xl text-blue-300"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-2xl font-bold text-green-600">${new Date(historias[historias.length - 1].fecha || historias[historias.length - 1].created_at).getFullYear()}</p>
+                                        <p class="text-sm text-gray-600">Última Consulta</p>
+                                    </div>
+                                    <i class="fas fa-calendar text-2xl text-green-300"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-2xl font-bold text-purple-600">${calculateAge(selectedPatient.fechaNacimiento)}</p>
+                                        <p class="text-sm text-gray-600">Años</p>
+                                    </div>
+                                    <i class="fas fa-birthday-cake text-2xl text-purple-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Historias -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <i class="fas fa-history mr-2 text-purple-500"></i>Historial de Consultas
+                        </h3>
+                        
+                        ${historias.map(historia => `
+                            <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center mb-3">
+                                            <i class="fas fa-calendar-day text-blue-500 mr-2"></i>
+                                            <span class="font-semibold text-gray-800">${new Date(historia.fecha || historia.created_at).toLocaleDateString('es-ES', { 
+                                                weekday: 'long', 
+                                                year: 'numeric', 
+                                                month: 'long', 
+                                                day: 'numeric' 
+                                            })}</span>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <h4 class="font-medium text-gray-700 mb-2">Motivo de Consulta</h4>
+                                                <p class="text-gray-600 text-sm">${historia.motivoConsulta || historia.motivo_consulta || 'No especificado'}</p>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-700 mb-2">Diagnóstico</h4>
+                                                <p class="text-gray-600 text-sm">${historia.diagnostico || 'No especificado'}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        ${historia.tratamiento ? `
+                                            <div class="mb-4">
+                                                <h4 class="font-medium text-gray-700 mb-2">Tratamiento</h4>
+                                                <p class="text-gray-600 text-sm">${historia.tratamiento}</p>
+                                            </div>
+                                        ` : ''}
+                                        
+                                        ${historia.medicoNombre ? `
+                                            <div class="text-sm text-gray-500">
+                                                <i class="fas fa-user-md mr-1"></i>Médico: ${historia.medicoNombre}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                    
+                                    <div class="ml-4">
+                                        <button onclick="viewHistoryDetail('${historia.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm">
+                                            <i class="fas fa-eye mr-1"></i>Ver Detalle
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            console.log('UI actualizada con las historias');
+        }
+
+        // Función para crear fórmula médica
+        function createFormula(patientId) {
+            selectedPatient = patients.find(p => p.id === patientId);
+            showTab('formula');
+            
+            const formulaContent = document.getElementById('formula-content');
+            formulaContent.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-teal-50 p-6 rounded-lg">
+                        <h4 class="font-semibold text-teal-800 mb-4">Paciente Seleccionada</h4>
+                        <p><strong>Nombre:</strong> ${selectedPatient.nombres} ${selectedPatient.apellidos}</p>
+                        <p><strong>Identificación:</strong> ${selectedPatient.identificacion}</p>
+                        <p><strong>Edad:</strong> ${calculateAge(selectedPatient.fechaNacimiento)} años</p>
+                    </div>
+                    
+                    <form id="formula-form" class="space-y-6">
+                        <div class="bg-white border rounded-lg p-6">
+                            <h5 class="font-semibold text-gray-800 mb-4">Nueva Fórmula Médica</h5>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Medicamentos y Dosis *</label>
+                                <textarea name="medicamentos" required rows="4" placeholder="Ej: Ibuprofeno 600mg - Tomar cada 8 horas por 5 días" 
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"></textarea>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Indicaciones Especiales</label>
+                                <textarea name="indicaciones" rows="3" placeholder="Instrucciones adicionales para la paciente" 
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"></textarea>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Duración del Tratamiento</label>
+                                <input type="text" name="duracion" placeholder="Ej: 7 días, 2 semanas, etc." 
+                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                            </div>
+                            
+                            <div class="flex gap-4 mt-6">
+                                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg">
+                                    <i class="fas fa-save mr-2"></i>Guardar Fórmula
+                                </button>
+                                <button type="button" onclick="generateFormulaPDF()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg">
+                                    <i class="fas fa-file-pdf mr-2"></i>Generar PDF
+                                </button>
+                                <button type="button" onclick="sendFormulaEmail()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
+                                    <i class="fas fa-envelope mr-2"></i>Enviar por Email
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            // Event listener para el formulario
+            document.getElementById('formula-form').addEventListener('submit', handleFormulaSubmit);
+        }
+
+        // Función para manejar envío de fórmula médica
+        async function handleFormulaSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const formulaData = {
+                pacienteId: selectedPatient.id,
+                medicamentos: formData.get('medicamentos'),
+                indicaciones: formData.get('indicaciones'),
+                duracion: formData.get('duracion')
+            };
+            
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE}/formulas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formulaData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al guardar fórmula médica');
+                }
+
+                showNotification('Éxito', 'Fórmula médica guardada exitosamente', 'success');
+                document.getElementById('formula-form').reset();
+            } catch (error) {
+                showNotification('Error', error.message, 'error');
+            }
+        }
+
+        // Función para generar PDF de fórmula médica
+        function generateFormulaPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Encabezado
+            doc.setFontSize(18);
+            doc.text('FÓRMULA MÉDICA', 20, 20);
+            doc.setFontSize(12);
+            doc.text(`Paciente: ${selectedPatient.nombres} ${selectedPatient.apellidos}`, 20, 35);
+            doc.text(`Identificación: ${selectedPatient.identificacion}`, 20, 45);
+            doc.text(`Edad: ${calculateAge(selectedPatient.fechaNacimiento)} años`, 20, 55);
+            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 20, 65);
+            
+            // Contenido de la fórmula
+            const form = document.getElementById('formula-form');
+            const formData = new FormData(form);
+            
+            let yPosition = 80;
+            
+            doc.text('MEDICAMENTOS:', 20, yPosition);
+            yPosition += 10;
+            const medicamentos = formData.get('medicamentos');
+            if (medicamentos) {
+                const lines = doc.splitTextToSize(medicamentos, 170);
+                doc.text(lines, 25, yPosition);
+                yPosition += lines.length * 5 + 10;
+            }
+            
+            doc.text('INDICACIONES:', 20, yPosition);
+            yPosition += 10;
+            const indicaciones = formData.get('indicaciones');
+            if (indicaciones) {
+                const lines = doc.splitTextToSize(indicaciones, 170);
+                doc.text(lines, 25, yPosition);
+                yPosition += lines.length * 5 + 10;
+            }
+            
+            const duracion = formData.get('duracion');
+            if (duracion) {
+                doc.text(`DURACIÓN: ${duracion}`, 20, yPosition);
+                yPosition += 15;
+            }
+            
+            // Firma
+            doc.text(`Médico: ${currentUser.name}`, 20, yPosition + 20);
+            doc.text(`Especialidad: ${currentUser.especialidad || 'Medicina General'}`, 20, yPosition + 30);
+            doc.text(`Registro: ${currentUser.registro || 'N/A'}`, 20, yPosition + 40);
+            
+            doc.save(`formula-medica-${selectedPatient.identificacion}-${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        // Función para enviar fórmula por email
+        function sendFormulaEmail() {
+            if (!selectedPatient.email) {
+                showNotification('Error', 'La paciente no tiene email registrado', 'error');
+                return;
+            }
+            
+            // Simular envío de email
+            showNotification('Éxito', `Fórmula médica enviada a ${selectedPatient.email}`, 'success');
+        }
+
+        // Función para cargar estadísticas del dashboard
+        async function loadDashboardStats() {
+            try {
+                const token = localStorage.getItem('authToken');
+                
+                // Cargar pacientes
+                const patientsResponse = await fetch(`${API_BASE}/patients`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (patientsResponse.ok) {
+                    const patientsData = await patientsResponse.json();
+                    document.getElementById('total-patients').textContent = patientsData.length;
+                }
+                
+                // Cargar historias del mes
+                const historiasResponse = await fetch(`${API_BASE}/historias`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (historiasResponse.ok) {
+                    const historiasData = await historiasResponse.json();
+                    const thisMonth = historiasData.filter(h => {
+                        const historyDate = new Date(h.created_at);
+                        const now = new Date();
+                        return historyDate.getMonth() === now.getMonth() && 
+                               historyDate.getFullYear() === now.getFullYear();
+                    });
+                    document.getElementById('monthly-consultations').textContent = thisMonth.length;
+                }
+                
+                // Simular pacientes por prioridad
+                const priorityContainer = document.getElementById('priority-patients');
+                priorityContainer.innerHTML = `
+                    <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                        <span class="text-red-800">Alta Prioridad</span>
+                        <span class="bg-red-600 text-white px-2 py-1 rounded-full text-sm">3</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                        <span class="text-yellow-800">Media Prioridad</span>
+                        <span class="bg-yellow-600 text-white px-2 py-1 rounded-full text-sm">8</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <span class="text-green-800">Baja Prioridad</span>
+                        <span class="bg-green-600 text-white px-2 py-1 rounded-full text-sm">12</span>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+
+        // Función para logout
+        function logout() {
+            currentUser = null;
+            selectedPatient = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUser');
+            userInfo.classList.add('hidden');
+            showScreen('login-form');
+            showNotification('Sesión cerrada', 'Has cerrado sesión correctamente', 'info');
+        }
+
+        // Función para verificar sesión existente
+        function checkExistingSession() {
+            const savedUser = localStorage.getItem('authUser');
+            const token = localStorage.getItem('authToken');
+            
+            if (savedUser && token) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    welcomeText.textContent = `Dra. ${currentUser.name}`;
+                    userSpecialty.textContent = currentUser.especialidad || 'Medicina General';
+                    userInfo.classList.remove('hidden');
+                    showScreen('dashboard');
+                    showTab('registro');
+                    return true;
+                } catch (e) {
+                    localStorage.removeItem('authUser');
+                    localStorage.removeItem('authToken');
+                }
+            }
+            return false;
+        }
+
+        // Event listeners
+        document.getElementById('auth-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username && password) {
+                handleLogin(username, password);
+            } else {
+                showNotification('Error', 'Por favor complete todos los campos', 'error');
+            }
+        });
+
+        document.getElementById('patient-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            const patientData = {
+                nombres: formData.get('nombres'),
+                apellidos: formData.get('apellidos'),
+                identificacion: formData.get('identificacion'),
+                fechaNacimiento: formData.get('fechaNacimiento'),
+                telefono: formData.get('telefono'),
+                email: formData.get('email'),
+                estadoCivil: formData.get('estadoCivil'),
+                ocupacion: formData.get('ocupacion'),
+                direccion: formData.get('direccion'),
+                ultimaMenstruacion: formData.get('ultimaMenstruacion'),
+                embarazosPrevios: formData.get('embarazosPrevios'),
+                partos: formData.get('partos'),
+                abortos: formData.get('abortos')
+            };
+            
+            registerPatient(patientData);
+        });
+
+        // Búsqueda en tiempo real
+        document.getElementById('search-input').addEventListener('input', function() {
+            if (this.value.length > 2) {
+                searchPatients();
+            }
+        });
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            loadingStatus.textContent = 'Verificando sesión...';
+            
+            setTimeout(() => {
+                if (!checkExistingSession()) {
+                    showScreen('login-form');
+                }
+            }, 1000);
+        });
+
+        // Log para debugging
+        console.log('YoSoy Historia Clínica - Sistema Médico para Mujeres iniciado');
+        console.log('Dominio:', window.location.hostname);
+        console.log('Protocolo:', window.location.protocol);
+    </script>
 </body>
 </html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico - YoSoy Historia Clínica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-purple-900 mb-8">🔍 Diagnóstico del Sistema</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Test de Conectividad Backend -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🔗 Conectividad Backend</h2>
+                <button onclick="testBackend()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                    Probar Conexión
+                </button>
+                <div id="backend-status" class="mt-4 p-3 rounded"></div>
+            </div>
+
+            <!-- Test de Dependencias JavaScript -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">📦 Dependencias JavaScript</h2>
+                <button onclick="testDependencies()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    Verificar Librerías
+                </button>
+                <div id="dependencies-status" class="mt-4 p-3 rounded"></div>
+            </div>
+
+            <!-- Test de React -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">⚛️ React</h2>
+                <button onclick="testReact()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    Probar React
+                </button>
+                <div id="react-status" class="mt-4 p-3 rounded"></div>
+            </div>
+
+            <!-- Test de LocalStorage -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">💾 LocalStorage</h2>
+                <button onclick="testLocalStorage()" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+                    Probar Almacenamiento
+                </button>
+                <div id="storage-status" class="mt-4 p-3 rounded"></div>
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <h2 class="text-xl font-semibold mb-4">📝 Logs del Sistema</h2>
+            <div id="logs" class="bg-gray-100 p-4 rounded max-h-64 overflow-y-auto font-mono text-sm"></div>
+            <button onclick="clearLogs()" class="mt-2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                Limpiar Logs
+            </button>
+        </div>
+
+        <!-- Link a la aplicación principal -->
+        <div class="mt-8 text-center">
+            <a href="secure-medical-system.html" class="bg-purple-900 text-white px-8 py-3 rounded-lg hover:bg-purple-800 inline-block">
+                🏥 Ir a la Aplicación Principal
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let logs = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.push(`[${timestamp}] ${type.toUpperCase()}: ${message}`);
+            updateLogs();
+        }
+
+        function updateLogs() {
+            document.getElementById('logs').innerHTML = logs.join('\n');
+        }
+
+        function setStatus(elementId, message, isSuccess) {
+            const element = document.getElementById(elementId);
+            element.className = `mt-4 p-3 rounded ${isSuccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+            element.innerHTML = message;
+        }
+
+        async function testBackend() {
+            log('Probando conectividad con backend...');
+            try {
+                const response = await fetch('http://localhost:3001/api/health');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    setStatus('backend-status', `✅ Backend conectado: ${data.status}`, true);
+                    log('Backend respondió correctamente', 'success');
+                } else {
+                    setStatus('backend-status', `❌ Backend error: ${response.status}`, false);
+                    log(`Backend error: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                setStatus('backend-status', `❌ Error de conexión: ${error.message}`, false);
+                log(`Error conectando al backend: ${error.message}`, 'error');
+            }
+        }
+
+        function testDependencies() {
+            log('Verificando dependencias JavaScript...');
+            const deps = [
+                { name: 'React', check: () => typeof React !== 'undefined' },
+                { name: 'ReactDOM', check: () => typeof ReactDOM !== 'undefined' },
+                { name: 'Babel', check: () => typeof Babel !== 'undefined' },
+                { name: 'Chart.js', check: () => typeof Chart !== 'undefined' },
+                { name: 'jsPDF', check: () => typeof jsPDF !== 'undefined' }
+            ];
+
+            let missing = [];
+            let loaded = [];
+
+            deps.forEach(dep => {
+                try {
+                    if (dep.check()) {
+                        loaded.push(dep.name);
+                        log(`${dep.name} cargado correctamente`, 'success');
+                    } else {
+                        missing.push(dep.name);
+                        log(`${dep.name} no está disponible`, 'warning');
+                    }
+                } catch (error) {
+                    missing.push(dep.name);
+                    log(`Error verificando ${dep.name}: ${error.message}`, 'error');
+                }
+            });
+
+            const status = missing.length === 0 
+                ? `✅ Todas las dependencias cargadas (${loaded.length})`
+                : `❌ Faltan dependencias: ${missing.join(', ')}`;
+            
+            setStatus('dependencies-status', status, missing.length === 0);
+        }
+
+        function testReact() {
+            log('Probando React...');
+            try {
+                // Crear un componente React simple
+                const TestComponent = React.createElement('div', {}, 'React funciona correctamente');
+                
+                // Intentar renderizar
+                const testDiv = document.createElement('div');
+                ReactDOM.render(TestComponent, testDiv);
+                
+                setStatus('react-status', '✅ React funciona correctamente', true);
+                log('React test exitoso', 'success');
+            } catch (error) {
+                setStatus('react-status', `❌ Error en React: ${error.message}`, false);
+                log(`Error en React: ${error.message}`, 'error');
+            }
+        }
+
+        function testLocalStorage() {
+            log('Probando LocalStorage...');
+            try {
+                const testKey = 'yosoy_test';
+                const testValue = { test: true, timestamp: Date.now() };
+                
+                // Probar escritura
+                localStorage.setItem(testKey, JSON.stringify(testValue));
+                
+                // Probar lectura
+                const retrieved = JSON.parse(localStorage.getItem(testKey));
+                
+                // Probar eliminación
+                localStorage.removeItem(testKey);
+                
+                if (retrieved && retrieved.test === true) {
+                    setStatus('storage-status', '✅ LocalStorage funciona correctamente', true);
+                    log('LocalStorage test exitoso', 'success');
+                } else {
+                    setStatus('storage-status', '❌ Error en LocalStorage: datos corruptos', false);
+                    log('LocalStorage test falló: datos corruptos', 'error');
+                }
+            } catch (error) {
+                setStatus('storage-status', `❌ Error en LocalStorage: ${error.message}`, false);
+                log(`Error en LocalStorage: ${error.message}`, 'error');
+            }
+        }
+
+        function clearLogs() {
+            logs = [];
+            updateLogs();
+        }
+
+        // Auto-test inicial
+        document.addEventListener('DOMContentLoaded', () => {
+            log('Sistema de diagnóstico iniciado');
+            setTimeout(() => {
+                testBackend();
+                testDependencies();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

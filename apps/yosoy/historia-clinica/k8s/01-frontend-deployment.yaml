@@ -18,7 +18,7 @@ spec:
       serviceAccountName: historia-clinicas-ksa
       containers:
       - name: historia-clinicas-frontend
-        image: gcr.io/authentic-prod-464216/yosoy-historia-clinica:v4
+        image: gcr.io/authentic-prod-464216/yosoy-historia-clinica:v7-dra-anamaria
         ports:
         - containerPort: 8080
         resources:

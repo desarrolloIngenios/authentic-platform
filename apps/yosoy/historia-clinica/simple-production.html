@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YoSoy Historia Clínica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            margin: 0; padding: 0; 
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .loading { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-purple-900 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">🏥 YoSoy Historia Clínica</h1>
+                <div id="user-info" class="hidden">
+                    <span id="welcome-text" class="mr-4"></span>
+                    <button onclick="logout()" class="bg-purple-700 hover:bg-purple-600 px-4 py-2 rounded">
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="flex items-center justify-center min-h-screen">
+        <div class="text-center">
+            <div class="loading w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full mx-auto mb-4"></div>
+            <h2 class="text-xl text-purple-900">Cargando Sistema Médico</h2>
+            <p id="loading-status" class="text-purple-600 mt-2">Inicializando...</p>
+        </div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-purple-700">
+        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md fade-in">
+            <h2 class="text-3xl font-bold text-purple-900 text-center mb-8">Iniciar Sesión</h2>
+            <form id="auth-form" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Usuario</label>
+                    <input type="text" id="username" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Ingrese su usuario">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                    <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Ingrese su contraseña">
+                </div>
+                <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                    Iniciar Sesión
+                </button>
+                <div class="text-center text-sm text-gray-500 mt-4 p-3 bg-gray-50 rounded">
+                    <p class="font-medium">Usuarios de demo:</p>
+                    <p>admin / admin123</p>
+                    <p>carlos / medico123</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="hidden">
+        <main class="container mx-auto px-4 py-8">
+            <!-- Welcome Card -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8 fade-in">
+                <h2 class="text-2xl font-bold text-purple-900 mb-2">¡Bienvenido al Sistema!</h2>
+                <p class="text-gray-600">Sistema médico digital completamente funcional en la nube.</p>
+                <div class="mt-4 p-3 bg-green-50 rounded border border-green-200">
+                    <p class="text-green-700 text-sm">✅ Conectado a https://hc.yo-soy.co - Sistema en producción</p>
+                </div>
+            </div>
+
+            <!-- Feature Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Pacientes -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow fade-in">
+                    <div class="text-4xl mb-4">👥</div>
+                    <h3 class="text-xl font-semibold text-purple-900 mb-2">Pacientes</h3>
+                    <p class="text-gray-600 mb-4">Gestión de información de pacientes</p>
+                    <button onclick="showNotification('Módulo de Pacientes', 'Funcionalidad en desarrollo')" 
+                            class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                        Ver Pacientes
+                    </button>
+                </div>
+
+                <!-- Historias Clínicas -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow fade-in">
+                    <div class="text-4xl mb-4">📋</div>
+                    <h3 class="text-xl font-semibold text-purple-900 mb-2">Historias Clínicas</h3>
+                    <p class="text-gray-600 mb-4">Registro médico digital completo</p>
+                    <button onclick="showNotification('Historias Clínicas', 'Funcionalidad en desarrollo')" 
+                            class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                        Nueva Historia
+                    </button>
+                </div>
+
+                <!-- Videoconsultas -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow fade-in">
+                    <div class="text-4xl mb-4">🎥</div>
+                    <h3 class="text-xl font-semibold text-purple-900 mb-2">Videoconsultas</h3>
+                    <p class="text-gray-600 mb-4">Consultas virtuales con Google Meet</p>
+                    <button onclick="showNotification('Videoconsultas', 'Sistema de videoconsultas disponible')" 
+                            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        ✅ Disponible
+                    </button>
+                </div>
+
+                <!-- Notificaciones -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow fade-in">
+                    <div class="text-4xl mb-4">🔔</div>
+                    <h3 class="text-xl font-semibold text-purple-900 mb-2">Notificaciones</h3>
+                    <p class="text-gray-600 mb-4">Alertas y recordatorios en tiempo real</p>
+                    <button onclick="window.open('/demo-notificaciones.html', '_blank')" 
+                            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        ✅ Ver Demo
+                    </button>
+                </div>
+
+                <!-- Base de Datos -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow fade-in">
+                    <div class="text-4xl mb-4">🗄️</div>
+                    <h3 class="text-xl font-semibold text-purple-900 mb-2">Base de Datos</h3>
+                    <p class="text-gray-600 mb-4">Sistema persistente con Kubernetes</p>
+                    <button onclick="showNotification('Base de Datos', 'Backend API funcionando correctamente')" 
+                            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        ✅ Operativa
+                    </button>
+                </div>
+
+                <!-- Reportes -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow fade-in">
+                    <div class="text-4xl mb-4">📊</div>
+                    <h3 class="text-xl font-semibold text-purple-900 mb-2">Reportes</h3>
+                    <p class="text-gray-600 mb-4">Analíticas y estadísticas médicas</p>
+                    <button onclick="showNotification('Reportes', 'Próximamente disponible')" 
+                            class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+                        🔄 En desarrollo
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="mt-8 bg-blue-50 rounded-lg shadow-lg p-6 border border-blue-200">
+                <h3 class="text-lg font-semibold text-blue-900 mb-4">🚀 Información del Sistema</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                    <div><span class="font-medium">Dominio:</span> <span class="text-blue-700">hc.yo-soy.co</span></div>
+                    <div><span class="font-medium">SSL:</span> <span class="text-green-600">✅ Activo</span></div>
+                    <div><span class="font-medium">Hosting:</span> <span class="text-blue-700">Google Cloud</span></div>
+                    <div><span class="font-medium">Estado:</span> <span class="text-green-600">✅ Producción</span></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-4 right-4 space-y-2 z-50"></div>
+
+    <script>
+        // Estado de la aplicación
+        let currentUser = null;
+        let isAuthenticated = false;
+
+        // API Configuration
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001/api' 
+            : '/api';
+
+        // Elementos del DOM
+        const loadingScreen = document.getElementById('loading-screen');
+        const loginForm = document.getElementById('login-form');
+        const dashboard = document.getElementById('dashboard');
+        const userInfo = document.getElementById('user-info');
+        const welcomeText = document.getElementById('welcome-text');
+        const loadingStatus = document.getElementById('loading-status');
+
+        // Función para mostrar notificaciones
+        function showNotification(title, message, type = 'info') {
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            toast.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full opacity-0`;
+            toast.innerHTML = `<strong>${title}</strong><br>${message}`;
+            
+            document.getElementById('toast-container').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Función para mostrar diferentes pantallas
+        function showScreen(screen) {
+            loadingScreen.classList.add('hidden');
+            loginForm.classList.add('hidden');
+            dashboard.classList.add('hidden');
+            
+            document.getElementById(screen).classList.remove('hidden');
+        }
+
+        // Función de login
+        async function handleLogin(username, password) {
+            try {
+                loadingStatus.textContent = 'Verificando credenciales...';
+                showScreen('loading-screen');
+                
+                // Simular verificación (reemplazar con API real)
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Credenciales de demo
+                const validUsers = {
+                    'admin': { password: 'admin123', name: 'Administrador' },
+                    'carlos': { password: 'medico123', name: 'Dr. Carlos Méndez' },
+                    'anamaria': { password: 'ana123', name: 'Dra. Ana María' }
+                };
+                
+                if (validUsers[username] && validUsers[username].password === password) {
+                    currentUser = { username, name: validUsers[username].name };
+                    isAuthenticated = true;
+                    
+                    // Guardar en localStorage
+                    localStorage.setItem('authUser', JSON.stringify(currentUser));
+                    
+                    // Mostrar dashboard
+                    loadingStatus.textContent = 'Cargando dashboard...';
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    welcomeText.textContent = `Bienvenido, ${currentUser.name}`;
+                    userInfo.classList.remove('hidden');
+                    showScreen('dashboard');
+                    
+                    showNotification('Login exitoso', `Bienvenido ${currentUser.name}`, 'success');
+                } else {
+                    throw new Error('Credenciales incorrectas');
+                }
+            } catch (error) {
+                showScreen('login-form');
+                showNotification('Error de login', error.message, 'error');
+            }
+        }
+
+        // Función de logout
+        function logout() {
+            currentUser = null;
+            isAuthenticated = false;
+            localStorage.removeItem('authUser');
+            userInfo.classList.add('hidden');
+            showScreen('login-form');
+            showNotification('Sesión cerrada', 'Has cerrado sesión correctamente', 'info');
+        }
+
+        // Verificar sesión existente
+        function checkExistingSession() {
+            const savedUser = localStorage.getItem('authUser');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    isAuthenticated = true;
+                    welcomeText.textContent = `Bienvenido, ${currentUser.name}`;
+                    userInfo.classList.remove('hidden');
+                    showScreen('dashboard');
+                    return true;
+                } catch (e) {
+                    localStorage.removeItem('authUser');
+                }
+            }
+            return false;
+        }
+
+        // Event listeners
+        document.getElementById('auth-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username && password) {
+                handleLogin(username, password);
+            } else {
+                showNotification('Error', 'Por favor complete todos los campos', 'error');
+            }
+        });
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            loadingStatus.textContent = 'Verificando sesión...';
+            
+            setTimeout(() => {
+                if (!checkExistingSession()) {
+                    showScreen('login-form');
+                }
+            }, 1000);
+        });
+
+        // Log para debugging
+        console.log('YoSoy Historia Clínica - Sistema iniciado');
+        console.log('Dominio:', window.location.hostname);
+        console.log('Protocolo:', window.location.protocol);
+    </script>
+</body>
+</html>

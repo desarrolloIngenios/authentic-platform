@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YoSoy Historia Clínica - Portal Principal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-900 to-purple-700 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center text-white mb-12">
+            <h1 class="text-5xl font-bold mb-4">🏥 YoSoy Historia Clínica</h1>
+            <p class="text-xl text-purple-200">Sistema Médico Digital Integral</p>
+            <p class="text-purple-300 mt-2">Plataforma completa para gestión de historias clínicas</p>
+        </div>
+
+        <!-- Status Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 text-white">
+                <h3 class="text-lg font-semibold mb-2">🔗 Backend API</h3>
+                <div id="backend-status" class="text-purple-200">Verificando...</div>
+            </div>
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 text-white">
+                <h3 class="text-lg font-semibold mb-2">📊 Base de Datos</h3>
+                <div id="db-status" class="text-purple-200">Verificando...</div>
+            </div>
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 text-white">
+                <h3 class="text-lg font-semibold mb-2">🔔 Notificaciones</h3>
+                <div class="text-green-300">✅ Sistema Activo</div>
+            </div>
+        </div>
+
+        <!-- Application Options -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Aplicación Principal -->
+            <div class="bg-white rounded-lg shadow-xl p-6 transform hover:scale-105 transition-transform">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">🚀</div>
+                    <h3 class="text-xl font-bold text-purple-900 mb-2">Aplicación Principal</h3>
+                    <p class="text-gray-600 mb-4">Sistema completo con todas las funcionalidades</p>
+                    <a href="medical-app.html" class="block bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                        Acceder
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sistema de Notificaciones -->
+            <div class="bg-white rounded-lg shadow-xl p-6 transform hover:scale-105 transition-transform">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">🔔</div>
+                    <h3 class="text-xl font-bold text-purple-900 mb-2">Notificaciones</h3>
+                    <p class="text-gray-600 mb-4">Demo del sistema de notificaciones en tiempo real</p>
+                    <a href="demo-notificaciones.html" class="block bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors">
+                        Demo
+                    </a>
+                </div>
+            </div>
+
+            <!-- Diagnóstico del Sistema -->
+            <div class="bg-white rounded-lg shadow-xl p-6 transform hover:scale-105 transition-transform">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">🔍</div>
+                    <h3 class="text-xl font-bold text-purple-900 mb-2">Diagnóstico</h3>
+                    <p class="text-gray-600 mb-4">Herramientas de diagnóstico y pruebas</p>
+                    <a href="diagnostico.html" class="block bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        Diagnosticar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Versión Simplificada -->
+            <div class="bg-white rounded-lg shadow-xl p-6 transform hover:scale-105 transition-transform">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">⚡</div>
+                    <h3 class="text-xl font-bold text-purple-900 mb-2">Versión Básica</h3>
+                    <p class="text-gray-600 mb-4">Interfaz simplificada y rápida</p>
+                    <a href="simple-app.html" class="block bg-yellow-600 text-white py-3 rounded-lg hover:bg-yellow-700 transition-colors">
+                        Acceder
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sistema Original -->
+            <div class="bg-white rounded-lg shadow-xl p-6 transform hover:scale-105 transition-transform">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">📋</div>
+                    <h3 class="text-xl font-bold text-purple-900 mb-2">Sistema Completo</h3>
+                    <p class="text-gray-600 mb-4">Versión completa con todas las funcionalidades</p>
+                    <a href="secure-medical-system.html" class="block bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                        Acceder
+                    </a>
+                </div>
+            </div>
+
+            <!-- Test de Carga -->
+            <div class="bg-white rounded-lg shadow-xl p-6 transform hover:scale-105 transition-transform">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">🧪</div>
+                    <h3 class="text-xl font-bold text-purple-900 mb-2">Test de Carga</h3>
+                    <p class="text-gray-600 mb-4">Verificar proceso de carga paso a paso</p>
+                    <a href="test-loading.html" class="block bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        Probar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Overview -->
+        <div class="mt-12 bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-8">
+            <h2 class="text-2xl font-bold text-white text-center mb-8">Funcionalidades Implementadas</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-white">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">✅</div>
+                    <h4 class="font-semibold">Videoconsultas</h4>
+                    <p class="text-sm text-purple-200">Google Meet integrado</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl mb-2">✅</div>
+                    <h4 class="font-semibold">Base de Datos</h4>
+                    <p class="text-sm text-purple-200">Backend persistente</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl mb-2">✅</div>
+                    <h4 class="font-semibold">Notificaciones</h4>
+                    <p class="text-sm text-purple-200">Tiempo real con SSE</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl mb-2">🔄</div>
+                    <h4 class="font-semibold">Reportes</h4>
+                    <p class="text-sm text-purple-200">En desarrollo</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-purple-200">
+            <p>&copy; 2025 YoSoy Historia Clínica - Sistema Médico Digital</p>
+            <p class="text-sm mt-2">Última actualización: 3 de noviembre de 2025</p>
+        </div>
+    </div>
+
+    <script>
+        // Verificar estado del backend
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch('http://localhost:3001/api/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('backend-status').innerHTML = '✅ Conectado';
+                    document.getElementById('db-status').innerHTML = '✅ ' + data.database;
+                } else {
+                    document.getElementById('backend-status').innerHTML = '❌ No responde';
+                    document.getElementById('db-status').innerHTML = '❌ Sin conexión';
+                }
+            } catch (error) {
+                document.getElementById('backend-status').innerHTML = '❌ Error de conexión';
+                document.getElementById('db-status').innerHTML = '❌ No disponible';
+            }
+        }
+
+        // Verificar estado al cargar
+        document.addEventListener('DOMContentLoaded', () => {
+            checkBackendStatus();
+        });
+    </script>
+</body>
+</html>

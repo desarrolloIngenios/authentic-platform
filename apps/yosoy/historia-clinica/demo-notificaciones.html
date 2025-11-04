@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Sistema de Notificaciones</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .notification-item {
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .priority-critica { border-left: 4px solid #ef4444; }
+        .priority-alta { border-left: 4px solid #f97316; }
+        .priority-media { border-left: 4px solid #eab308; }
+        .priority-baja { border-left: 4px solid #22c55e; }
+        
+        .real-time-indicator {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <div class="bg-blue-900 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">🔔 Demo Sistema de Notificaciones</h1>
+            <div class="flex items-center space-x-4">
+                <div id="connection-status" class="flex items-center">
+                    <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                    <span>Desconectado</span>
+                </div>
+                <button id="logout-btn" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-section" class="container mx-auto max-w-md mt-10 p-6 bg-white rounded-lg shadow-lg">
+        <h2 class="text-2xl font-bold text-center mb-6">Iniciar Sesión</h2>
+        <form id="login-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Usuario</label>
+                <select id="username" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="admin">admin (Administrador)</option>
+                    <option value="carlos">carlos (Médico)</option>
+                    <option value="anamaria">anamaria (Enfermera)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                <input type="password" id="password" value="admin123" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Contraseña">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                Iniciar Sesión
+            </button>
+        </form>
+    </div>
+
+    <!-- Main App -->
+    <div id="app-section" class="container mx-auto mt-6 hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Panel de Control -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">📊 Panel de Control</h3>
+                    
+                    <!-- Estadísticas -->
+                    <div id="stats" class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span>Total:</span>
+                            <span id="total-count" class="font-bold">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Pendientes:</span>
+                            <span id="pending-count" class="font-bold text-orange-600">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Leídas:</span>
+                            <span id="read-count" class="font-bold text-green-600">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Crear Notificación -->
+                    <form id="create-notification-form" class="space-y-4">
+                        <h4 class="font-bold">✨ Crear Notificación</h4>
+                        <input type="text" id="notification-title" placeholder="Título" class="w-full p-2 border rounded">
+                        <textarea id="notification-message" placeholder="Mensaje" class="w-full p-2 border rounded h-20"></textarea>
+                        <select id="notification-type" class="w-full p-2 border rounded">
+                            <option value="sistema">Sistema</option>
+                            <option value="cita">Cita</option>
+                            <option value="examen">Examen</option>
+                            <option value="medicamento">Medicamento</option>
+                            <option value="urgente">Urgente</option>
+                            <option value="mensaje">Mensaje</option>
+                        </select>
+                        <select id="notification-priority" class="w-full p-2 border rounded">
+                            <option value="baja">Baja</option>
+                            <option value="media">Media</option>
+                            <option value="alta">Alta</option>
+                            <option value="critica">Crítica</option>
+                        </select>
+                        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+                            Crear Notificación
+                        </button>
+                    </form>
+
+                    <!-- Acciones -->
+                    <div class="mt-6 space-y-2">
+                        <button id="mark-all-read" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                            Marcar Todas como Leídas
+                        </button>
+                        <button id="schedule-reminders" class="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700">
+                            Programar Recordatorios
+                        </button>
+                        <button id="refresh-notifications" class="w-full bg-gray-600 text-white py-2 rounded hover:bg-gray-700">
+                            Actualizar Lista
+                        </button>
+                    </div>
+
+                    <!-- Indicador Tiempo Real -->
+                    <div class="mt-6 p-3 bg-green-50 border border-green-200 rounded">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-green-500 rounded-full mr-2 real-time-indicator"></div>
+                            <span class="text-sm text-green-700">Notificaciones en tiempo real activas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Notificaciones -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">🔔 Notificaciones</h3>
+                    
+                    <!-- Filtros -->
+                    <div class="mb-4 flex flex-wrap gap-2">
+                        <select id="filter-status" class="p-2 border rounded">
+                            <option value="">Todos los estados</option>
+                            <option value="pendiente">Pendientes</option>
+                            <option value="leida">Leídas</option>
+                            <option value="archivada">Archivadas</option>
+                        </select>
+                        <select id="filter-type" class="p-2 border rounded">
+                            <option value="">Todos los tipos</option>
+                            <option value="sistema">Sistema</option>
+                            <option value="cita">Cita</option>
+                            <option value="examen">Examen</option>
+                            <option value="medicamento">Medicamento</option>
+                            <option value="urgente">Urgente</option>
+                            <option value="mensaje">Mensaje</option>
+                        </select>
+                        <select id="filter-priority" class="p-2 border rounded">
+                            <option value="">Todas las prioridades</option>
+                            <option value="baja">Baja</option>
+                            <option value="media">Media</option>
+                            <option value="alta">Alta</option>
+                            <option value="critica">Crítica</option>
+                        </select>
+                    </div>
+
+                    <!-- Lista -->
+                    <div id="notifications-list" class="space-y-3 max-h-96 overflow-y-auto">
+                        <div class="text-center text-gray-500 py-8">
+                            No hay notificaciones
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 space-y-2 z-50"></div>
+
+    <script>
+        class NotificationSystem {
+            constructor() {
+                this.token = null;
+                this.user = null;
+                this.eventSource = null;
+                this.notifications = [];
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.checkAuthStatus();
+            }
+
+            setupEventListeners() {
+                // Login form
+                document.getElementById('login-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.login();
+                });
+
+                // Logout button
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    this.logout();
+                });
+
+                // Create notification form
+                document.getElementById('create-notification-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.createNotification();
+                });
+
+                // Action buttons
+                document.getElementById('mark-all-read').addEventListener('click', () => {
+                    this.markAllAsRead();
+                });
+
+                document.getElementById('schedule-reminders').addEventListener('click', () => {
+                    this.scheduleReminders();
+                });
+
+                document.getElementById('refresh-notifications').addEventListener('click', () => {
+                    this.loadNotifications();
+                });
+
+                // Filter changes
+                ['filter-status', 'filter-type', 'filter-priority'].forEach(id => {
+                    document.getElementById(id).addEventListener('change', () => {
+                        this.loadNotifications();
+                    });
+                });
+            }
+
+            async login() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                try {
+                    const response = await fetch('http://localhost:3001/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        this.token = data.token;
+                        this.user = data.user;
+                        localStorage.setItem('token', this.token);
+                        localStorage.setItem('user', JSON.stringify(this.user));
+                        
+                        this.showApp();
+                        this.connectToNotifications();
+                        this.loadNotifications();
+                        this.loadStats();
+                        this.showToast('Autenticación exitosa', 'success');
+                    } else {
+                        this.showToast(data.error || 'Error en el login', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error en login:', error);
+                    this.showToast('Error de conexión', 'error');
+                }
+            }
+
+            logout() {
+                this.token = null;
+                this.user = null;
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                
+                if (this.eventSource) {
+                    this.eventSource.close();
+                    this.eventSource = null;
+                }
+                
+                this.showLogin();
+                this.updateConnectionStatus(false);
+                this.showToast('Sesión cerrada', 'info');
+            }
+
+            checkAuthStatus() {
+                const token = localStorage.getItem('token');
+                const user = localStorage.getItem('user');
+
+                if (token && user) {
+                    this.token = token;
+                    this.user = JSON.parse(user);
+                    this.showApp();
+                    this.connectToNotifications();
+                    this.loadNotifications();
+                    this.loadStats();
+                } else {
+                    this.showLogin();
+                }
+            }
+
+            showLogin() {
+                document.getElementById('login-section').classList.remove('hidden');
+                document.getElementById('app-section').classList.add('hidden');
+            }
+
+            showApp() {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
+            }
+
+            connectToNotifications() {
+                if (this.eventSource) {
+                    this.eventSource.close();
+                }
+
+                const url = `http://localhost:3001/api/notificaciones/stream?token=${this.token}`;
+                this.eventSource = new EventSource(url);
+
+                this.eventSource.onopen = () => {
+                    console.log('Conectado al stream de notificaciones');
+                    this.updateConnectionStatus(true);
+                };
+
+                this.eventSource.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    this.handleRealtimeNotification(data);
+                };
+
+                this.eventSource.onerror = (error) => {
+                    console.error('Error en SSE:', error);
+                    this.updateConnectionStatus(false);
+                    
+                    // Intentar reconectar después de 5 segundos
+                    setTimeout(() => {
+                        if (this.token) {
+                            this.connectToNotifications();
+                        }
+                    }, 5000);
+                };
+            }
+
+            handleRealtimeNotification(data) {
+                console.log('Notificación en tiempo real:', data);
+
+                switch (data.type) {
+                    case 'connected':
+                        this.showToast('Conectado a notificaciones en tiempo real', 'success');
+                        break;
+                    case 'nueva_notificacion':
+                        this.notifications.unshift(data.notificacion);
+                        this.renderNotifications();
+                        this.loadStats();
+                        this.showNotificationToast(data.notificacion);
+                        break;
+                    case 'heartbeat':
+                        // Mantener la conexión viva
+                        break;
+                }
+            }
+
+            showNotificationToast(notification) {
+                const priorityColors = {
+                    baja: 'bg-green-500',
+                    media: 'bg-yellow-500',
+                    alta: 'bg-orange-500',
+                    critica: 'bg-red-500'
+                };
+
+                const typeIcons = {
+                    sistema: '⚙️',
+                    cita: '📅',
+                    examen: '🔬',
+                    medicamento: '💊',
+                    urgente: '🚨',
+                    mensaje: '💬'
+                };
+
+                this.showToast(
+                    `${typeIcons[notification.tipo] || '🔔'} ${notification.titulo}`,
+                    'info',
+                    priorityColors[notification.prioridad]
+                );
+            }
+
+            updateConnectionStatus(connected) {
+                const status = document.getElementById('connection-status');
+                const indicator = status.querySelector('div');
+                const text = status.querySelector('span');
+
+                if (connected) {
+                    indicator.className = 'w-3 h-3 bg-green-500 rounded-full mr-2';
+                    text.textContent = 'Conectado';
+                } else {
+                    indicator.className = 'w-3 h-3 bg-red-500 rounded-full mr-2';
+                    text.textContent = 'Desconectado';
+                }
+            }
+
+            async loadNotifications() {
+                if (!this.token) return;
+
+                try {
+                    const params = new URLSearchParams({
+                        limit: 50
+                    });
+
+                    const status = document.getElementById('filter-status').value;
+                    const type = document.getElementById('filter-type').value;
+                    const priority = document.getElementById('filter-priority').value;
+
+                    if (status) params.append('estado', status);
+                    if (type) params.append('tipo', type);
+                    if (priority) params.append('prioridad', priority);
+
+                    const response = await fetch(`http://localhost:3001/api/notificaciones?${params}`, {
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        this.notifications = data.notificaciones;
+                        this.renderNotifications();
+                    } else {
+                        this.showToast(data.error || 'Error cargando notificaciones', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error cargando notificaciones:', error);
+                    this.showToast('Error de conexión', 'error');
+                }
+            }
+
+            async loadStats() {
+                if (!this.token) return;
+
+                try {
+                    const response = await fetch('http://localhost:3001/api/notificaciones/estadisticas', {
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`
+                        }
+                    });
+
+                    const stats = await response.json();
+
+                    if (response.ok) {
+                        document.getElementById('total-count').textContent = stats.total || 0;
+                        document.getElementById('pending-count').textContent = stats.pendientes || 0;
+                        document.getElementById('read-count').textContent = stats.leidas || 0;
+                    }
+                } catch (error) {
+                    console.error('Error cargando estadísticas:', error);
+                }
+            }
+
+            renderNotifications() {
+                const container = document.getElementById('notifications-list');
+                
+                if (this.notifications.length === 0) {
+                    container.innerHTML = '<div class="text-center text-gray-500 py-8">No hay notificaciones</div>';
+                    return;
+                }
+
+                const typeIcons = {
+                    sistema: '⚙️',
+                    cita: '📅',
+                    examen: '🔬',
+                    medicamento: '💊',
+                    urgente: '🚨',
+                    mensaje: '💬'
+                };
+
+                const priorityColors = {
+                    baja: 'priority-baja',
+                    media: 'priority-media',
+                    alta: 'priority-alta',
+                    critica: 'priority-critica'
+                };
+
+                container.innerHTML = this.notifications.map(notification => `
+                    <div class="notification-item ${priorityColors[notification.prioridad]} bg-gray-50 p-4 rounded-lg border ${notification.estado === 'pendiente' ? 'bg-blue-50' : ''}" data-id="${notification.id}">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-lg mr-2">${typeIcons[notification.tipo] || '🔔'}</span>
+                                    <h4 class="font-semibold ${notification.estado === 'pendiente' ? 'text-blue-800' : 'text-gray-700'}">${notification.titulo}</h4>
+                                    <span class="ml-2 px-2 py-1 text-xs rounded ${this.getPriorityClass(notification.prioridad)}">${notification.prioridad}</span>
+                                </div>
+                                <p class="text-gray-600 mb-2">${notification.mensaje}</p>
+                                <div class="text-xs text-gray-500">
+                                    ${new Date(notification.createdAt).toLocaleString('es-ES')}
+                                    ${notification.fechaLeida ? ` • Leída: ${new Date(notification.fechaLeida).toLocaleString('es-ES')}` : ''}
+                                </div>
+                            </div>
+                            <div class="flex space-x-2 ml-4">
+                                ${notification.estado === 'pendiente' ? `
+                                    <button onclick="app.markAsRead(${notification.id})" class="text-blue-600 hover:text-blue-800" title="Marcar como leída">
+                                        ✓
+                                    </button>
+                                ` : ''}
+                                <button onclick="app.archiveNotification(${notification.id})" class="text-gray-600 hover:text-gray-800" title="Archivar">
+                                    📁
+                                </button>
+                                <button onclick="app.deleteNotification(${notification.id})" class="text-red-600 hover:text-red-800" title="Eliminar">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            getPriorityClass(priority) {
+                const classes = {
+                    baja: 'bg-green-100 text-green-800',
+                    media: 'bg-yellow-100 text-yellow-800',
+                    alta: 'bg-orange-100 text-orange-800',
+                    critica: 'bg-red-100 text-red-800'
+                };
+                return classes[priority] || 'bg-gray-100 text-gray-800';
+            }
+
+            async createNotification() {
+                const title = document.getElementById('notification-title').value;
+                const message = document.getElementById('notification-message').value;
+                const type = document.getElementById('notification-type').value;
+                const priority = document.getElementById('notification-priority').value;
+
+                if (!title || !message) {
+                    this.showToast('Complete todos los campos', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:3001/api/notificaciones', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.token}`
+                        },
+                        body: JSON.stringify({
+                            usuarioId: this.user.id,
+                            titulo: title,
+                            mensaje: message,
+                            tipo: type,
+                            prioridad: priority
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        document.getElementById('create-notification-form').reset();
+                        this.showToast('Notificación creada exitosamente', 'success');
+                        this.loadNotifications();
+                        this.loadStats();
+                    } else {
+                        this.showToast(data.error || 'Error creando notificación', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error creando notificación:', error);
+                    this.showToast('Error de conexión', 'error');
+                }
+            }
+
+            async markAsRead(id) {
+                try {
+                    const response = await fetch(`http://localhost:3001/api/notificaciones/${id}/leer`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        this.loadNotifications();
+                        this.loadStats();
+                        this.showToast('Notificación marcada como leída', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error marcando como leída:', error);
+                    this.showToast('Error de conexión', 'error');
+                }
+            }
+
+            async markAllAsRead() {
+                const pendingIds = this.notifications
+                    .filter(n => n.estado === 'pendiente')
+                    .map(n => n.id);
+
+                if (pendingIds.length === 0) {
+                    this.showToast('No hay notificaciones pendientes', 'info');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:3001/api/notificaciones/leer-multiples', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.token}`
+                        },
+                        body: JSON.stringify({ ids: pendingIds })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        this.loadNotifications();
+                        this.loadStats();
+                        this.showToast(`${data.actualizadas} notificaciones marcadas como leídas`, 'success');
+                    }
+                } catch (error) {
+                    console.error('Error marcando todas como leídas:', error);
+                    this.showToast('Error de conexión', 'error');
+                }
+            }
+
+            async archiveNotification(id) {
+                try {
+                    const response = await fetch(`http://localhost:3001/api/notificaciones/${id}/archivar`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        this.loadNotifications();
+                        this.loadStats();
+                        this.showToast('Notificación archivada', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error archivando notificación:', error);
+                    this.showToast('Error de conexión', 'error');
+                }
+            }
+
+            async deleteNotification(id) {
+                if (!confirm('¿Está seguro de eliminar esta notificación?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`http://localhost:3001/api/notificaciones/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        this.loadNotifications();
+                        this.loadStats();
+                        this.showToast('Notificación eliminada', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error eliminando notificación:', error);
+                    this.showToast('Error de conexión', 'error');
+                }
+            }
+
+            async scheduleReminders() {
+                try {
+                    const response = await fetch('http://localhost:3001/api/notificaciones/programar-recordatorios', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        this.showToast(`${data.notificaciones} recordatorios programados para ${data.citas} citas`, 'success');
+                        this.loadNotifications();
+                        this.loadStats();
+                    } else {
+                        this.showToast(data.error || 'Error programando recordatorios', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error programando recordatorios:', error);
+                    this.showToast('Error de conexión', 'error');
+                }
+            }
+
+            showToast(message, type = 'info', customClass = '') {
+                const toastContainer = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                
+                const colors = {
+                    success: 'bg-green-500',
+                    error: 'bg-red-500',
+                    warning: 'bg-yellow-500',
+                    info: 'bg-blue-500'
+                };
+
+                toast.className = `${customClass || colors[type]} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full opacity-0`;
+                toast.textContent = message;
+
+                toastContainer.appendChild(toast);
+
+                // Animar entrada
+                setTimeout(() => {
+                    toast.classList.remove('translate-x-full', 'opacity-0');
+                }, 100);
+
+                // Remover después de 5 segundos
+                setTimeout(() => {
+                    toast.classList.add('translate-x-full', 'opacity-0');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, 5000);
+            }
+        }
+
+        // Inicializar la aplicación
+        const app = new NotificationSystem();
+    </script>
+</body>
+</html>

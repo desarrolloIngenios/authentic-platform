@@ -1,0 +1,384 @@
+const express = require('express');
+const cors = require('cors');
+const sqlite3 = require('sqlite3').verbose();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || 'yosoy-historia-clinica-jwt-secret';
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data', 'yosoy_historia_clinica.db');
+
+// Middleware
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || ['http://localhost:3000', 'https://hc.yo-soy.co'],
+    credentials: true
+}));
+app.use(express.json());
+
+// Inicializar base de datos
+const db = new sqlite3.Database(DB_PATH, (err) => {
+    if (err) {
+        console.error('Error al conectar con la base de datos:', err);
+    } else {
+        console.log('Conectado a la base de datos SQLite:', DB_PATH);
+        ensureTestUser();
+    }
+});
+
+// Asegurar que existe un usuario de prueba
+function ensureTestUser() {
+    const testUser = {
+        id: 'user-admin',
+        username: 'admin',
+        password: '123456',
+        name: 'Dr. Admin',
+        especialidad: 'Medicina General',
+        registro: 'REG-001',
+        email: 'admin@yosoy.co'
+    };
+
+    db.get('SELECT id FROM usuarios WHERE username = ?', [testUser.username], (err, row) => {
+        if (err) {
+            console.error('Error verificando usuario:', err);
+            return;
+        }
+
+        if (!row) {
+            bcrypt.hash(testUser.password, 10, (err, hashedPassword) => {
+                if (err) {
+                    console.error('Error hasheando contraseña:', err);
+                    return;
+                }
+
+                db.run(
+                    'INSERT INTO usuarios (id, username, password, name, especialidad, registro, email) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                    [testUser.id, testUser.username, hashedPassword, testUser.name, testUser.especialidad, testUser.registro, testUser.email],
+                    (err) => {
+                        if (err) {
+                            console.error('Error creando usuario admin:', err);
+                        } else {
+                            console.log('Usuario admin creado exitosamente');
+                        }
+                    }
+                );
+            });
+        } else {
+            console.log('Usuario admin ya existe');
+        }
+    });
+}
+
+// Middleware de autenticación
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ error: 'Token de acceso requerido' });
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ error: 'Token inválido' });
+        }
+        req.user = user;
+        next();
+    });
+}
+
+// Rutas de autenticación
+app.post('/api/auth/login', (req, res) => {
+    const { username, password } = req.body;
+
+    console.log('=== LOGIN ATTEMPT ===');
+    console.log('Username:', username);
+
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
+    }
+
+    db.get('SELECT * FROM usuarios WHERE username = ?', [username], (err, user) => {
+        if (err) {
+            console.error('Error al buscar usuario:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+
+        if (!user) {
+            console.log('Usuario no encontrado');
+            return res.status(401).json({ error: 'Credenciales inválidas' });
+        }
+
+        console.log('Usuario encontrado:', user.username);
+
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err) {
+                console.error('Error al verificar contraseña:', err);
+                return res.status(500).json({ error: 'Error interno del servidor' });
+            }
+
+            console.log('Contraseña coincide:', isMatch);
+
+            if (!isMatch) {
+                return res.status(401).json({ error: 'Credenciales inválidas' });
+            }
+
+            const token = jwt.sign(
+                { 
+                    id: user.id, 
+                    username: user.username, 
+                    name: user.name,
+                    especialidad: user.especialidad,
+                    registro: user.registro
+                },
+                JWT_SECRET,
+                { expiresIn: '24h' }
+            );
+
+            console.log('Login exitoso, token generado');
+
+            res.json({
+                token,
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    name: user.name,
+                    especialidad: user.especialidad,
+                    registro: user.registro,
+                    email: user.email
+                }
+            });
+        });
+    });
+});
+
+// Ruta para verificar token
+app.get('/api/auth/verify', authenticateToken, (req, res) => {
+    res.json(req.user);
+});
+
+// Rutas de pacientes
+app.get('/api/patients', authenticateToken, (req, res) => {
+    console.log('=== OBTENIENDO PACIENTES ===');
+    
+    db.all('SELECT * FROM pacientes ORDER BY apellidos, nombres', (err, rows) => {
+        if (err) {
+            console.error('Error al obtener pacientes:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        console.log(`Pacientes encontradas: ${rows.length}`);
+        
+        // Mapear los campos para compatibilidad con el frontend
+        const mappedRows = rows.map(row => ({
+            ...row,
+            documento: row.identificacion, // Mapear identificacion a documento
+            fecha_nacimiento: row.fechaNacimiento // Mapear fechaNacimiento a fecha_nacimiento
+        }));
+        
+        res.json(mappedRows);
+    });
+});
+
+app.get('/api/patients/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    
+    db.get('SELECT * FROM pacientes WHERE id = ?', [id], (err, row) => {
+        if (err) {
+            console.error('Error al obtener paciente:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        if (!row) {
+            return res.status(404).json({ error: 'Paciente no encontrada' });
+        }
+        
+        // Mapear los campos para compatibilidad con el frontend
+        const mappedRow = {
+            ...row,
+            documento: row.identificacion,
+            fecha_nacimiento: row.fechaNacimiento
+        };
+        
+        res.json(mappedRow);
+    });
+});
+
+// Ruta para historias clínicas por paciente (CORREGIDA para el esquema real)
+app.get('/api/patients/:id/historias', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    
+    console.log('=== OBTENIENDO HISTORIAS DE PACIENTE ===');
+    console.log('ID de paciente:', id);
+    
+    // Primero obtener la identificación del paciente
+    db.get('SELECT identificacion, nombres, apellidos FROM pacientes WHERE id = ?', [id], (err, paciente) => {
+        if (err) {
+            console.error('Error al obtener paciente:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        if (!paciente) {
+            console.log('Paciente no encontrada');
+            return res.status(404).json({ error: 'Paciente no encontrada' });
+        }
+        
+        console.log('Paciente encontrada:', paciente);
+        
+        // Buscar historias por identificación (esquema actual)
+        const query = `
+            SELECT h.*, u.name as medicoNombre 
+            FROM historias_clinicas h 
+            LEFT JOIN usuarios u ON h.medico_id = u.id 
+            WHERE h.identificacion = ? 
+            ORDER BY h.fecha DESC, h.created_at DESC
+        `;
+        
+        console.log('Ejecutando consulta:', query);
+        console.log('Parámetros:', [paciente.identificacion]);
+        
+        db.all(query, [paciente.identificacion], (err, rows) => {
+            if (err) {
+                console.error('Error al obtener historias de paciente:', err);
+                return res.status(500).json({ error: 'Error interno del servidor' });
+            }
+            
+            console.log(`Historias encontradas: ${rows.length}`);
+            console.log('Historias:', rows);
+            
+            // Mapear los campos para compatibilidad con el frontend
+            const mappedRows = rows.map(row => ({
+                ...row,
+                motivo_consulta: row.motivoConsulta,
+                fecha_consulta: row.fecha,
+                paciente_nombre: row.nombrePaciente
+            }));
+            
+            res.json(mappedRows);
+        });
+    });
+});
+
+// Rutas de historias clínicas
+app.get('/api/historias', authenticateToken, (req, res) => {
+    const query = `
+        SELECT h.*, u.name as medicoNombre 
+        FROM historias_clinicas h 
+        LEFT JOIN usuarios u ON h.medico_id = u.id 
+        ORDER BY h.created_at DESC
+    `;
+    
+    db.all(query, (err, rows) => {
+        if (err) {
+            console.error('Error al obtener historias clínicas:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        res.json(rows);
+    });
+});
+
+app.post('/api/historias', authenticateToken, (req, res) => {
+    const { 
+        paciente_id, motivo_consulta, diagnostico, tratamiento, observaciones 
+    } = req.body;
+
+    // Obtener información del paciente
+    db.get('SELECT nombres, apellidos, identificacion FROM pacientes WHERE id = ?', [paciente_id], (err, paciente) => {
+        if (err) {
+            console.error('Error al obtener paciente:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+
+        if (!paciente) {
+            return res.status(404).json({ error: 'Paciente no encontrada' });
+        }
+
+        const historiaId = `hist-${Date.now()}`;
+        const nombrePaciente = `${paciente.nombres} ${paciente.apellidos}`;
+
+        db.run(
+            `INSERT INTO historias_clinicas (
+                id, nombrePaciente, identificacion, motivoConsulta, 
+                diagnostico, tratamiento, medico_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                historiaId, nombrePaciente, paciente.identificacion, motivo_consulta,
+                diagnostico, tratamiento, req.user.id
+            ],
+            function(err) {
+                if (err) {
+                    console.error('Error al crear historia clínica:', err);
+                    return res.status(500).json({ error: 'Error interno del servidor' });
+                }
+                res.status(201).json({ 
+                    id: historiaId, 
+                    message: 'Historia clínica creada exitosamente' 
+                });
+            }
+        );
+    });
+});
+
+app.get('/api/historias/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    
+    const query = `
+        SELECT h.*, u.name as medicoNombre 
+        FROM historias_clinicas h 
+        LEFT JOIN usuarios u ON h.medico_id = u.id 
+        WHERE h.id = ?
+    `;
+    
+    db.get(query, [id], (err, row) => {
+        if (err) {
+            console.error('Error al obtener historia clínica:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        if (!row) {
+            return res.status(404).json({ error: 'Historia clínica no encontrada' });
+        }
+        
+        res.json(row);
+    });
+});
+
+// Ruta de salud
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        version: '1.0.0-esquema-real',
+        database: 'Connected to ' + DB_PATH
+    });
+});
+
+// Manejar errores
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Algo salió mal!' });
+});
+
+// Iniciar servidor
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor backend ejecutándose en puerto ${PORT}`);
+    console.log(`Entorno: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`Base de datos: ${DB_PATH}`);
+});
+
+// Manejar cierre graceful
+process.on('SIGINT', () => {
+    console.log('Cerrando servidor...');
+    db.close((err) => {
+        if (err) {
+            console.error('Error al cerrar base de datos:', err);
+        } else {
+            console.log('Base de datos cerrada.');
+        }
+        process.exit(0);
+    });
+});
+
+module.exports = app;

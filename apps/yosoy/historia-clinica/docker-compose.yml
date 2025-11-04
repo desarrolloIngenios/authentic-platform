@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - JWT_SECRET=yosoy-historia-clinica-jwt-secret-key-2024
+      - DB_TYPE=sqlite
+      - DB_PATH=/app/data/yosoy_historia_clinica.db
+    volumes:
+      - backend_data:/app/data
+    networks:
+      - yosoy-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.fixed
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    environment:
+      - API_URL=http://backend:3001
+    networks:
+      - yosoy-network
+
+volumes:
+  backend_data:
+
+networks:
+  yosoy-network:
+    driver: bridge

@@ -1,0 +1,31 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: yosoy-ssl-cert
+  namespace: yosoy-historia-clinica
+spec:
+  domains:
+    - hc.yo-soy.co
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: yosoy-ingress
+  namespace: yosoy-historia-clinica
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    networking.gke.io/managed-certificates: "yosoy-ssl-cert"
+    kubernetes.io/ingress.global-static-ip-name: "yosoy-ip"
+    networking.gke.io/v1beta1.FrontendConfig: "yosoy-frontend-config"
+spec:
+  rules:
+  - host: hc.yo-soy.co
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: yosoy-frontend-service
+            port:
+              number: 80

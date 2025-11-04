@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yosoy-historia-clinica-frontend-simple
+  namespace: yosoy-historia-clinica
+  labels:
+    app: yosoy-historia-clinica-frontend-simple
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: yosoy-historia-clinica-frontend-simple
+  template:
+    metadata:
+      labels:
+        app: yosoy-historia-clinica-frontend-simple
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html-content
+          mountPath: /usr/share/nginx/html
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      volumes:
+      - name: html-content
+        configMap:
+          name: frontend-complete
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: yosoy-historia-clinica-service-simple
+  namespace: yosoy-historia-clinica
+  labels:
+    app: yosoy-historia-clinica-frontend-simple
+spec:
+  selector:
+    app: yosoy-historia-clinica-frontend-simple
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP

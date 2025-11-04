@@ -17,29 +17,29 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentPage }) => {
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-slate-800">Dashboard Médico</h1>
-        <p className="mt-2 text-lg text-slate-600">Resumen de la actividad clínica.</p>
+        <h1 className="text-4xl font-bold text-purple-800">Dashboard Médico</h1>
+        <p className="mt-2 text-lg text-purple-600">Resumen de la actividad clínica.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Pacientes</CardTitle>
-            <Users className="h-5 w-5 text-blue-500" />
+            <Users className="h-5 w-5 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalPatients}</div>
-            <p className="text-xs text-slate-500">Pacientes registrados en el sistema</p>
+            <p className="text-xs text-purple-500">Pacientes registrados en el sistema</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Historias Clínicas</CardTitle>
-            <FileText className="h-5 w-5 text-green-500" />
+            <FileText className="h-5 w-5 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalRecords}</div>
-            <p className="text-xs text-slate-500">Registros clínicos totales</p>
+            <p className="text-xs text-purple-500">Registros clínicos totales</p>
           </CardContent>
         </Card>
       </div>

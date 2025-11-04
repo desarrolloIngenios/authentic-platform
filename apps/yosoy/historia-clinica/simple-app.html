@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YoSoy Historia Clínica - Versión Básica</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createRoot } = ReactDOM;
+
+        function App() {
+            const [isLoading, setIsLoading] = useState(true);
+            const [backendStatus, setBackendStatus] = useState('Verificando...');
+
+            useEffect(() => {
+                // Simular carga
+                setTimeout(() => {
+                    setIsLoading(false);
+                }, 2000);
+
+                // Verificar backend
+                checkBackend();
+            }, []);
+
+            const checkBackend = async () => {
+                try {
+                    const response = await fetch('http://localhost:3001/api/health');
+                    if (response.ok) {
+                        const data = await response.json();
+                        setBackendStatus(`✅ Conectado: ${data.status}`);
+                    } else {
+                        setBackendStatus('❌ Backend no responde');
+                    }
+                } catch (error) {
+                    setBackendStatus('❌ Error de conexión');
+                }
+            };
+
+            if (isLoading) {
+                return (
+                    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                            <h1 className="text-2xl font-bold text-purple-900">YoSoy Historia Clínica</h1>
+                            <p className="text-gray-600 mt-2">Cargando sistema médico...</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <div className="bg-purple-900 text-white p-4">
+                        <div className="container mx-auto flex justify-between items-center">
+                            <h1 className="text-2xl font-bold">🏥 YoSoy Historia Clínica</h1>
+                            <div className="text-sm">
+                                {backendStatus}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="container mx-auto p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Card 1 */}
+                            <div className="bg-white rounded-lg shadow-lg p-6">
+                                <h2 className="text-xl font-semibold text-purple-900 mb-4">👥 Pacientes</h2>
+                                <p className="text-gray-600">Gestión de información de pacientes</p>
+                                <button className="mt-4 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                                    Ver Pacientes
+                                </button>
+                            </div>
+
+                            {/* Card 2 */}
+                            <div className="bg-white rounded-lg shadow-lg p-6">
+                                <h2 className="text-xl font-semibold text-purple-900 mb-4">📋 Historias Clínicas</h2>
+                                <p className="text-gray-600">Registro médico digital</p>
+                                <button className="mt-4 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                                    Nueva Historia
+                                </button>
+                            </div>
+
+                            {/* Card 3 */}
+                            <div className="bg-white rounded-lg shadow-lg p-6">
+                                <h2 className="text-xl font-semibold text-purple-900 mb-4">🔔 Notificaciones</h2>
+                                <p className="text-gray-600">Alertas y recordatorios</p>
+                                <button className="mt-4 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                                    Ver Notificaciones
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Status */}
+                        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
+                            <h3 className="text-lg font-semibold mb-4">Estado del Sistema</h3>
+                            <div className="space-y-2">
+                                <div className="flex justify-between">
+                                    <span>Frontend:</span>
+                                    <span className="text-green-600">✅ Funcionando</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Backend:</span>
+                                    <span className={backendStatus.includes('✅') ? 'text-green-600' : 'text-red-600'}>
+                                        {backendStatus}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>React:</span>
+                                    <span className="text-green-600">✅ Cargado</span>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-4 pt-4 border-t">
+                                <button 
+                                    onClick={() => window.location.href = 'secure-medical-system.html'}
+                                    className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 mr-4"
+                                >
+                                    🚀 Cargar Aplicación Completa
+                                </button>
+                                <button 
+                                    onClick={() => window.location.href = 'diagnostico.html'}
+                                    className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+                                >
+                                    🔍 Diagnóstico Avanzado
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Renderizar la aplicación
+        console.log('Iniciando aplicación React...');
+        try {
+            const root = createRoot(document.getElementById('app'));
+            root.render(<App />);
+            console.log('✅ Aplicación React iniciada correctamente');
+        } catch (error) {
+            console.error('❌ Error iniciando React:', error);
+            document.getElementById('app').innerHTML = `
+                <div class="flex items-center justify-center min-h-screen bg-red-50">
+                    <div class="text-center">
+                        <h1 class="text-2xl font-bold text-red-600 mb-4">Error en la Aplicación</h1>
+                        <p class="text-red-500">No se pudo cargar React: ${error.message}</p>
+                        <button onclick="location.reload()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded">
+                            Reintentar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
