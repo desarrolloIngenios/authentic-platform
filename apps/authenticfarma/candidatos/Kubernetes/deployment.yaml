@@ -29,11 +29,11 @@ spec:
             runAsNonRoot: true
           resources:
             requests:
+              memory: "128Mi"
               cpu: "100m"
-              memory: "256Mi"
             limits:
-              cpu: "300m"
-              memory: "512Mi"
+              memory: "256Mi"
+              cpu: "200m"
         - name: app
           image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
           ports:
@@ -41,11 +41,11 @@ spec:
               name: http
           resources:
             requests:
-              cpu: "200m"
-              memory: "512Mi"
+              cpu: "100m"
+              memory: "256Mi"
             limits:
-              cpu: "1000m"
-              memory: "1Gi"
+              cpu: "500m"
+              memory: "512Mi"
           readinessProbe:
             httpGet:
               path: /login
@@ -97,11 +97,11 @@ spec:
             - name: BROADCAST_DRIVER
               value: "log"
             - name: CACHE_DRIVER
-              value: "file"
+              value: "database"
             - name: QUEUE_CONNECTION
               value: "sync"
             - name: SESSION_DRIVER
-              value: "file"
+              value: "database"
             - name: SESSION_LIFETIME
               value: "120"
             - name: SESSION_DOMAIN
