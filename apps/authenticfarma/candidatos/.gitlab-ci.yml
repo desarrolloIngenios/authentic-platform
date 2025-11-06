@@ -1,0 +1,198 @@
+# GitLab CI Pipeline para AuthenticFarma Candidatos
+# Automatiza: Test -> Build -> Deploy con GitOps
+
+stages:
+  - test
+  - build
+  - publish
+  - update-manifests
+
+variables:
+  # Configuración de GCP
+  PROJECT_ID: "authentic-prod-464216"
+  REGION: "us-central1"
+  REPOSITORY: "authenticfarma-repo"
+  IMAGE: "authentic-candidatos"
+  
+  # Configuración de Kubernetes
+  NAMESPACE: "authenticfarma-candidatos"
+  DEPLOYMENT_NAME: "authenticfarma-candidatos"
+  
+  # GitOps Repository
+  GITOPS_REPO: "https://github.com/desarrolloIngenios/authentic-platform.git"
+  GITOPS_PATH: "apps/authenticfarma/candidatos/Kubernetes"
+
+# ===============================================
+# STAGE 1: TESTING
+# ===============================================
+test_laravel:
+  stage: test
+  image: php:8.2-cli
+  before_script:
+    - apt-get update -y && apt-get install -y unzip git zip libzip-dev
+    - docker-php-ext-install zip
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  script:
+    - cd apps/authenticfarma/candidatos
+    - composer install --no-interaction --prefer-dist --no-dev
+    - cp .env.example .env
+    - php artisan key:generate
+    - php artisan config:cache
+    - php artisan route:cache
+    - echo "✅ Laravel application validated successfully"
+  only:
+    - dev
+    - main
+
+# ===============================================
+# STAGE 2: BUILD DOCKER IMAGE
+# ===============================================
+build_docker_image:
+  stage: build
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+  before_script:
+    - echo "🔨 Building Docker image for candidatos..."
+  script:
+    - cd apps/authenticfarma/candidatos
+    - |
+      # Crear nuevo tag basado en la rama y commit
+      if [ "$CI_COMMIT_REF_NAME" = "main" ]; then
+        IMAGE_TAG="v$(date +%Y%m%d)-${CI_COMMIT_SHORT_SHA}"
+      else
+        IMAGE_TAG="dev-${CI_COMMIT_SHORT_SHA}"
+      fi
+      
+      echo "📦 Building image: $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$IMAGE_TAG"
+      
+      # Build de la imagen
+      docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$IMAGE_TAG .
+      
+      # Guardar tag para siguiente stage
+      echo $IMAGE_TAG > ../../../image_tag.txt
+      
+      echo "✅ Image built successfully: $IMAGE_TAG"
+  artifacts:
+    paths:
+      - image_tag.txt
+    expire_in: 1 hour
+  only:
+    - dev
+    - main
+
+# ===============================================
+# STAGE 3: PUBLISH TO REGISTRY
+# ===============================================
+publish_to_gcr:
+  stage: publish
+  image: google/cloud-sdk:alpine
+  before_script:
+    - echo "📤 Publishing to Google Container Registry..."
+    - echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp_key.json
+    - gcloud auth activate-service-account --key-file=/tmp/gcp_key.json
+    - gcloud auth configure-docker $REGION-docker.pkg.dev -q
+  script:
+    - |
+      IMAGE_TAG=$(cat image_tag.txt)
+      echo "📦 Pushing image: $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$IMAGE_TAG"
+      
+      # Push de la imagen
+      docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$IMAGE_TAG
+      
+      # Si es main, también tagear como latest
+      if [ "$CI_COMMIT_REF_NAME" = "main" ]; then
+        docker tag $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$IMAGE_TAG \
+                   $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest
+        docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest
+      fi
+      
+      echo "✅ Image published successfully"
+  dependencies:
+    - build_docker_image
+  only:
+    - dev
+    - main
+
+# ===============================================
+# STAGE 4: UPDATE GITOPS MANIFESTS
+# ===============================================
+update_k8s_manifests:
+  stage: update-manifests
+  image: alpine/git
+  before_script:
+    - apk add --no-cache yq
+    - git config --global user.email "ci@authenticfarma.com"
+    - git config --global user.name "GitLab CI/CD"
+  script:
+    - |
+      IMAGE_TAG=$(cat image_tag.txt)
+      echo "📝 Updating Kubernetes manifests with image: $IMAGE_TAG"
+      
+      # Clonar el repositorio GitOps
+      git clone https://oauth2:${GITLAB_TOKEN}@github.com/desarrolloIngenios/authentic-platform.git gitops
+      cd gitops
+      
+      # Checkout al branch correcto
+      if [ "$CI_COMMIT_REF_NAME" = "main" ]; then
+        git checkout main
+        TARGET_FILE="apps/authenticfarma/candidatos/Kubernetes/deployment.yaml"
+      else
+        git checkout dev
+        TARGET_FILE="apps/authenticfarma/candidatos/Kubernetes/deployment-updated.yaml"
+      fi
+      
+      # Actualizar la imagen en el deployment
+      echo "🔄 Updating image in $TARGET_FILE"
+      
+      # Usar yq para actualizar la imagen
+      yq eval ".spec.template.spec.containers[1].image = \"$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$IMAGE_TAG\"" -i $TARGET_FILE
+      
+      # Verificar cambios
+      if git diff --quiet; then
+        echo "ℹ️  No changes detected in manifests"
+      else
+        echo "📋 Changes detected:"
+        git diff $TARGET_FILE
+        
+        # Commit y push
+        git add $TARGET_FILE
+        git commit -m "ci: update candidatos image to $IMAGE_TAG
+        
+        - Updated by GitLab CI/CD pipeline
+        - Commit: $CI_COMMIT_SHA
+        - Branch: $CI_COMMIT_REF_NAME
+        - Job: $CI_JOB_URL"
+        
+        git push origin $CI_COMMIT_REF_NAME
+        
+        echo "✅ Manifests updated and pushed successfully"
+      fi
+  dependencies:
+    - publish_to_gcr
+  only:
+    - dev
+    - main
+
+# ===============================================
+# STAGE 5: NOTIFICATION (OPTIONAL)
+# ===============================================
+notify_deployment:
+  stage: update-manifests
+  image: alpine:latest
+  script:
+    - |
+      IMAGE_TAG=$(cat image_tag.txt)
+      echo "🎉 Deployment pipeline completed successfully!"
+      echo "📦 New image: $IMAGE_TAG"
+      echo "🔄 ArgoCD will sync automatically in ~3 minutes"
+      echo "🌐 Check status: https://candidatos.authenticfarma.com"
+  dependencies:
+    - update_k8s_manifests
+  when: on_success
+  only:
+    - dev
+    - main

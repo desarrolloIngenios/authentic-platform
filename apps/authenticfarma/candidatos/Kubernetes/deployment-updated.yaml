@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: authentic-candidatos
+  name: authenticfarma-candidatos
   namespace: authenticfarma-candidatos
   labels:
-    app: authentic-candidatos
+    app: authenticfarma-candidatos
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: authentic-candidatos
+      app: authenticfarma-candidatos
   template:
     metadata:
       labels:
-        app: authentic-candidatos
+        app: authenticfarma-candidatos
       annotations:
         iam.gke.io/gcp-service-account: authentic-candidatos-gsa@authentic-prod-464216.iam.gserviceaccount.com
     spec:
-      serviceAccountName: authentic-candidatos-ksa
+      serviceAccountName: authenticfarma-candidatos-sa
       containers:
         - name: cloud-sql-proxy
           image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
@@ -36,7 +36,7 @@ spec:
             limits:
               memory: "200Mi"
               cpu: "150m"
-        - name: authentic-candidatos
+        - name: authenticfarma-candidatos
           image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.1.0
           ports:
             - containerPort: 80
