@@ -12,4 +12,4 @@ commonLabels:
 
 images:
   - name: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos
-    newTag: v4.2.1-test  # Simular nueva versión para prueba GitOps
+    newTag: v4.2.0  # Revertir a imagen funcional
