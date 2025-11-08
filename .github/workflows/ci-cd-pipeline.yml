@@ -31,10 +31,15 @@ jobs:
     
     - name: 📦 Install dependencies
       run: |
-        find . -name "package.json" -not -path "./node_modules/*" | while read package; do
-          dir=$(dirname "$package")
-          echo "Installing dependencies in $dir"
-          cd "$dir" && npm ci && cd - > /dev/null
+        # Solo instalar en directorios principales de Node.js
+        for dir in "apps/yosoy/historia-clinica/backend"; do
+          if [ -f "$dir/package.json" ] && [ -f "$dir/package-lock.json" ]; then
+            echo "Installing dependencies in $dir"
+            cd "$dir" && npm ci && cd - > /dev/null
+          elif [ -f "$dir/package.json" ]; then
+            echo "Installing dependencies in $dir (using npm install)"
+            cd "$dir" && npm install && cd - > /dev/null
+          fi
         done
     
     - name: 🔍 Lint code
