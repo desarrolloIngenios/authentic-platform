@@ -931,6 +931,231 @@
             console.log('UI actualizada con las historias');
         }
 
+        // Función para ver detalle de historia clínica
+        function viewHistoryDetail(historiaId) {
+            const API_BASE = '';
+            
+            fetch(`${API_BASE}/api/historias/${historiaId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(historia => {
+                const signos = typeof historia.signos === 'string' ? JSON.parse(historia.signos) : (historia.signos || {});
+                
+                const historyDetails = document.getElementById('history-details');
+                historyDetails.innerHTML = `
+                    <div class="print-area">
+                        <div class="bg-white border rounded-lg p-6">
+                            <div class="flex justify-between items-start mb-6">
+                                <h5 class="font-semibold text-gray-800">Detalle Historia Clínica</h5>
+                                <div class="flex gap-2">
+                                    <button onclick="viewHistoryList()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded">
+                                        <i class="fas fa-arrow-left mr-2"></i>Volver
+                                    </button>
+                                    <button onclick="printHistory(${historiaId})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded">
+                                        <i class="fas fa-print mr-2"></i>Imprimir
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <h6 class="font-medium text-gray-700">Paciente</h6>
+                                        <p>${selectedPatient.nombres} ${selectedPatient.apellidos}</p>
+                                    </div>
+                                    <div>
+                                        <h6 class="font-medium text-gray-700">Fecha</h6>
+                                        <p>${new Date(historia.created_at).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h6 class="font-medium text-gray-700">Motivo de Consulta</h6>
+                                    <p class="bg-gray-50 p-3 rounded">${historia.motivoConsulta || 'No especificado'}</p>
+                                </div>
+                                
+                                ${historia.sintomasActuales ? `
+                                <div>
+                                    <h6 class="font-medium text-gray-700">Síntomas Actuales</h6>
+                                    <p class="bg-gray-50 p-3 rounded">${historia.sintomasActuales}</p>
+                                </div>
+                                ` : ''}
+                                
+                                <div>
+                                    <h6 class="font-medium text-gray-700">Signos Vitales</h6>
+                                    <div class="bg-blue-50 p-3 rounded grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                                        <div><strong>Presión:</strong> ${signos.presionArterial || 'N/A'}</div>
+                                        <div><strong>Pulso:</strong> ${signos.pulso || 'N/A'}</div>
+                                        <div><strong>Temperatura:</strong> ${signos.temperatura || 'N/A'}</div>
+                                        <div><strong>Peso:</strong> ${signos.peso || 'N/A'}</div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h6 class="font-medium text-gray-700">Diagnóstico</h6>
+                                    <p class="bg-yellow-50 p-3 rounded">${historia.diagnostico || 'No especificado'}</p>
+                                </div>
+                                
+                                ${historia.tratamiento ? `
+                                <div>
+                                    <h6 class="font-medium text-gray-700">Tratamiento</h6>
+                                    <p class="bg-green-50 p-3 rounded">${historia.tratamiento}</p>
+                                </div>
+                                ` : ''}
+                                
+                                ${historia.planTratamiento ? `
+                                <div>
+                                    <h6 class="font-medium text-gray-700">Plan de Tratamiento</h6>
+                                    <p class="bg-blue-50 p-3 rounded">${historia.planTratamiento}</p>
+                                </div>
+                                ` : ''}
+                                
+                                ${historia.observaciones ? `
+                                <div>
+                                    <h6 class="font-medium text-gray-700">Observaciones</h6>
+                                    <p class="bg-gray-50 p-3 rounded">${historia.observaciones}</p>
+                                </div>
+                                ` : ''}
+                                
+                                ${historia.medicoNombre ? `
+                                <div>
+                                    <h6 class="font-medium text-gray-700">Médico</h6>
+                                    <p class="text-blue-600">${historia.medicoNombre}</p>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error cargando detalle de historia:', error);
+                showNotification('Error', `No se pudo cargar el detalle de la historia clínica: ${error.message}`, 'error');
+            });
+        }
+
+        // Función para imprimir historia específica
+        function printHistory(historiaId) {
+            fetch(`/api/historias/${historiaId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(historia => {
+                // Crear ventana de impresión con el detalle de la historia
+                const printWindow = window.open('', '_blank');
+                const signos = typeof historia.signos === 'string' ? JSON.parse(historia.signos) : (historia.signos || {});
+                
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Historia Clínica - ${selectedPatient.nombres} ${selectedPatient.apellidos}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+                            .section { margin-bottom: 15px; }
+                            .label { font-weight: bold; color: #333; }
+                            .value { margin-left: 10px; }
+                            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>Historia Clínica</h1>
+                            <h2>YoSoy - Sistema Médico</h2>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="grid">
+                                <div><span class="label">Paciente:</span><span class="value">${selectedPatient.nombres} ${selectedPatient.apellidos}</span></div>
+                                <div><span class="label">Identificación:</span><span class="value">${selectedPatient.identificacion}</span></div>
+                                <div><span class="label">Fecha:</span><span class="value">${new Date(historia.created_at).toLocaleDateString()}</span></div>
+                                <div><span class="label">Médico:</span><span class="value">${historia.medicoNombre || 'No especificado'}</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="label">Motivo de Consulta:</div>
+                            <div class="value">${historia.motivoConsulta || 'No especificado'}</div>
+                        </div>
+                        
+                        ${historia.sintomasActuales ? `
+                        <div class="section">
+                            <div class="label">Síntomas Actuales:</div>
+                            <div class="value">${historia.sintomasActuales}</div>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="section">
+                            <div class="label">Signos Vitales:</div>
+                            <div class="grid" style="margin-left: 10px;">
+                                <div>Presión Arterial: ${signos.presionArterial || 'N/A'}</div>
+                                <div>Pulso: ${signos.pulso || 'N/A'}</div>
+                                <div>Temperatura: ${signos.temperatura || 'N/A'}</div>
+                                <div>Peso: ${signos.peso || 'N/A'}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="label">Diagnóstico:</div>
+                            <div class="value">${historia.diagnostico || 'No especificado'}</div>
+                        </div>
+                        
+                        ${historia.tratamiento ? `
+                        <div class="section">
+                            <div class="label">Tratamiento:</div>
+                            <div class="value">${historia.tratamiento}</div>
+                        </div>
+                        ` : ''}
+                        
+                        ${historia.planTratamiento ? `
+                        <div class="section">
+                            <div class="label">Plan de Tratamiento:</div>
+                            <div class="value">${historia.planTratamiento}</div>
+                        </div>
+                        ` : ''}
+                        
+                        ${historia.observaciones ? `
+                        <div class="section">
+                            <div class="label">Observaciones:</div>
+                            <div class="value">${historia.observaciones}</div>
+                        </div>
+                        ` : ''}
+                        
+                        <div style="margin-top: 50px; text-align: center; color: #666;">
+                            <p>Fecha de impresión: ${new Date().toLocaleString()}</p>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                
+                printWindow.document.close();
+                printWindow.focus();
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+            })
+            .catch(error => {
+                console.error('Error imprimiendo historia:', error);
+                showNotification('Error', `No se pudo imprimir la historia clínica: ${error.message}`, 'error');
+            });
+        }
+
         // Función para crear fórmula médica
         function createFormula(patientId) {
             selectedPatient = patients.find(p => p.id === patientId);
