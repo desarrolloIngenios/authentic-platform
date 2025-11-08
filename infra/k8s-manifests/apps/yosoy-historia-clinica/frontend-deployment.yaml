@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yosoy-historia-clinica-frontend
+  namespace: yosoy-historia-clinica
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: yosoy-historia-clinica-frontend
+  template:
+    metadata:
+      labels:
+        app: yosoy-historia-clinica-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: gcr.io/authentic-prod-464216/yosoy-hc-frontend:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yosoy-historia-clinica-frontend-simple
+  namespace: yosoy-historia-clinica
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: yosoy-historia-clinica-frontend-simple
+  template:
+    metadata:
+      labels:
+        app: yosoy-historia-clinica-frontend-simple
+    spec:
+      containers:
+      - name: frontend-simple
+        image: gcr.io/authentic-prod-464216/yosoy-hc-frontend-simple:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
