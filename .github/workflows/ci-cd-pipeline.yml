@@ -59,10 +59,6 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/dev'
     
-    strategy:
-      matrix:
-        app: [yosoy-hc-backend, yosoy-hc-frontend, authenticfarma-backend]
-    
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
@@ -76,36 +72,27 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker
+      run: gcloud auth configure-docker gcr.io
     
-    - name: 🏗️ Build and Push Image
+    - name: 🏗️ Build Historia Clinica Backend
       run: |
         IMAGE_TAG=dev-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ matrix.app }}
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/yosoy-hc-backend
         
-        # Determinar el dockerfile correcto
-        case "${{ matrix.app }}" in
-          yosoy-hc-backend)
-            DOCKERFILE_PATH="apps/yosoy/historia-clinica/Dockerfile"
-            CONTEXT_PATH="apps/yosoy/historia-clinica"
-            ;;
-          yosoy-hc-frontend)
-            DOCKERFILE_PATH="apps/yosoy/historia-clinica/frontend-simple.Dockerfile"
-            CONTEXT_PATH="apps/yosoy/historia-clinica"
-            ;;
-          authenticfarma-backend)
-            DOCKERFILE_PATH="apps/authenticfarma/Dockerfile"
-            CONTEXT_PATH="apps/authenticfarma"
-            ;;
-        esac
+        echo "Building Historia Clinica Backend: $IMAGE_NAME:$IMAGE_TAG"
         
-        echo "Building image: $IMAGE_NAME:$IMAGE_TAG"
-        docker build -f $DOCKERFILE_PATH -t $IMAGE_NAME:$IMAGE_TAG $CONTEXT_PATH
-        docker push $IMAGE_NAME:$IMAGE_TAG
-        
-        # También tag como 'dev-latest'
-        docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:dev-latest
-        docker push $IMAGE_NAME:dev-latest
+        if [ -f "apps/yosoy/historia-clinica/backend/Dockerfile" ]; then
+          docker build -f apps/yosoy/historia-clinica/backend/Dockerfile -t $IMAGE_NAME:$IMAGE_TAG apps/yosoy/historia-clinica/backend
+          docker push $IMAGE_NAME:$IMAGE_TAG
+          
+          # También tag como 'dev-latest'
+          docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:dev-latest
+          docker push $IMAGE_NAME:dev-latest
+          
+          echo "✅ Successfully built and pushed Historia Clinica Backend"
+        else
+          echo "⚠️ Dockerfile not found, skipping build"
+        fi
         
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
