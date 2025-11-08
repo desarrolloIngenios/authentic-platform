@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: yosoy-historia-clinica-prod
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: yosoy-historia-clinica
+    app.kubernetes.io/part-of: yosoy
+    environment: prod
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: prod-deployments
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/desarrolloIngenios/authentic-platform.git
+    targetRevision: main  # 🚀 Producción desde rama main
+    path: infra/k8s-manifests/apps/yosoy-historia-clinica
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: yosoy-historia-clinica  # 🏭 Namespace original de producción
+  syncPolicy:
+    # ⚠️ NO automated - Requiere aprobación manual
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+    - RespectIgnoreDifferences=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+  # 🛡️ Configuraciones de seguridad para producción
+  ignoreDifferences:
+  - group: apps
+    kind: Deployment
+    jsonPointers:
+    - /spec/replicas
+    - /spec/template/metadata/annotations
