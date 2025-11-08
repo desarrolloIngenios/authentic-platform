@@ -667,18 +667,10 @@
             
             const formData = new FormData(e.target);
             const historyData = {
-                pacienteId: selectedPatient.id,
-                motivoConsulta: formData.get('motivoConsulta'),
-                sintomasActuales: formData.get('sintomasActuales'),
-                examenFisico: formData.get('examenFisico'),
-                signos: {
-                    presionArterial: formData.get('presionArterial'),
-                    frecuenciaCardiaca: formData.get('frecuenciaCardiaca'),
-                    temperatura: formData.get('temperatura'),
-                    peso: formData.get('peso')
-                },
+                paciente_id: selectedPatient.id,
+                motivo_consulta: formData.get('motivoConsulta'),
                 diagnostico: formData.get('diagnostico'),
-                planTratamiento: formData.get('planTratamiento'),
+                tratamiento: formData.get('planTratamiento'),
                 observaciones: formData.get('observaciones')
             };
             
