@@ -342,6 +342,104 @@ app.get('/api/historias/:id', authenticateToken, (req, res) => {
     });
 });
 
+// Rutas de fórmulas médicas
+app.get('/api/formulas', authenticateToken, (req, res) => {
+    // Primero verificar si la tabla existe, si no, crear una estructura básica
+    db.all(`SELECT name FROM sqlite_master WHERE type='table' AND name='formulas_medicas'`, (err, tables) => {
+        if (err) {
+            console.error('Error verificando tabla:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        if (tables.length === 0) {
+            // La tabla no existe, crear tabla
+            db.run(`CREATE TABLE IF NOT EXISTS formulas_medicas (
+                id TEXT PRIMARY KEY,
+                pacienteId INTEGER,
+                medicamentos TEXT,
+                indicaciones TEXT,
+                duracion TEXT,
+                medicoId TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`, (createErr) => {
+                if (createErr) {
+                    console.error('Error creando tabla formulas_medicas:', createErr);
+                    return res.status(500).json({ error: 'Error interno del servidor' });
+                }
+                res.json([]);
+            });
+        } else {
+            // La tabla existe, obtener fórmulas
+            db.all('SELECT * FROM formulas_medicas ORDER BY created_at DESC', (err, rows) => {
+                if (err) {
+                    console.error('Error al obtener fórmulas médicas:', err);
+                    return res.status(500).json({ error: 'Error interno del servidor' });
+                }
+                res.json(rows);
+            });
+        }
+    });
+});
+
+app.post('/api/formulas', authenticateToken, (req, res) => {
+    const { pacienteId, medicamentos, indicaciones, duracion } = req.body;
+    
+    console.log('=== GUARDANDO FÓRMULA MÉDICA ===');
+    console.log('Datos recibidos:', req.body);
+    
+    // Primero verificar que la tabla existe
+    db.all(`SELECT name FROM sqlite_master WHERE type='table' AND name='formulas_medicas'`, (err, tables) => {
+        if (err) {
+            console.error('Error verificando tabla:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        if (tables.length === 0) {
+            // Crear tabla si no existe
+            db.run(`CREATE TABLE IF NOT EXISTS formulas_medicas (
+                id TEXT PRIMARY KEY,
+                pacienteId INTEGER,
+                medicamentos TEXT,
+                indicaciones TEXT,
+                duracion TEXT,
+                medicoId TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`, (createErr) => {
+                if (createErr) {
+                    console.error('Error creando tabla formulas_medicas:', createErr);
+                    return res.status(500).json({ error: 'Error interno del servidor' });
+                }
+                insertFormula();
+            });
+        } else {
+            insertFormula();
+        }
+    });
+    
+    function insertFormula() {
+        const formulaId = `form-${Date.now()}`;
+        
+        db.run(
+            `INSERT INTO formulas_medicas (
+                id, pacienteId, medicamentos, indicaciones, duracion, medicoId
+            ) VALUES (?, ?, ?, ?, ?, ?)`,
+            [formulaId, pacienteId, medicamentos, indicaciones, duracion, req.user.id],
+            function(err) {
+                if (err) {
+                    console.error('Error al crear fórmula médica:', err);
+                    return res.status(500).json({ error: 'Error interno del servidor' });
+                }
+                
+                console.log('Fórmula médica creada exitosamente:', formulaId);
+                res.status(201).json({ 
+                    id: formulaId, 
+                    message: 'Fórmula médica creada exitosamente' 
+                });
+            }
+        );
+    }
+});
+
 // Ruta de salud
 app.get('/api/health', (req, res) => {
     res.json({ 
