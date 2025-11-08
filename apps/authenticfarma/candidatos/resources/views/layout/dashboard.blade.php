@@ -289,6 +289,7 @@
 			color: #00a86b;
 		}
 		//estilo custom modal
+
 		
 	</style>
 </head>
