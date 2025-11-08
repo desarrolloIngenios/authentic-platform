@@ -8,7 +8,6 @@ resources:
   - services.yaml
   - ingress.yaml
   - configmap.yaml
-  - pvc.yaml
 
 labels:
 - pairs:
