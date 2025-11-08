@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: yosoy-historia-clinica
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: yosoy-historia-clinica
+    app.kubernetes.io/part-of: yosoy
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/desarrolloIngenios/authentic-platform.git
+    targetRevision: dev
+    path: infra/k8s-manifests/apps/yosoy-historia-clinica
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: yosoy-historia-clinica
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
