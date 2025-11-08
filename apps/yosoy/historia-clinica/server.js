@@ -227,11 +227,10 @@ app.get('/api/patients/:id/historias', authenticateToken, (req, res) => {
         
         console.log('Paciente encontrada:', paciente);
         
-        // Buscar historias por identificación (esquema actual)
+        // Buscar historias por identificación (esquema actual) - Consulta simplificada
         const query = `
-            SELECT h.*, u.name as medicoNombre 
+            SELECT h.* 
             FROM historias_clinicas h 
-            LEFT JOIN usuarios u ON h.medico_id = u.id 
             WHERE h.identificacion = ? 
             ORDER BY h.fecha DESC, h.created_at DESC
         `;
@@ -264,9 +263,8 @@ app.get('/api/patients/:id/historias', authenticateToken, (req, res) => {
 // Rutas de historias clínicas
 app.get('/api/historias', authenticateToken, (req, res) => {
     const query = `
-        SELECT h.*, u.name as medicoNombre 
+        SELECT h.*
         FROM historias_clinicas h 
-        LEFT JOIN usuarios u ON h.medico_id = u.id 
         ORDER BY h.created_at DESC
     `;
     
@@ -325,9 +323,8 @@ app.get('/api/historias/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
     
     const query = `
-        SELECT h.*, u.name as medicoNombre 
+        SELECT h.*
         FROM historias_clinicas h 
-        LEFT JOIN usuarios u ON h.medico_id = u.id 
         WHERE h.id = ?
     `;
     
