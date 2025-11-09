@@ -124,12 +124,13 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: 📋 Create or Update Release PR
-      uses: repo-sync/pull-request@v2
+      uses: peter-evans/create-pull-request@v5
       with:
-        source_branch: dev
-        destination_branch: main
-        pr_title: "🚀 Release: Deploy dev changes to production"
-        pr_body: |
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: release/auto-dev-to-main
+        base: main
+        title: "🚀 Release: Deploy dev changes to production"
+        body: |
           ## 🚀 Production Release
           
           This PR contains validated changes from `dev` ready for production deployment.
@@ -153,7 +154,12 @@ jobs:
           Merging this PR will trigger production deployment via ArgoCD.
           
           **Monitor deployment**: https://argo.authenticfarma.com/applications/authentic-platform-prod
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        labels: |
+          release
+          production
+          auto-generated
+        assignees: ottofonseca
+        reviewers: ottofonseca
 
   # 🏗️ Build Prod Images (cuando se merge a main)
   build-prod:
