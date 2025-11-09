@@ -300,8 +300,8 @@ jobs:
     - name: 📋 Create Release PR using GitHub CLI
       run: |
         # Configurar Git
-        git config --global user.name "ottofonseca"
-        git config --global user.email "ottofonseca@gmail.com"
+        git config --global user.name "desarrolloIngenios"
+        git config --global user.email "desarrollo@ingenios.com"
         
         # Fetch main branch para poder comparar
         git fetch origin main:main
@@ -350,7 +350,6 @@ jobs:
         **Monitor deployment**: https://argo.authenticfarma.com/applications/authentic-platform-prod
 
         **Created**: $(date -Iseconds)" \
-            --assignee ottofonseca \
             --label "release,production,auto-generated"
         fi
       env:
