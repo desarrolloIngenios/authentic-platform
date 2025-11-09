@@ -129,6 +129,9 @@ jobs:
         git config --global user.name "ottofonseca"
         git config --global user.email "ottofonseca@gmail.com"
         
+        # Fetch main branch para poder comparar
+        git fetch origin main:main
+        
         # Verificar si ya existe un PR abierto de dev -> main
         existing_pr=$(gh pr list --base main --head dev --json number --jq '.[0].number')
         
