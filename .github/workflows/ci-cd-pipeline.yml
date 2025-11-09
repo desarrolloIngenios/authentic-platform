@@ -113,7 +113,7 @@ jobs:
   create-release-pr:
     name: 📋 Create Release PR
     runs-on: ubuntu-latest
-    needs: [test, build-dev]
+    needs: test
     if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
     
     steps:
