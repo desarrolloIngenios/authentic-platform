@@ -1,0 +1,87 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: candidatos-urgent-fix
+  namespace: authenticfarma-prod
+  labels:
+    app: candidatos-urgent-fix
+    fix-type: browser-timeout
+spec:
+  template:
+    spec:
+      containers:
+      - name: fix-browser-timeout
+        # Usar la misma imagen que candidatos
+        image: your-registry/candidatos:latest
+        command: ["/bin/bash"]
+        args:
+        - -c
+        - |
+          echo "🚨 INICIANDO FIX URGENTE - Aplicación no responde"
+          echo "Timestamp: $(date)"
+          
+          cd /var/www/html
+          
+          # Verificar que estamos en el directorio correcto
+          if [ ! -f "artisan" ]; then
+            echo "❌ No se encuentra artisan - abortando"
+            exit 1
+          fi
+          
+          echo "📊 Estado inicial:"
+          echo "APP_ENV: $(grep APP_ENV .env || echo 'No encontrado')"
+          echo "APP_DEBUG: $(grep APP_DEBUG .env || echo 'No encontrado')"
+          
+          echo "🧹 Limpiando TODOS los caches..."
+          php artisan cache:clear || true
+          php artisan config:clear || true
+          php artisan route:clear || true
+          php artisan view:clear || true
+          php artisan optimize:clear || true
+          
+          echo "⚡ Regenerando configuración optimizada..."
+          php artisan config:cache || echo "Error en config:cache"
+          php artisan route:cache || echo "Error en route:cache"
+          php artisan view:cache || echo "Error en view:cache"
+          
+          echo "🔍 Verificando JavaScript assets..."
+          if [ ! -f "public/js/app.js" ]; then
+            echo "⚠️ app.js no encontrado - necesario regenerar assets"
+          else
+            echo "✅ app.js existe"
+          fi
+          
+          echo "📊 Estado final:"
+          if php artisan route:list >/dev/null 2>&1; then
+            echo "✅ Laravel funcionando correctamente"
+          else
+            echo "❌ Problema con Laravel detectado"
+            exit 1
+          fi
+          
+          echo "🎉 Fix urgente completado: $(date)"
+        volumeMounts:
+        - name: app-volume
+          mountPath: /var/www/html
+        env:
+        - name: APP_ENV
+          value: "production"
+        - name: APP_DEBUG
+          value: "false"
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+      volumes:
+      - name: app-volume
+        persistentVolumeClaim:
+          claimName: candidatos-app-pvc  # Ajustar según configuración real
+      restartPolicy: Never
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 1800  # Limpiar después de 30 minutos
