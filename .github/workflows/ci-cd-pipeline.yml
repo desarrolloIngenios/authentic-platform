@@ -52,12 +52,69 @@ jobs:
         # Add test commands here
         echo "Running tests..."
 
-  # 🏗️ Build y Push Images para Dev
-  build-dev:
-    name: 🏗️ Build & Push Dev Images
+  # 🔍 Detect Changed Applications
+  detect-changes:
+    name: 🔍 Detect Changed Apps
     runs-on: ubuntu-latest
     needs: test
     if: github.ref == 'refs/heads/dev'
+    outputs:
+      authenticfarma: ${{ steps.changes.outputs.authenticfarma }}
+      yosoy: ${{ steps.changes.outputs.yosoy }}
+      isyours: ${{ steps.changes.outputs.isyours }}
+      moodle: ${{ steps.changes.outputs.moodle }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 🔍 Check for changes
+      id: changes
+      run: |
+        # Fetch main para comparar
+        git fetch origin main:main || echo "No main branch"
+        
+        # Detectar cambios en cada app
+        if git diff --name-only HEAD~1 | grep -q "^apps/authenticfarma/"; then
+          echo "authenticfarma=true" >> $GITHUB_OUTPUT
+          echo "✅ AuthenticFarma (candidatos) has changes"
+        else
+          echo "authenticfarma=false" >> $GITHUB_OUTPUT
+          echo "⏭️ AuthenticFarma (candidatos) no changes"
+        fi
+        
+        if git diff --name-only HEAD~1 | grep -q "^apps/yosoy/"; then
+          echo "yosoy=true" >> $GITHUB_OUTPUT
+          echo "✅ YoSoy (historia clinica) has changes"
+        else
+          echo "yosoy=false" >> $GITHUB_OUTPUT
+          echo "⏭️ YoSoy (historia clinica) no changes"
+        fi
+        
+        if git diff --name-only HEAD~1 | grep -q "^apps/isyours/"; then
+          echo "isyours=true" >> $GITHUB_OUTPUT
+          echo "✅ IsYours has changes"
+        else
+          echo "isyours=false" >> $GITHUB_OUTPUT
+          echo "⏭️ IsYours no changes"
+        fi
+        
+        if git diff --name-only HEAD~1 | grep -q "^apps/moodle-elearning/"; then
+          echo "moodle=true" >> $GITHUB_OUTPUT
+          echo "✅ Moodle E-Learning has changes"
+        else
+          echo "moodle=false" >> $GITHUB_OUTPUT
+          echo "⏭️ Moodle E-Learning no changes"
+        fi
+
+  # 🏗️ Build AuthenticFarma (Candidatos)
+  build-authenticfarma:
+    name: 🏗️ Build AuthenticFarma (Candidatos)
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.authenticfarma == 'true'
     
     steps:
     - name: 📥 Checkout code
@@ -96,12 +153,129 @@ jobs:
         
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-  # 🚀 Deploy to Dev Environment
+  # 🏗️ Build YoSoy (Historia Clinica)  
+  build-yosoy:
+    name: 🏗️ Build YoSoy (Historia Clinica)
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.yosoy == 'true'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: � Auth to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: 📋 Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+    
+    - name: 🐳 Configure Docker
+      run: gcloud auth configure-docker gcr.io
+    
+    - name: 🏗️ Build YoSoy Backend
+      run: |
+        IMAGE_TAG=dev-$(git rev-parse --short HEAD)
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/yosoy-hc-backend
+        
+        if [ -f "apps/yosoy/historia-clinica/backend/Dockerfile" ]; then
+          docker build -f apps/yosoy/historia-clinica/backend/Dockerfile -t $IMAGE_NAME:$IMAGE_TAG apps/yosoy/historia-clinica/backend
+          docker push $IMAGE_NAME:$IMAGE_TAG
+          docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:dev-latest
+          docker push $IMAGE_NAME:dev-latest
+          echo "✅ YoSoy backend built and pushed"
+        fi
+
+  # 🏗️ Build IsYours
+  build-isyours:
+    name: 🏗️ Build IsYours
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.isyours == 'true'
+    
+    steps:
+    - name: � Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔐 Auth to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: 📋 Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+    
+    - name: 🐳 Configure Docker
+      run: gcloud auth configure-docker gcr.io
+    
+    - name: 🏗️ Build IsYours
+      run: |
+        IMAGE_TAG=dev-$(git rev-parse --short HEAD)
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/isyours
+        
+        if [ -f "apps/isyours/Dockerfile" ]; then
+          docker build -f apps/isyours/Dockerfile -t $IMAGE_NAME:$IMAGE_TAG apps/isyours
+          docker push $IMAGE_NAME:$IMAGE_TAG
+          docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:dev-latest
+          docker push $IMAGE_NAME:dev-latest
+          echo "✅ IsYours built and pushed"
+        fi
+
+  # 🏗️ Build Moodle E-Learning
+  build-moodle:
+    name: 🏗️ Build Moodle E-Learning
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.moodle == 'true'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔐 Auth to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: 📋 Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+    
+    - name: 🐳 Configure Docker
+      run: gcloud auth configure-docker gcr.io
+    
+    - name: 🏗️ Build Moodle
+      run: |
+        IMAGE_TAG=dev-$(git rev-parse --short HEAD)
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/moodle-elearning
+        
+        if [ -f "apps/moodle-elearning/Dockerfile" ]; then
+          docker build -f apps/moodle-elearning/Dockerfile -t $IMAGE_NAME:$IMAGE_TAG apps/moodle-elearning
+          docker push $IMAGE_NAME:$IMAGE_TAG
+          docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:dev-latest
+          docker push $IMAGE_NAME:dev-latest
+          echo "✅ Moodle built and pushed"
+        fi
+
+  # �🚀 Deploy to Dev Environment
   deploy-dev:
     name: 🚀 Deploy to Dev Environment
     runs-on: ubuntu-latest
-    needs: build-dev
-    if: github.ref == 'refs/heads/dev'
+    needs: [detect-changes, build-authenticfarma, build-yosoy, build-isyours, build-moodle]
+    if: |
+      always() && 
+      (needs.detect-changes.result == 'success') &&
+      (
+        (needs.build-authenticfarma.result == 'success') ||
+        (needs.build-yosoy.result == 'success') ||
+        (needs.build-isyours.result == 'success') ||
+        (needs.build-moodle.result == 'success') ||
+        (needs.build-authenticfarma.result == 'skipped' && 
+         needs.build-yosoy.result == 'skipped' && 
+         needs.build-isyours.result == 'skipped' && 
+         needs.build-moodle.result == 'skipped')
+      )
     
     steps:
     - name: 📝 Trigger ArgoCD Sync (Dev)
@@ -182,15 +356,68 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # 🏗️ Build Prod Images (cuando se merge a main)
-  build-prod:
-    name: 🏗️ Build & Push Prod Images
+  # 🔍 Detect Changes for Production
+  detect-changes-prod:
+    name: 🔍 Detect Changes for Production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    outputs:
+      authenticfarma: ${{ steps.changes.outputs.authenticfarma }}
+      yosoy: ${{ steps.changes.outputs.yosoy }}
+      isyours: ${{ steps.changes.outputs.isyours }}
+      moodle: ${{ steps.changes.outputs.moodle }}
     
-    strategy:
-      matrix:
-        app: [authenticfarma-backend]
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: 🔍 Detect app changes
+      id: changes
+      run: |
+        # Compare with previous commit for main branch
+        echo "🔍 Detecting changes in applications for production..."
+        
+        # Check if any files changed in each app
+        if git diff --quiet HEAD~1 HEAD -- apps/authenticfarma/; then
+          echo "authenticfarma=false" >> $GITHUB_OUTPUT
+          echo "❌ AuthenticFarma: No changes"
+        else
+          echo "authenticfarma=true" >> $GITHUB_OUTPUT
+          echo "✅ AuthenticFarma: Changes detected"
+        fi
+        
+        if git diff --quiet HEAD~1 HEAD -- apps/yosoy/; then
+          echo "yosoy=false" >> $GITHUB_OUTPUT
+          echo "❌ YoSoy: No changes"
+        else
+          echo "yosoy=true" >> $GITHUB_OUTPUT
+          echo "✅ YoSoy: Changes detected"
+        fi
+        
+        if git diff --quiet HEAD~1 HEAD -- apps/isyours/; then
+          echo "isyours=false" >> $GITHUB_OUTPUT
+          echo "❌ IsYours: No changes"
+        else
+          echo "isyours=true" >> $GITHUB_OUTPUT
+          echo "✅ IsYours: Changes detected"
+        fi
+        
+        if git diff --quiet HEAD~1 HEAD -- apps/moodle-elearning/; then
+          echo "moodle=false" >> $GITHUB_OUTPUT
+          echo "❌ Moodle: No changes"
+        else
+          echo "moodle=true" >> $GITHUB_OUTPUT
+          echo "✅ Moodle: Changes detected"
+        fi
+
+  # 🏗️ Production Build - AuthenticFarma
+  build-prod-authenticfarma:
+    name: 🏗️ Build AuthenticFarma for Production
+    runs-on: ubuntu-latest
+    needs: detect-changes-prod
+    if: needs.detect-changes-prod.outputs.authenticfarma == 'true'
     
     steps:
     - name: 📥 Checkout code
@@ -205,33 +432,152 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker
+      run: gcloud auth configure-docker gcr.io
     
-    - name: 🏗️ Build and Push Prod Image
+    - name: 🏗️ Build AuthenticFarma
       run: |
         VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ matrix.app }}
-        
-        # Configuración para AuthenticFarma (candidatos)
-        DOCKERFILE_PATH="apps/authenticfarma/Dockerfile"
-        CONTEXT_PATH="apps/authenticfarma"
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/authenticfarma-candidatos
         
         echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
-        docker build -f $DOCKERFILE_PATH -t $IMAGE_NAME:$VERSION_TAG $CONTEXT_PATH
+        
+        docker build -f apps/authenticfarma/candidatos/dockerfile -t $IMAGE_NAME:$VERSION_TAG apps/authenticfarma/candidatos
         docker push $IMAGE_NAME:$VERSION_TAG
         
-        # Tag como 'latest' para producción
         docker tag $IMAGE_NAME:$VERSION_TAG $IMAGE_NAME:latest
         docker push $IMAGE_NAME:latest
         
         echo "✅ Production image pushed: $IMAGE_NAME:$VERSION_TAG"
 
+  # 🏗️ Production Build - YoSoy
+  build-prod-yosoy:
+    name: 🏗️ Build YoSoy for Production  
+    runs-on: ubuntu-latest
+    needs: detect-changes-prod
+    if: needs.detect-changes-prod.outputs.yosoy == 'true'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔐 Auth to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: 📋 Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+    
+    - name: 🐳 Configure Docker
+      run: gcloud auth configure-docker gcr.io
+    
+    - name: 🏗️ Build YoSoy Backend
+      run: |
+        VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/yosoy-hc-backend
+        
+        echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
+        
+        if [ -f "apps/yosoy/historia-clinica/backend/Dockerfile" ]; then
+          docker build -f apps/yosoy/historia-clinica/backend/Dockerfile -t $IMAGE_NAME:$VERSION_TAG apps/yosoy/historia-clinica/backend
+          docker push $IMAGE_NAME:$VERSION_TAG
+          docker tag $IMAGE_NAME:$VERSION_TAG $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:latest
+          echo "✅ YoSoy production image pushed: $IMAGE_NAME:$VERSION_TAG"
+        fi
+
+  # 🏗️ Production Build - IsYours
+  build-prod-isyours:
+    name: 🏗️ Build IsYours for Production
+    runs-on: ubuntu-latest
+    needs: detect-changes-prod
+    if: needs.detect-changes-prod.outputs.isyours == 'true'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔐 Auth to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: 📋 Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+    
+    - name: 🐳 Configure Docker
+      run: gcloud auth configure-docker gcr.io
+    
+    - name: 🏗️ Build IsYours
+      run: |
+        VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/isyours
+        
+        echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
+        
+        if [ -f "apps/isyours/Dockerfile" ]; then
+          docker build -f apps/isyours/Dockerfile -t $IMAGE_NAME:$VERSION_TAG apps/isyours
+          docker push $IMAGE_NAME:$VERSION_TAG
+          docker tag $IMAGE_NAME:$VERSION_TAG $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:latest
+          echo "✅ IsYours production image pushed: $IMAGE_NAME:$VERSION_TAG"
+        fi
+
+  # 🏗️ Production Build - Moodle
+  build-prod-moodle:
+    name: 🏗️ Build Moodle for Production
+    runs-on: ubuntu-latest
+    needs: detect-changes-prod
+    if: needs.detect-changes-prod.outputs.moodle == 'true'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔐 Auth to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: 📋 Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+    
+    - name: 🐳 Configure Docker  
+      run: gcloud auth configure-docker gcr.io
+    
+    - name: 🏗️ Build Moodle
+      run: |
+        VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/moodle-elearning
+        
+        echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
+        
+        if [ -f "apps/moodle-elearning/Dockerfile" ]; then
+          docker build -f apps/moodle-elearning/Dockerfile -t $IMAGE_NAME:$VERSION_TAG apps/moodle-elearning
+          docker push $IMAGE_NAME:$VERSION_TAG
+          docker tag $IMAGE_NAME:$VERSION_TAG $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:latest
+          echo "✅ Moodle production image pushed: $IMAGE_NAME:$VERSION_TAG"
+        fi
+
   # 🛡️ Production Deployment (Manual Approval Required)
   notify-prod-ready:
     name: 🛡️ Notify Production Ready
     runs-on: ubuntu-latest
-    needs: build-prod
-    if: github.ref == 'refs/heads/main'
+    needs: [detect-changes-prod, build-prod-authenticfarma, build-prod-yosoy, build-prod-isyours, build-prod-moodle]
+    if: |
+      always() && 
+      (needs.detect-changes-prod.result == 'success') &&
+      (
+        (needs.build-prod-authenticfarma.result == 'success') ||
+        (needs.build-prod-yosoy.result == 'success') ||
+        (needs.build-prod-isyours.result == 'success') ||
+        (needs.build-prod-moodle.result == 'success') ||
+        (needs.build-prod-authenticfarma.result == 'skipped' && 
+         needs.build-prod-yosoy.result == 'skipped' && 
+         needs.build-prod-isyours.result == 'skipped' && 
+         needs.build-prod-moodle.result == 'skipped')
+      )
     
     steps:
     - name: 📢 Production Deployment Notification
