@@ -133,35 +133,15 @@ jobs:
         existing_pr=$(gh pr list --base main --head dev --json number --jq '.[0].number')
         
         if [ "$existing_pr" != "null" ] && [ -n "$existing_pr" ]; then
-          echo "PR existente encontrado: #$existing_pr"
-          echo "Actualizando PR existente..."
-          gh pr edit $existing_pr \
-            --title "🚀 Release: Deploy dev changes to production" \
-            --body "## 🚀 Production Release
-
-        This PR contains validated changes from \`dev\` ready for production deployment.
-
-        ### 📋 Changes
-
-        - Auto-generated from successful dev builds
-        - All tests passing ✅
-        - GCP Authentication working ✅
-
-        ### 🛡️ Pre-deployment Checklist
-
-        - [ ] Review all changes
-        - [ ] Verify dev environment testing
-        - [ ] Confirm database migrations (if any)
-        - [ ] Check breaking changes
-        - [ ] Validate configuration updates
-
-        ### 🚀 Deployment
-
-        Merging this PR will trigger production deployment via ArgoCD.
-
-        **Monitor deployment**: https://argo.authenticfarma.com/applications/authentic-platform-prod
-
-        **Auto-updated**: $(date -Iseconds)"
+          echo "✅ PR existente encontrado: #$existing_pr"
+          echo "🔗 URL: https://github.com/desarrolloIngenios/authentic-platform/pull/$existing_pr"
+          echo ""
+          echo "ℹ️ No es necesario crear un nuevo PR."
+          echo "📋 El PR existente ya contiene todos los cambios de dev."
+          echo "� Para desplegar a producción, hacer merge del PR existente."
+          echo ""
+          echo "📊 Cambios incluidos en el PR:"
+          git log main..dev --oneline --max-count=5
         else
           echo "Creando nuevo PR..."
           gh pr create \
