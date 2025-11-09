@@ -21,7 +21,7 @@ class GoogleController extends Controller
      */
     private function optimizeSession()
     {
-        // Limpiar datos temporales innecesarios
+        // Limpiar datos temporales innecesarios y optimizar almacenamiento
         session()->forget([
             '_token',
             '_previous',

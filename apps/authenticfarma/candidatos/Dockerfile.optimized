@@ -1,0 +1,28 @@
+FROM php:8.1-fpm-alpine
+
+# Instalar extensiones PHP para performance
+RUN apk add --no-cache \
+    nginx \
+    redis \
+    && docker-php-ext-install opcache pdo_mysql
+
+# Configurar OPcache
+COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+# Configurar PHP-FPM para performance
+COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+
+WORKDIR /var/www/html
+
+# Copiar archivos de la aplicación
+COPY . .
+
+# Optimizaciones Laravel en build time
+RUN composer install --no-dev --optimize-autoloader --classmap-authoritative \
+    && php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache \
+    && php artisan event:cache
+
+EXPOSE 9000
+CMD ["php-fpm"]

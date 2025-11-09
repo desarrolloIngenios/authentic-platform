@@ -1,0 +1,31 @@
+# PATCH para el deployment existente - SOLO si quieres optimización automática
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: candidatos
+  namespace: authenticfarma-prod
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: optimizer
+        image: your-registry/candidatos:latest
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          cd /var/www/html
+          if [ -f "artisan" ]; then
+            echo "🚀 Auto-optimización en startup..."
+            php artisan route:cache || true
+            php artisan view:cache || true
+            echo "✅ Optimización automática completada"
+          fi
+        volumeMounts:
+        - name: app-volume
+          mountPath: /var/www/html
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      containers:
+      # ... resto de containers existentes sin cambios
