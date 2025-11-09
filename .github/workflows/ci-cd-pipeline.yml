@@ -300,8 +300,8 @@ jobs:
     - name: 📋 Create Release PR using GitHub CLI
       run: |
         # Configurar Git
-        git config --global user.name "desarrolloIngenios"
-        git config --global user.email "desarrollo@ingenios.com"
+        git config --global user.name "authentic-24"
+        git config --global user.email "stack.dev@authentic.com.co"
         
         # Fetch main branch para poder comparar
         git fetch origin main:main
