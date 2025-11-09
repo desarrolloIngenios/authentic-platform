@@ -215,12 +215,12 @@ jobs:
         # Determinar el dockerfile correcto
         case "${{ matrix.app }}" in
           yosoy-hc-backend)
-            DOCKERFILE_PATH="apps/yosoy/historia-clinica/Dockerfile"
-            CONTEXT_PATH="apps/yosoy/historia-clinica"
+            DOCKERFILE_PATH="apps/yosoy/historia-clinica/backend/Dockerfile"
+            CONTEXT_PATH="apps/yosoy/historia-clinica/backend"
             ;;
           yosoy-hc-frontend)
-            DOCKERFILE_PATH="apps/yosoy/historia-clinica/frontend-simple.Dockerfile" 
-            CONTEXT_PATH="apps/yosoy/historia-clinica"
+            DOCKERFILE_PATH="apps/yosoy/historia-clinica/gcp-deployment/frontend/Dockerfile" 
+            CONTEXT_PATH="apps/yosoy/historia-clinica/gcp-deployment/frontend"
             ;;
           authenticfarma-backend)
             DOCKERFILE_PATH="apps/authenticfarma/Dockerfile"
