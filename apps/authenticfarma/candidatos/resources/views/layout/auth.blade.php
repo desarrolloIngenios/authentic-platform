@@ -180,6 +180,8 @@
     <script src="{{ asset('js/select-chosen.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/jquery.scrollbar.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/toastr.js') }}"></script>
+
+    {{-- aqui --}}
     @yield('js')
     <script>
         @if(session('warning'))

@@ -47,19 +47,18 @@
             </p>
         </div>
     </div>
-    {{-- Botón de postulación --}}
-    {{-- <div class="text-center mt-4">
-        @if ($vacante->id_estado == 1)
-            <a href="{{ route('candidato.postular', $vacante->id) }}" class="btn btn-primary-custom">
-            <a href="#" class="btn btn-primary-custom">
-                Aplicar a esta vacante
-            </a>
+
+    <div class="d-flex justify-content-center align-items-center mt-5" style="width: 100%;">
+        @if(isset($aplicaciones) && in_array(($vacante->idofoferta_laboral ?? $vacante->id), $aplicaciones))
+            <button class="btn" style="background: #bdbdbd; color: #fff; font-weight: 500; padding: 14px 32px; border-radius: 30px; font-size: 1.1rem; min-width: 260px; cursor: not-allowed;" disabled>
+                <i class="la la-check mr-1"></i> Ya aplicaste a esta vacante
+            </button>
         @else
-            <button class="btn btn-secondary" disabled>
-                Vacante no disponible
+            <button class="btn" style="background: #00945e; color: #fff; font-weight: 500; padding: 14px 32px; border-radius: 30px; font-size: 1.1rem; box-shadow: 0 4px 16px rgba(0,148,94,0.10); transition: background 0.2s; min-width: 260px;" onclick="aplicarAVacante({{ $vacante->idofoferta_laboral ?? $vacante->id }}, '{{ $vacante->cargo->nombre ?? '' }}')">
+                <i class="la la-paper-plane mr-1"></i> Aplicar a esta vacante
             </button>
         @endif
-    </div> --}}
+    </div>
 
 
 

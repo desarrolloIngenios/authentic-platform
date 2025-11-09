@@ -22,9 +22,26 @@
                 </small>
             </h3>
         </div>        <!-- Buscador -->
-        <div class="boton-search d-flex align-items-center mt-2 mt-md-0">
+        <div class="boton-search mr-2">
             <input type="text" id="filtro-cargo" name="cargo" placeholder="Buscar por cargo o título..." class="form-control">
         </div>
+
+        <!-- Botón flotante Mi perfil -->
+        <a href="/account" class="btn d-flex align-items-center perfil-float-btn pulse-anim"
+           style="background: #00945e; color: #fff; white-space: nowrap; font-weight: 500; position: fixed; left: 30px; bottom: 30px; z-index: 1050; box-shadow: 0 4px 16px rgba(0,0,0,0.15); padding: 14px 26px; border-radius: 30px; border: none;">
+            <i class="la la-user mr-1" style="font-size: 1.2rem;"></i> Mi perfil
+        </a>
+
+        <style>
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0,148,94, 0.5); }
+            70% { box-shadow: 0 0 0 12px rgba(0,148,94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0,148,94, 0); }
+        }
+        .pulse-anim {
+            animation: pulse 1.5s infinite;
+        }
+        </style>
     </div>
 
     <hr class="mb-4">
