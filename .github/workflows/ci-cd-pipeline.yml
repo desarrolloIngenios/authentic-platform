@@ -349,8 +349,7 @@ jobs:
 
         **Monitor deployment**: https://argo.authenticfarma.com/applications/authentic-platform-prod
 
-        **Created**: $(date -Iseconds)" \
-            --label "release,production,auto-generated"
+        **Created**: $(date -Iseconds)"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
