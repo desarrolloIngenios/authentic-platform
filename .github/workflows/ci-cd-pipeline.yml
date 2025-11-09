@@ -123,43 +123,81 @@ jobs:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: 📋 Create or Update Release PR
-      uses: peter-evans/create-pull-request@v5
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        branch: release/auto-dev-to-main
-        base: main
-        title: "🚀 Release: Deploy dev changes to production"
-        body: |
-          ## 🚀 Production Release
-          
-          This PR contains validated changes from `dev` ready for production deployment.
-          
-          ### 📋 Changes
-          
-          - Auto-generated from successful dev builds
-          - All tests passing ✅
-          - Images built and pushed to registry ✅
-          
-          ### 🛡️ Pre-deployment Checklist
-          
-          - [ ] Review all changes
-          - [ ] Verify dev environment testing
-          - [ ] Confirm database migrations (if any)
-          - [ ] Check breaking changes
-          - [ ] Validate configuration updates
-          
-          ### 🚀 Deployment
-          
-          Merging this PR will trigger production deployment via ArgoCD.
-          
-          **Monitor deployment**: https://argo.authenticfarma.com/applications/authentic-platform-prod
-        labels: |
-          release
-          production
-          auto-generated
-        assignees: ottofonseca
-        reviewers: ottofonseca
+    - name: 📋 Create Release PR using GitHub CLI
+      run: |
+        # Configurar Git
+        git config --global user.name "ottofonseca"
+        git config --global user.email "ottofonseca@gmail.com"
+        
+        # Verificar si ya existe un PR abierto de dev -> main
+        existing_pr=$(gh pr list --base main --head dev --json number --jq '.[0].number')
+        
+        if [ "$existing_pr" != "null" ] && [ -n "$existing_pr" ]; then
+          echo "PR existente encontrado: #$existing_pr"
+          echo "Actualizando PR existente..."
+          gh pr edit $existing_pr \
+            --title "🚀 Release: Deploy dev changes to production" \
+            --body "## 🚀 Production Release
+
+        This PR contains validated changes from \`dev\` ready for production deployment.
+
+        ### 📋 Changes
+
+        - Auto-generated from successful dev builds
+        - All tests passing ✅
+        - GCP Authentication working ✅
+
+        ### 🛡️ Pre-deployment Checklist
+
+        - [ ] Review all changes
+        - [ ] Verify dev environment testing
+        - [ ] Confirm database migrations (if any)
+        - [ ] Check breaking changes
+        - [ ] Validate configuration updates
+
+        ### 🚀 Deployment
+
+        Merging this PR will trigger production deployment via ArgoCD.
+
+        **Monitor deployment**: https://argo.authenticfarma.com/applications/authentic-platform-prod
+
+        **Auto-updated**: $(date -Iseconds)"
+        else
+          echo "Creando nuevo PR..."
+          gh pr create \
+            --base main \
+            --head dev \
+            --title "🚀 Release: Deploy dev changes to production" \
+            --body "## 🚀 Production Release
+
+        This PR contains validated changes from \`dev\` ready for production deployment.
+
+        ### 📋 Changes
+
+        - Auto-generated from successful dev builds
+        - All tests passing ✅
+        - GCP Authentication working ✅
+
+        ### 🛡️ Pre-deployment Checklist
+
+        - [ ] Review all changes
+        - [ ] Verify dev environment testing
+        - [ ] Confirm database migrations (if any)
+        - [ ] Check breaking changes
+        - [ ] Validate configuration updates
+
+        ### 🚀 Deployment
+
+        Merging this PR will trigger production deployment via ArgoCD.
+
+        **Monitor deployment**: https://argo.authenticfarma.com/applications/authentic-platform-prod
+
+        **Created**: $(date -Iseconds)" \
+            --assignee ottofonseca \
+            --label "release,production,auto-generated"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # 🏗️ Build Prod Images (cuando se merge a main)
   build-prod:
