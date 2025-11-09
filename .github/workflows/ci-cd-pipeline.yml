@@ -74,22 +74,22 @@ jobs:
     - name: 🐳 Configure Docker
       run: gcloud auth configure-docker gcr.io
     
-    - name: 🏗️ Build Historia Clinica Backend
+    - name: 🏗️ Build AuthenticFarma Backend (Candidatos)
       run: |
         IMAGE_TAG=dev-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/yosoy-hc-backend
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/authenticfarma-backend
         
-        echo "Building Historia Clinica Backend: $IMAGE_NAME:$IMAGE_TAG"
+        echo "Building AuthenticFarma Backend (Candidatos): $IMAGE_NAME:$IMAGE_TAG"
         
-        if [ -f "apps/yosoy/historia-clinica/backend/Dockerfile" ]; then
-          docker build -f apps/yosoy/historia-clinica/backend/Dockerfile -t $IMAGE_NAME:$IMAGE_TAG apps/yosoy/historia-clinica/backend
+        if [ -f "apps/authenticfarma/Dockerfile" ]; then
+          docker build -f apps/authenticfarma/Dockerfile -t $IMAGE_NAME:$IMAGE_TAG apps/authenticfarma
           docker push $IMAGE_NAME:$IMAGE_TAG
           
           # También tag como 'dev-latest'
           docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:dev-latest
           docker push $IMAGE_NAME:dev-latest
           
-          echo "✅ Successfully built and pushed Historia Clinica Backend"
+          echo "✅ Successfully built and pushed AuthenticFarma Backend"
         else
           echo "⚠️ Dockerfile not found, skipping build"
         fi
@@ -190,7 +190,7 @@ jobs:
     
     strategy:
       matrix:
-        app: [yosoy-hc-backend, yosoy-hc-frontend, authenticfarma-backend]
+        app: [authenticfarma-backend]
     
     steps:
     - name: 📥 Checkout code
@@ -212,21 +212,9 @@ jobs:
         VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
         IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ matrix.app }}
         
-        # Determinar el dockerfile correcto
-        case "${{ matrix.app }}" in
-          yosoy-hc-backend)
-            DOCKERFILE_PATH="apps/yosoy/historia-clinica/backend/Dockerfile"
-            CONTEXT_PATH="apps/yosoy/historia-clinica/backend"
-            ;;
-          yosoy-hc-frontend)
-            DOCKERFILE_PATH="apps/yosoy/historia-clinica/gcp-deployment/frontend/Dockerfile" 
-            CONTEXT_PATH="apps/yosoy/historia-clinica/gcp-deployment/frontend"
-            ;;
-          authenticfarma-backend)
-            DOCKERFILE_PATH="apps/authenticfarma/Dockerfile"
-            CONTEXT_PATH="apps/authenticfarma"
-            ;;
-        esac
+        # Configuración para AuthenticFarma (candidatos)
+        DOCKERFILE_PATH="apps/authenticfarma/Dockerfile"
+        CONTEXT_PATH="apps/authenticfarma"
         
         echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
         docker build -f $DOCKERFILE_PATH -t $IMAGE_NAME:$VERSION_TAG $CONTEXT_PATH
