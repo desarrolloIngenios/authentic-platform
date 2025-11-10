@@ -1,5 +1,10 @@
 # YoSoy Historia Clínica - Sistema Médico para Mujeres
 
+## 📊 Deploy Status
+- ✅ **Artifact Registry**: `yosoy-repo/yosoy-hc-backend` 
+- 🔄 **Production Migration**: Migrating to us-central1-docker.pkg.dev
+- 🌐 **Live Application**: https://hc.yo-soy.co
+
 ## Descripción
 Sistema médico completo especializado en atención ginecológica y de medicina general para mujeres, desarrollado con Node.js, SQLite y desplegado en Google Kubernetes Engine.
 
