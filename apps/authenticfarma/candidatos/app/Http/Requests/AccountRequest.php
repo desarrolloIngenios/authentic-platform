@@ -21,6 +21,7 @@ class AccountRequest extends  BaseFormRequest
      */
     public function rules(): array
     {
+        // Reglas de validación para la actualización de la cuenta del usuario
         return [
             'nombres' => 'required|string|min:2|max:100',
             'apellidos' => 'required|string|min:2|max:100',
@@ -51,7 +52,7 @@ class AccountRequest extends  BaseFormRequest
             'date' => 'El campo :attribute debe ser una fecha válida.',
             'before' => 'La :attribute debe ser una fecha anterior a hoy.',
             'exists' => 'El valor seleccionado para :attribute no es válido.',
-            
+
             'nombres.required' => 'Por favor ingrese sus nombres.',
             'apellidos.required' => 'Por favor ingrese sus apellidos.',
             'genero_id.required' => 'Por favor seleccione su género.',
@@ -61,11 +62,11 @@ class AccountRequest extends  BaseFormRequest
             'telefono.required' => 'Por favor ingrese su número de teléfono.',
             'email.required' => 'Por favor ingrese su correo electrónico.',
             'email.email' => 'Por favor ingrese un correo electrónico válido.',
-            
+
             'pais_nacimiento_id.required' => 'Por favor seleccione su país de nacimiento.',
             'departamento_nacimiento_id.required' => 'Por favor seleccione su departamento de nacimiento.',
             'ciudad_nacimiento_id.required' => 'Por favor seleccione su ciudad de nacimiento.',
-            
+
             'pais_residencia_id.required' => 'Por favor seleccione su país de residencia.',
             'departamento_residencia_id.required' => 'Por favor seleccione su departamento de residencia.',
             'ciudad_residencia_id.required' => 'Por favor seleccione su ciudad de residencia.',
