@@ -38,8 +38,6 @@ class CandidateController extends Controller
         $this->experienceService = $experienceService;
     }
 
-
-
     public function store(CandidatePdfRequest $request)
     {
 
@@ -60,7 +58,7 @@ class CandidateController extends Controller
                 toastr()->error('No se pudo procesar el CV. El servicio de IA tuvo un error interno. Intenta nuevamente más tarde o con otro archivo.');
                 return back();
             }
-            // dd($cv);
+
             // Validar cada apartado extraído del PDF
             $errores = [];
 
@@ -254,28 +252,6 @@ class CandidateController extends Controller
 
                     foreach ($experiences as $index => $exp) {
                         try {
-                            // Log::info("Procesando experiencia #{$index}", [
-                            //     'empresa' => $exp['empresa'] ?? 'N/A',
-                            //     'puesto' => $exp['puesto'] ?? 'N/A',
-                            //     'es_array' => is_array($exp)
-                            // ]);
-
-
-                            // if (!is_array($exp)) {
-                            //     Log::warning('Experiencia no es un array, saltando...', ['experiencia' => $exp]);
-                            //     continue;
-                            // }
-
-
-                            // if (!isset($exp['empresa']) && !isset($exp['puesto'])) {
-                            //     Log::warning('Experiencia sin empresa ni puesto, saltando...', [
-                            //         'experiencia_keys' => array_keys($exp),
-                            //         'experiencia_values' => $exp
-                            //     ]);
-                            //     continue;
-                            // }
-
-                            // Log::info("Creando nueva experiencia laboral para candidato ID: {$candidato->id_candidato}");
 
                             $experiencia = new HvCanExpLab();
                             // Mapear claves alternativas para compatibilidad

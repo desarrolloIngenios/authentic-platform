@@ -4,21 +4,19 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ExperienceLaboralService
 {
+    protected $geminiService;
+
+    public function __construct()
+    {
+        // Usar el factory para obtener el servicio configurado (Vertex AI o Studio)
+        $this->geminiService = GeminiServiceFactory::make();
+    }
     public function validarCargosDesdePDF(array $experiencias)
     {
-        // Determinar el token según el ambiente
-        if (app()->environment('production')) {
-            $token = config('IA.gemini.prod_token', 'AIzaSyDXcJ1nZoEe2Ilkt_RAPAcgausCQjjS0To');
-        } else {
-            // $token = config('IA.gemini.dev_token', 'AIzaSyAumhK-8m_t_zqVwJz8UndYjesVd_mRyPo');
-            $token = 'AIzaSyDXcJ1nZoEe2Ilkt_RAPAcgausCQjjS0To';
-        }
-
-        // $model = 'gemini-1.5-flash';
-        $model = 'gemini-2.0-flash-lite';
         // Obtener listas desde la base de datos
         $cargosValidos = DB::table('tipo_cargo')->pluck('nombre')->toArray();
         $areasValidas = DB::table('area')->pluck('nombre')->toArray();
@@ -30,82 +28,78 @@ class ExperienceLaboralService
             $puestoOriginal = $exp['puesto'];
             $descripcion = $exp['descripcion'] ?? '';
 
-            // === IA para el cargo ===
-            $promptCargo = "Tengo este cargo laboral: \"$puestoOriginal\".\n";
-            $promptCargo .= "De la siguiente lista de cargos válidos, dime cuál es el más parecido o equivalente. ";
-            $promptCargo .= "Responde solo con uno de los nombres exactos de la lista, sin explicación.\n\n";
-            $promptCargo .= implode(", ", $cargosValidos);
+            try {
+                // === IA para el cargo ===
+                $promptCargo = "Tengo este cargo laboral: \"$puestoOriginal\".\n";
+                $promptCargo .= "De la siguiente lista de cargos válidos, dime cuál es el más parecido o equivalente. ";
+                $promptCargo .= "Responde solo con uno de los nombres exactos de la lista, sin explicación.\n\n";
+                $promptCargo .= implode(", ", $cargosValidos);
 
-            $responseCargo = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$token", [
-                'contents' => [
-                    'parts' => [
-                        ['text' => $promptCargo]
-                    ]
-                ]
-            ]);
+                $cargoMatch = $this->geminiService->generateContent($promptCargo, [
+                    'temperature' => 0.1,
+                    'maxTokens' => 100
+                ]);
 
-            $cargoMatch = trim($responseCargo->json()['candidates'][0]['content']['parts'][0]['text'] ?? $puestoOriginal);
-            if ($cargoMatch) {
-                $cargoMatch = preg_replace('/^```json\s*/', '', $cargoMatch);
-                $cargoMatch = preg_replace('/\s*```$/', '', $cargoMatch);
-                $cargoMatch = trim($cargoMatch);
+                $cargoMatch = $this->cleanResponse($cargoMatch);
+                $exp['puesto_normalizado'] = $cargoMatch ?: $puestoOriginal;
+
+                // === IA para el área ===
+                $promptArea = "Según esta descripción laboral: \"$descripcion\".\n";
+                $promptArea .= "¿Cuál de estas áreas es la más relacionada? Responde solo con un nombre exacto de la lista. Si no encuentras ninguno escoge 'Otros'\n\n";
+                $promptArea .= implode(", ", $areasValidas);
+
+                $areaMatch = $this->geminiService->generateContent($promptArea, [
+                    'temperature' => 0.1,
+                    'maxTokens' => 100
+                ]);
+
+                $areaMatch = $this->cleanResponse($areaMatch);
+                $exp['area_deducida'] = $areaMatch ?: 'Otros';
+
+                // === IA para el sector ===
+                $promptSector = "Según esta descripción laboral: \"$descripcion\".\n";
+                $promptSector .= "¿Cuál de estos sectores es el más relacionado? Responde solo con un nombre exacto de la lista. Si no encuentras ninguno escoge 'Otras Industrias'\n\n";
+                $promptSector .= implode(", ", $sectoresValidos);
+
+                $sectorMatch = $this->geminiService->generateContent($promptSector, [
+                    'temperature' => 0.1,
+                    'maxTokens' => 100
+                ]);
+
+                $sectorMatch = $this->cleanResponse($sectorMatch);
+                $exp['sector_deducido'] = $sectorMatch ?: 'Otras Industrias';
+
+                // Agregar a la colección final
+                $experienciasActualizadas[] = $exp;
+            } catch (\Exception $e) {
+                // En caso de error, usar valores por defecto
+                $exp['puesto_normalizado'] = $puestoOriginal;
+                $exp['area_deducida'] = 'Otros';
+                $exp['sector_deducido'] = 'Otras Industrias';
+                $experienciasActualizadas[] = $exp;
+
+                // Log del error para debugging
+                Log::error('Error en validación de cargo con IA: ' . $e->getMessage());
             }
-            $exp['puesto_normalizado'] = $cargoMatch;
-
-            // === IA para el área ===
-            $promptArea = "Según esta descripción laboral: \"$descripcion\".\n";
-            $promptArea .= "¿Cuál de estas áreas es la más relacionada? Responde solo con un nombre exacto de la lista. Si no encentras ninguno escoge 'Otros'\n\n";
-            $promptArea .= implode(", ", $areasValidas);
-
-            $responseArea = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$token", [
-                'contents' => [
-                    'parts' => [
-                        ['text' => $promptArea]
-                    ]
-                ]
-            ]);
-
-            $areaMatch = trim($responseArea->json()['candidates'][0]['content']['parts'][0]['text'] ?? null);
-
-            if ($areaMatch) {
-                $areaMatch = preg_replace('/^```json\s*/', '', $areaMatch);
-                $areaMatch = preg_replace('/\s*```$/', '', $areaMatch);
-                $areaMatch = trim($areaMatch);
-            }
-            $exp['area_deducida'] = $areaMatch;
-
-            // === IA para el sector ===
-            $promptSector = "Según esta descripción laboral: \"$descripcion\".\n";
-            $promptSector .= "¿Cuál de estos sectores es el más relacionado? Responde solo con un nombre exacto de la lista. Si no encentras ninguno escoge 'Otras Industrias'\n\n";
-            $promptSector .= implode(", ", $sectoresValidos);
-
-            $responseSector = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$token", [
-                'contents' => [
-                    'parts' => [
-                        ['text' => $promptSector]
-                    ]
-                ]
-            ]);
-
-            $sectorMatch = trim($responseSector->json()['candidates'][0]['content']['parts'][0]['text'] ?? null);
-
-            if ($sectorMatch) {
-                $sectorMatch = preg_replace('/^```json\s*/', '', $sectorMatch);
-                $sectorMatch = preg_replace('/\s*```$/', '', $sectorMatch);
-                $sectorMatch = trim($sectorMatch);
-            }
-            $exp['sector_deducido'] = $sectorMatch;
-
-            // Agregar a la colección final
-            $experienciasActualizadas[] = $exp;
         }
 
         return $experienciasActualizadas;
+    }
+
+    /**
+     * Limpia la respuesta de Gemini removiendo marcadores de código
+     */
+    private function cleanResponse(?string $response): ?string
+    {
+        if (!$response) {
+            return null;
+        }
+
+        $response = trim($response);
+        $response = preg_replace('/^```json\s*/', '', $response);
+        $response = preg_replace('/\s*```$/', '', $response);
+        $response = trim($response);
+
+        return $response;
     }
 }
