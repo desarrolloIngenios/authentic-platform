@@ -60,13 +60,10 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
     # Agrega estas líneas para la optimización de producción
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
-
-# El comando final para iniciar el servidor web
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-
+# Skip cache durante build - se ejecutará en runtime
+# RUN php artisan config:cache
+# RUN php artisan route:cache
+# RUN php artisan view:cache
 
 EXPOSE 80
 
