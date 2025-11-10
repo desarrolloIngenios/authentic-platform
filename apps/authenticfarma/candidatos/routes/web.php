@@ -27,6 +27,9 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\VacantController as AdminVacantController;
 use App\Http\Controllers\Admin\PlanController as AdminPlanController;
 
+// Controladores de IA
+use App\Http\Controllers\AI\GeminiController;
+
 use App\Http\Controllers\PlanController;
 
 
@@ -145,4 +148,24 @@ Route::get('/vacantes/relevantes', [VacantController::class, 'getRelevantVacanci
 
 Route::get('/healthz', function () {
     return response()->json(['status' => 'ok'], 200);
+});
+
+// ================================
+// RUTAS DE IA - GEMINI
+// ================================
+Route::middleware(['auth'])->prefix('ai')->name('ai.')->group(function () {
+    // Test de conectividad
+    Route::get('/test', [GeminiController::class, 'testConnection'])->name('test');
+    
+    // Análisis de CV
+    Route::post('/analyze-cv', [GeminiController::class, 'analyzeCV'])->name('analyze.cv');
+    
+    // Generar preguntas de entrevista
+    Route::post('/interview-questions', [GeminiController::class, 'generateInterviewQuestions'])->name('interview.questions');
+    
+    // Matching candidato-puesto
+    Route::post('/match-candidate', [GeminiController::class, 'matchCandidate'])->name('match.candidate');
+    
+    // Estadísticas de uso de IA
+    Route::get('/stats', [GeminiController::class, 'getAIStats'])->name('stats');
 });

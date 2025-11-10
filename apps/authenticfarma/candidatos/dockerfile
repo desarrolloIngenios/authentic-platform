@@ -59,6 +59,26 @@ RUN echo '* * * * * cd /var/www && php artisan schedule:run >> /dev/null 2>&1' >
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
+# Vertex AI Configuration - AuthenticFarma Production
+ARG VERTEX_AI_PROJECT_ID=authentic-prod-464216
+ARG VERTEX_AI_LOCATION=us-central1
+ARG VERTEX_AI_MODEL=gemini-1.5-flash
+ARG GOOGLE_APPLICATION_CREDENTIALS=/var/www/storage/vertex-ai-credentials.json
+ARG VERTEX_AI_SERVICE_ACCOUNT=laravel-gemini-prod@authentic-prod-464216.iam.gserviceaccount.com
+
+ENV VERTEX_AI_PROJECT_ID=$VERTEX_AI_PROJECT_ID
+ENV VERTEX_AI_LOCATION=$VERTEX_AI_LOCATION
+ENV VERTEX_AI_MODEL=$VERTEX_AI_MODEL
+ENV GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
+ENV VERTEX_AI_SERVICE_ACCOUNT=$VERTEX_AI_SERVICE_ACCOUNT
+
+# Copy Vertex AI credentials if provided during build
+COPY --chown=www:www vertex-ai-credentials.json* /var/www/storage/
+
+# Create directory for credentials if it doesn't exist
+RUN mkdir -p /var/www/storage/app/credentials && \
+    chmod 755 /var/www/storage/app/credentials
+
     # Agrega estas líneas para la optimización de producción
 RUN php artisan config:cache
 RUN php artisan route:cache

@@ -19,6 +19,10 @@ env:
   REGISTRY: us-central1-docker.pkg.dev
   PROJECT_ID: authentic-prod-464216
   REPO_NAME: authenticfarma-repo
+  # Vertex AI Configuration
+  VERTEX_AI_PROJECT_ID: authentic-prod-464216
+  VERTEX_AI_LOCATION: us-central1
+  VERTEX_AI_MODEL: gemini-1.5-flash
 
 jobs:
   # 🧪 Tests y validaciones
@@ -441,14 +445,44 @@ jobs:
     - name: 🐳 Configure Docker
       run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
+    - name: 🤖 Setup Vertex AI Credentials  
+      run: |
+        echo "Setting up Vertex AI credentials for AuthenticFarma..."
+        echo "Service Account: laravel-gemini-prod@authentic-prod-464216.iam.gserviceaccount.com"
+        echo '${{ secrets.VERTEX_AI_PRODUCTION }}' > /tmp/vertex-ai-credentials.json
+        echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/vertex-ai-credentials.json" >> $GITHUB_ENV
+        
+        # Verify credentials file
+        if [ -f "/tmp/vertex-ai-credentials.json" ]; then
+          echo "✅ Vertex AI credentials file created successfully"
+          # Validate JSON format (without exposing content)
+          if jq empty /tmp/vertex-ai-credentials.json 2>/dev/null; then
+            echo "✅ Vertex AI credentials JSON is valid"
+          else
+            echo "❌ Invalid JSON format in Vertex AI credentials"
+            exit 1
+          fi
+        else
+          echo "❌ Failed to create Vertex AI credentials file"
+          exit 1
+        fi
+        
     - name: 🏗️ Build AuthenticFarma Candidatos
       run: |
         VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
         IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/authentic-candidatos
         
-        echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
+        echo "Building PRODUCTION image with Vertex AI support: $IMAGE_NAME:$VERSION_TAG"
         
-        docker build -f apps/authenticfarma/candidatos/dockerfile -t $IMAGE_NAME:$VERSION_TAG apps/authenticfarma/candidatos
+        # Build with Vertex AI credentials as build arg
+        docker build \
+          --build-arg VERTEX_AI_PROJECT_ID=${{ env.VERTEX_AI_PROJECT_ID }} \
+          --build-arg VERTEX_AI_LOCATION=${{ env.VERTEX_AI_LOCATION }} \
+          --build-arg VERTEX_AI_MODEL=${{ env.VERTEX_AI_MODEL }} \
+          --build-arg GOOGLE_APPLICATION_CREDENTIALS=/tmp/vertex-ai-credentials.json \
+          -f apps/authenticfarma/candidatos/dockerfile \
+          -t $IMAGE_NAME:$VERSION_TAG \
+          apps/authenticfarma/candidatos
         docker push $IMAGE_NAME:$VERSION_TAG
         
         docker tag $IMAGE_NAME:$VERSION_TAG $IMAGE_NAME:latest
