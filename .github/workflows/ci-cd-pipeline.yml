@@ -476,12 +476,12 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker gcr.io
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
     - name: 🏗️ Build YoSoy Backend
       run: |
         VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/yosoy-hc-backend
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/yosoy-repo/yosoy-hc-backend
         
         echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
         
@@ -513,12 +513,12 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker gcr.io
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
     - name: 🏗️ Build IsYours
       run: |
         VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/isyours
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/isyours-repo/isyoursapp
         
         echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
         
@@ -550,12 +550,12 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker  
-      run: gcloud auth configure-docker gcr.io
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
     - name: 🏗️ Build Moodle
       run: |
         VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/moodle-elearning
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/moodle-repo/moodle-elearning
         
         echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
         
