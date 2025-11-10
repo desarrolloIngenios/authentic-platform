@@ -16,13 +16,8 @@ permissions:
   checks: read
 
 env:
-  REGISTRY: us-central1-docker.pkg.dev
+  REGISTRY: gcr.io
   PROJECT_ID: authentic-prod-464216
-  REPO_NAME: authenticfarma-repo
-  # Vertex AI Configuration
-  VERTEX_AI_PROJECT_ID: authentic-prod-464216
-  VERTEX_AI_LOCATION: us-central1
-  VERTEX_AI_MODEL: gemini-1.5-flash
 
 jobs:
   # 🧪 Tests y validaciones
@@ -142,7 +137,7 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker ${{ env.REGISTRY }}
+      run: gcloud auth configure-docker gcr.io
     
     - name: 🏗️ Build AuthenticFarma Backend (Candidatos)
       run: |
@@ -443,54 +438,16 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker ${{ env.REGISTRY }}
+      run: gcloud auth configure-docker gcr.io
     
-    - name: 🤖 Setup Vertex AI Credentials  
-      run: |
-        echo "Setting up Vertex AI credentials for AuthenticFarma..."
-        echo "Service Account: laravel-gemini-prod@authentic-prod-464216.iam.gserviceaccount.com"
-        echo '${{ secrets.VERTEX_AI_PRODUCTION }}' > /tmp/vertex-ai-credentials.json
-        echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/vertex-ai-credentials.json" >> $GITHUB_ENV
-        
-        # Verify credentials file
-        if [ -f "/tmp/vertex-ai-credentials.json" ]; then
-          echo "✅ Vertex AI credentials file created successfully"
-          # Validate JSON format (without exposing content)
-          if jq empty /tmp/vertex-ai-credentials.json 2>/dev/null; then
-            echo "✅ Vertex AI credentials JSON is valid"
-          else
-            echo "❌ Invalid JSON format in Vertex AI credentials"
-            exit 1
-          fi
-        else
-          echo "❌ Failed to create Vertex AI credentials file"
-          exit 1
-        fi
-        
-    - name: 🏗️ Build AuthenticFarma Candidatos
+    - name: 🏗️ Build AuthenticFarma
       run: |
         VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/authentic-candidatos
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/authenticfarma-candidatos
         
-        echo "Building PRODUCTION image with Vertex AI support: $IMAGE_NAME:$VERSION_TAG"
+        echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
         
-        # Prepare Vertex AI credentials for container deployment
-        if [ -f "/tmp/vertex-ai-credentials.json" ]; then
-          echo "✅ Vertex AI credentials available for runtime deployment"
-        else
-          echo "⚠️ Vertex AI credentials not found - using placeholder (AI features will be limited)"
-        fi
-        
-        # Build with Vertex AI environment variables
-        docker build \
-          --build-arg VERTEX_AI_PROJECT_ID=${{ env.VERTEX_AI_PROJECT_ID }} \
-          --build-arg VERTEX_AI_LOCATION=${{ env.VERTEX_AI_LOCATION }} \
-          --build-arg VERTEX_AI_MODEL=${{ env.VERTEX_AI_MODEL }} \
-          --build-arg GOOGLE_APPLICATION_CREDENTIALS=/var/www/storage/vertex-ai-credentials.json \
-          -f apps/authenticfarma/candidatos/dockerfile \
-          -t $IMAGE_NAME:$VERSION_TAG \
-          apps/authenticfarma/candidatos
-        
+        docker build -f apps/authenticfarma/candidatos/dockerfile -t $IMAGE_NAME:$VERSION_TAG apps/authenticfarma/candidatos
         docker push $IMAGE_NAME:$VERSION_TAG
         
         docker tag $IMAGE_NAME:$VERSION_TAG $IMAGE_NAME:latest
@@ -518,12 +475,12 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker ${{ env.REGISTRY }}
+      run: gcloud auth configure-docker gcr.io
     
     - name: 🏗️ Build YoSoy Backend
       run: |
         VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/yosoy-repo/yosoy-hc-backend
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/yosoy-hc-backend
         
         echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
         
@@ -555,12 +512,12 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker ${{ env.REGISTRY }}
+      run: gcloud auth configure-docker gcr.io
     
     - name: 🏗️ Build IsYours
       run: |
         VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/isyours-repo/isyoursapp
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/isyours
         
         echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
         
@@ -592,12 +549,12 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker  
-      run: gcloud auth configure-docker ${{ env.REGISTRY }}
+      run: gcloud auth configure-docker gcr.io
     
     - name: 🏗️ Build Moodle
       run: |
         VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/moodle-repo/moodle-elearning
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/moodle-elearning
         
         echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
         

@@ -4,17 +4,15 @@ FROM --platform=linux/amd64 php:8.2-fpm
 WORKDIR /var/www
 
 # Instalador de extensiones PHP
-ADD --chmod=755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/install-php-extensions
-RUN sync && install-php-extensions \
-    mbstring pdo_mysql zip exif pcntl gd bcmath intl \
-    curl json openssl sockets grpc
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
+    install-php-extensions mbstring pdo_mysql zip exif pcntl gd bcmath intl
 
 # Dependencias del sistema
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
     curl \
-    jq \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
@@ -34,14 +32,8 @@ RUN groupadd -g 1000 www && useradd -u 1000 -ms /bin/bash -g www www
 COPY composer.json composer.lock ./
 
 # 🔎 Instalar dependencias Laravel con más detalle y sin límite de memoria
-RUN --mount=type=cache,target=/tmp/composer \
-    COMPOSER_MEMORY_LIMIT=-1 composer install \
-    --no-interaction --no-plugins --no-scripts --prefer-dist \
-    --optimize-autoloader --no-dev --no-cache || \
-    (echo "🔍 First composer install failed. Trying without Google Cloud packages..." && \
-     composer remove google/cloud-aiplatform google/cloud-storage --no-update --no-interaction && \
-     COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-plugins --no-scripts --prefer-dist --optimize-autoloader --no-dev --no-cache && \
-     echo "⚠️ Installed without Google Cloud packages - AI features will be limited")
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-plugins --no-scripts --prefer-dist --optimize-autoloader --no-dev || \
+    (cat /var/www/composer.json && cat /var/www/composer.lock && exit 1)
 
 # Copiar el resto del código
 COPY --chown=www:www . /var/www
@@ -67,46 +59,17 @@ RUN echo '* * * * * cd /var/www && php artisan schedule:run >> /dev/null 2>&1' >
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Vertex AI Configuration - AuthenticFarma Production
-ARG VERTEX_AI_PROJECT_ID=authentic-prod-464216
-ARG VERTEX_AI_LOCATION=us-central1
-ARG VERTEX_AI_MODEL=gemini-1.5-flash
-ARG GOOGLE_APPLICATION_CREDENTIALS=/var/www/storage/vertex-ai-credentials.json
-ARG VERTEX_AI_SERVICE_ACCOUNT=laravel-gemini-prod@authentic-prod-464216.iam.gserviceaccount.com
+    # Agrega estas líneas para la optimización de producción
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
 
-ENV VERTEX_AI_PROJECT_ID=$VERTEX_AI_PROJECT_ID
-ENV VERTEX_AI_LOCATION=$VERTEX_AI_LOCATION
-ENV VERTEX_AI_MODEL=$VERTEX_AI_MODEL
-ENV GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
-ENV VERTEX_AI_SERVICE_ACCOUNT=$VERTEX_AI_SERVICE_ACCOUNT
+# El comando final para iniciar el servidor web
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
-# Create directory for credentials 
-RUN mkdir -p /var/www/storage/app/credentials && \
-    chmod 755 /var/www/storage/app/credentials
-
-# Create placeholder for Vertex AI credentials (will be replaced at runtime)
-RUN echo '{"type":"service_account","project_id":"authentic-prod-464216","private_key_id":"placeholder","client_email":"laravel-gemini-prod@authentic-prod-464216.iam.gserviceaccount.com"}' > /var/www/storage/vertex-ai-credentials.json && \
-    chmod 644 /var/www/storage/vertex-ai-credentials.json
-
-# Agrega estas líneas para la optimización de producción
-# Skip cache commands during build - they'll run at runtime
-RUN touch /var/www/.env.example
-# RUN php artisan config:cache
-# RUN php artisan route:cache  
-# RUN php artisan view:cache
-
-# Copy and setup entrypoint and diagnostic tools
-COPY docker/entrypoint.sh /entrypoint.sh
-COPY docker/diagnose.sh /diagnose.sh
-RUN chmod +x /entrypoint.sh /diagnose.sh
-
-# Run diagnostics to help troubleshoot build issues
-RUN echo "🔍 Running build diagnostics..." && \
-    /diagnose.sh || echo "⚠️ Diagnostics completed with warnings"
 
 EXPOSE 80
 
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+ENTRYPOINT ["bash", "/var/www/docker/run.sh"]
 
 
