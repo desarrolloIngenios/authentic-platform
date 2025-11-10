@@ -8,6 +8,8 @@
         "php": "^8.2",
         "google/cloud-aiplatform": "^1.0",
         "google/cloud-storage": "^1.48",
+        "ext-json": "*",
+        "ext-curl": "*",
         "kitloong/laravel-migrations-generator": "^7.0",
         "laravel/framework": "^11.9",
         "laravel/sanctum": "^4.0",
