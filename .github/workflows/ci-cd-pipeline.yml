@@ -474,15 +474,23 @@ jobs:
         
         echo "Building PRODUCTION image with Vertex AI support: $IMAGE_NAME:$VERSION_TAG"
         
-        # Build with Vertex AI credentials as build arg
+        # Prepare Vertex AI credentials for container deployment
+        if [ -f "/tmp/vertex-ai-credentials.json" ]; then
+          echo "✅ Vertex AI credentials available for runtime deployment"
+        else
+          echo "⚠️ Vertex AI credentials not found - using placeholder (AI features will be limited)"
+        fi
+        
+        # Build with Vertex AI environment variables
         docker build \
           --build-arg VERTEX_AI_PROJECT_ID=${{ env.VERTEX_AI_PROJECT_ID }} \
           --build-arg VERTEX_AI_LOCATION=${{ env.VERTEX_AI_LOCATION }} \
           --build-arg VERTEX_AI_MODEL=${{ env.VERTEX_AI_MODEL }} \
-          --build-arg GOOGLE_APPLICATION_CREDENTIALS=/tmp/vertex-ai-credentials.json \
+          --build-arg GOOGLE_APPLICATION_CREDENTIALS=/var/www/storage/vertex-ai-credentials.json \
           -f apps/authenticfarma/candidatos/dockerfile \
           -t $IMAGE_NAME:$VERSION_TAG \
           apps/authenticfarma/candidatos
+        
         docker push $IMAGE_NAME:$VERSION_TAG
         
         docker tag $IMAGE_NAME:$VERSION_TAG $IMAGE_NAME:latest

@@ -72,24 +72,28 @@ ENV VERTEX_AI_MODEL=$VERTEX_AI_MODEL
 ENV GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
 ENV VERTEX_AI_SERVICE_ACCOUNT=$VERTEX_AI_SERVICE_ACCOUNT
 
-# Copy Vertex AI credentials if provided during build
-COPY --chown=www:www vertex-ai-credentials.json* /var/www/storage/
-
-# Create directory for credentials if it doesn't exist
+# Create directory for credentials 
 RUN mkdir -p /var/www/storage/app/credentials && \
     chmod 755 /var/www/storage/app/credentials
 
-    # Agrega estas líneas para la optimización de producción
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
+# Create placeholder for Vertex AI credentials (will be replaced at runtime)
+RUN echo '{"type":"service_account","project_id":"authentic-prod-464216","private_key_id":"placeholder","client_email":"laravel-gemini-prod@authentic-prod-464216.iam.gserviceaccount.com"}' > /var/www/storage/vertex-ai-credentials.json && \
+    chmod 644 /var/www/storage/vertex-ai-credentials.json
 
-# El comando final para iniciar el servidor web
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Agrega estas líneas para la optimización de producción
+# Skip cache commands during build - they'll run at runtime
+RUN touch /var/www/.env.example
+# RUN php artisan config:cache
+# RUN php artisan route:cache  
+# RUN php artisan view:cache
 
+# Copy and setup entrypoint
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
 
-ENTRYPOINT ["bash", "/var/www/docker/run.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
 
 
