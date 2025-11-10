@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "google/cloud-ai-platform": "^1.44",
         "google/cloud-storage": "^1.48",
         "kitloong/laravel-migrations-generator": "^7.0",
         "laravel/framework": "^11.9",

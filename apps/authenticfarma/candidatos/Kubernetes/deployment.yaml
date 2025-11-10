@@ -146,6 +146,20 @@ spec:
               value: "null"
             - name: GOOGLE_CLOUD_KEY_FILE
               value: "keys/gcs-key.json"
+            # --- VERTEX AI / GEMINI CONFIG ---
+            - name: GEMINI_PROVIDER
+              value: "vertex"
+            - name: GEMINI_MODEL
+              value: "gemini-2.0-flash-lite"
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              valueFrom:
+                secretKeyRef:
+                  name: vertex-ai-secrets
+                  key: credentials-json
+            - name: GOOGLE_CLOUD_PROJECT
+              value: "authentic-prod-464216"
+            - name: GOOGLE_CLOUD_LOCATION
+              value: "us-central1"
             # --- PUSHER ---
             - name: PUSHER_APP_ID
               value: ""
