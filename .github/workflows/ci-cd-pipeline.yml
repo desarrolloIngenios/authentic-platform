@@ -16,8 +16,9 @@ permissions:
   checks: read
 
 env:
-  REGISTRY: gcr.io
+  REGISTRY: us-central1-docker.pkg.dev
   PROJECT_ID: authentic-prod-464216
+  REPO_NAME: authenticfarma-repo
 
 jobs:
   # 🧪 Tests y validaciones
@@ -137,24 +138,24 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker gcr.io
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
     - name: 🏗️ Build AuthenticFarma Backend (Candidatos)
       run: |
         IMAGE_TAG=dev-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/authenticfarma-backend
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/authentic-candidatos
         
         echo "Building AuthenticFarma Backend (Candidatos): $IMAGE_NAME:$IMAGE_TAG"
         
-        if [ -f "apps/authenticfarma/Dockerfile" ]; then
-          docker build -f apps/authenticfarma/Dockerfile -t $IMAGE_NAME:$IMAGE_TAG apps/authenticfarma
+        if [ -f "apps/authenticfarma/candidatos/dockerfile" ]; then
+          docker build -f apps/authenticfarma/candidatos/dockerfile -t $IMAGE_NAME:$IMAGE_TAG apps/authenticfarma/candidatos
           docker push $IMAGE_NAME:$IMAGE_TAG
           
           # También tag como 'dev-latest'
           docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:dev-latest
           docker push $IMAGE_NAME:dev-latest
           
-          echo "✅ Successfully built and pushed AuthenticFarma Backend"
+          echo "✅ Successfully built and pushed AuthenticFarma Candidatos"
         else
           echo "⚠️ Dockerfile not found, skipping build"
         fi
@@ -181,7 +182,7 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker gcr.io
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
     - name: 🏗️ Build YoSoy Backend
       run: |
@@ -216,7 +217,7 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker gcr.io
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
     - name: 🏗️ Build IsYours
       run: |
@@ -251,7 +252,7 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker gcr.io
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
     - name: 🏗️ Build Moodle
       run: |
@@ -438,12 +439,12 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker gcr.io
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
     - name: 🏗️ Build AuthenticFarma
       run: |
         VERSION_TAG=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
-        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/authenticfarma-candidatos
+        IMAGE_NAME=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/authentic-candidatos
         
         echo "Building PRODUCTION image: $IMAGE_NAME:$VERSION_TAG"
         
@@ -475,7 +476,7 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker gcr.io
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
     - name: 🏗️ Build YoSoy Backend
       run: |
@@ -512,7 +513,7 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker
-      run: gcloud auth configure-docker gcr.io
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
     - name: 🏗️ Build IsYours
       run: |
@@ -549,7 +550,7 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
     
     - name: 🐳 Configure Docker  
-      run: gcloud auth configure-docker gcr.io
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
     
     - name: 🏗️ Build Moodle
       run: |
