@@ -37,7 +37,7 @@ spec:
               memory: "200Mi"
               cpu: "150m"
         - name: authenticfarma-candidatos
-          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
           ports:
             - containerPort: 80
           resources:
