@@ -177,3 +177,11 @@ spec:
                 secretKeyRef:
                   name: laravel-secrets
                   key: GOOGLE_CLIENT_SECRET
+          volumeMounts:
+            - name: vertex-ai-credentials
+              mountPath: /var/www/storage/app/credentials
+              readOnly: true
+      volumes:
+        - name: vertex-ai-credentials
+          secret:
+            secretName: vertex-ai-secrets
