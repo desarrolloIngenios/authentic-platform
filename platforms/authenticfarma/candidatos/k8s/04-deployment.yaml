@@ -90,7 +90,7 @@ spec:
         - name: cloud-sql-proxy
           image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
           args:
-            - "--address=0.0.0.0"
+            - "--address=0.0.0.0" 
             - "--port=3306"
             - "authenticfarma-425820:us-central1:authentic"
           securityContext:
