@@ -13,3 +13,5 @@ commonLabels:
 images:
   - name: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos
     newTag: latest  # Usar imagen más reciente del CI/CD
+  - name: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy
+    newTag: latest  # Usar nuestra imagen de cloud-sql-proxy
