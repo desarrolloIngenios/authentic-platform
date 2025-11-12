@@ -185,3 +185,6 @@ spec:
         - name: vertex-ai-credentials
           secret:
             secretName: vertex-ai-secrets
+            items:
+              - key: credentials-json
+                path: vertex-ai-production.json
