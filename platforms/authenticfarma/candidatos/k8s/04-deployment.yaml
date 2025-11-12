@@ -88,13 +88,29 @@ spec:
             - name: SESSION_LIFETIME
               value: "120"
         - name: cloud-sql-proxy
-          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
           args:
             - "--structured-logs"
             - "--port=3306"
             - "authentic-prod-464216:us-central1:authentic-mysql"
+            - "--auto-iam-authn"
+            - "--health-check"
+            - "--http-address=0.0.0.0"
+            - "--http-port=8090"
+          ports:
+            - name: mysql
+              containerPort: 3306
+            - name: health
+              containerPort: 8090
           securityContext:
             runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
           resources:
             requests:
               cpu: "100m"
@@ -102,3 +118,19 @@ spec:
             limits:
               cpu: "200m"
               memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8090
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8090
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
