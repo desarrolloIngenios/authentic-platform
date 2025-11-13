@@ -20,7 +20,7 @@ variables:
   
   # GitOps Repository
   GITOPS_REPO: "https://github.com/desarrolloIngenios/authentic-platform.git"
-  GITOPS_PATH: "apps/authenticfarma/candidatos/Kubernetes"
+  GITOPS_PATH: "platforms/authenticfarma/candidatos/k8s"
 
 # ===============================================
 # STAGE 1: TESTING
@@ -139,10 +139,10 @@ update_k8s_manifests:
       # Checkout al branch correcto
       if [ "$CI_COMMIT_REF_NAME" = "main" ]; then
         git checkout main
-        TARGET_FILE="apps/authenticfarma/candidatos/Kubernetes/deployment.yaml"
+        TARGET_FILE="platforms/authenticfarma/candidatos/k8s/04-deployment.yaml"
       else
         git checkout dev
-        TARGET_FILE="apps/authenticfarma/candidatos/Kubernetes/deployment-updated.yaml"
+        TARGET_FILE="platforms/authenticfarma/candidatos/k8s/04-deployment.yaml"
       fi
       
       # Actualizar la imagen en el deployment

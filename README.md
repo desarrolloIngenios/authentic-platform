@@ -1,161 +1,248 @@
-# Authentic Platform Starter Pack
+# 🏗️ Authentic Platform - GitOps Multi-Cloud
 
-¡Perfecto! 🎯 Aquí tienes la **versión final del README.md lista para tu repositorio `authentic-platform`**, con los placeholders listos para reemplazar con tu proyecto real (`PROJECT_ID`, `REGION`, `GITHUB_REPO`, `DOMAIN`) y con todos los pasos para la implementación, CI/CD y portabilidad multi-nube.
+Plataforma centralizada GitOps para gestionar todas las aplicaciones de Authentic con ArgoCD y Kubernetes.
 
-```markdown
-# Authentic Platform - Implementación y CI/CD
+## 🏢 Plataformas y Aplicaciones
 
-Este repositorio contiene la **estructura base** para desplegar y gestionar todas las aplicaciones de Authentic:  
+### 1. **AuthenticFarma** 🏥
+Empleabilidad para el sector farmacéutico
+- **candidatos** - Sistema de gestión de RRHH y candidatos con IA
+- **empresas** - Portal para empresas farmacéuticas
+- **moodle-elearning** - Plataforma de e-learning especializada
 
-- **AuthenticFarma** (empleabilidad sector farmacéutico)  
-  - App Candidatos  
-  - App Empresas  
-  - Moodle (e-learning)  
-- **YoSoy** (empleabilidad mujeres migrantes)  
-- **IsYours** (empleabilidad mujeres migrantes en USA)  
-- **Agencia de agentes IA** (reclutamiento y selección automatizada)
+### 2. **YoSoy** 👤
+Empleabilidad para mujeres migrantes
+- **historia-clinica** - Sistema de historias clínicas médicas
+- **telemedicina** - Plataforma de consultas virtuales
 
-La plataforma está diseñada para ser **portátil multi-nube**, actualmente en **GCP**, pero preparada para migrar a **AWS** u otros proveedores.
+### 3. **IsYours** 🏠
+Empleabilidad para mujeres migrantes en USA
+- **inmobiliaria** - Plataforma inmobiliaria
 
----
+### 4. **AI Agents** 🤖
+Agencia de agentes de IA para reclutamiento automatizado
+- **orchestrator** - Coordinador de agentes
+- **worker** - Procesadores de tareas
 
-## 📁 Estructura del repositorio
+## 📁 Estructura del Repositorio
 
 ```
-
 authentic-platform/
-│
-├── apps/                        # Aplicaciones y microservicios
+├── platforms/                    # ✅ Configuraciones GitOps principales
 │   ├── authenticfarma/
-│   ├── yosoy/
-│   ├── isyours/
-│   ├── moodle-elearning/
+│   │   └── candidatos/
+│   │       └── k8s/             # Manifiestos Kubernetes
 │   └── agents/
-│
-├── infra/                       # Infraestructura como código
-│   ├── gcp/
-│   ├── aws/
-│   ├── common/
-│   └── k8s-manifests/
-│
-├── ci-cd/                       # Pipelines y templates CI/CD
-│   ├── gitlab-ci/
-│   ├── argo-apps/
-│   └── templates/
-│
-├── docs/                        # Documentación adicional
-│   ├── architecture/
-│   ├── api/
-│   └── developers/
-│
-├── scripts/                     # Scripts de build, deploy y migración
-└── README.md
-
-````
-
----
-
-## ⚙️ Requisitos previos
-
-- Cuenta en **GCP** (proyecto: `PROJECT_ID`)  
-- Clúster **GKE Autopilot**  
-- Base de datos **Cloud SQL MySQL**  
-- **GitHub** o **GitLab**  
-- **ArgoCD** instalado en el clúster  
-- **Terraform** 1.5+  
-- **kubectl**, **gcloud CLI**, **docker CLI**  
-- Service Account con permisos mínimos: Artifact Registry, GKE, Cloud SQL, Secret Manager  
-
-> Opcional: Para AWS, crear credenciales IAM con permisos equivalentes y preparar módulos Terraform de AWS.
-
----
-
-## 🚀 Paso a paso para la implementación
-
-### 1️⃣ Clonar el repositorio
-```bash
-git clone https://github.com/<GITHUB_REPO>/authentic-platform.git
-cd authentic-platform
-````
-
----
-
-### 2️⃣ Configurar infraestructura (Terraform)
-
-1. Ir a la carpeta del proveedor deseado:
-
-```bash
-cd infra/gcp
+├── infra/                        # Infraestructura como código
+│   ├── gcp/                     # Google Cloud Platform
+│   ├── aws/                     # Amazon Web Services
+│   └── k8s-manifests/           # Recursos base K8s
+├── ci-cd/                       # Pipelines CI/CD
+│   ├── argo-apps/               # Aplicaciones ArgoCD
+│   └── gitlab-ci/               # Templates GitLab CI
+├── docker/                      # Imágenes Docker personalizadas
+│   └── cloud-sql-proxy/         # Proxy para Cloud SQL
+└── scripts/                     # Scripts de automatización
 ```
 
-2. Inicializar Terraform:
+## 🚀 Tecnologías
 
+### **Orquestación**
+- **Kubernetes (GKE)** - Orquestación de contenedores
+- **ArgoCD** - GitOps y despliegue continuo
+- **Helm** - Gestión de paquetes Kubernetes
+
+### **Base de Datos**
+- **Cloud SQL (MySQL)** - Base de datos principal
+- **Redis** - Cache y sesiones
+
+### **Servicios Cloud (GCP)**
+- **Artifact Registry** - Registro de imágenes Docker
+- **Cloud Storage** - Almacenamiento de archivos
+- **Secret Manager** - Gestión segura de credenciales
+- **Cloud Load Balancing** - Balanceador de carga
+- **Cloud DNS** - Gestión de dominios
+
+### **IA y Machine Learning**
+- **Vertex AI** - Plataforma de IA de Google
+- **Gemini 1.5 Flash** - Modelo de IA generativa
+- **Google Cloud AI** - Servicios de IA
+
+## ⚙️ Configuración del Entorno
+
+### **Prerrequisitos**
 ```bash
-terraform init
+# Herramientas necesarias
+kubectl
+docker
+gcloud
+argocd
+helm
 ```
 
-3. Aplicar módulos para crear:
+## 🔄 GitOps con ArgoCD
 
-   * VPC y subredes
-   * Clúster GKE Autopilot
-   * Cloud SQL MySQL
-   * Artifact Registry
-   * Secret Manager
+### **Aplicaciones Configuradas**
+- **authenticfarma-candidatos** - `platforms/authenticfarma/candidatos/k8s/`
+- **yosoy-historia-clinica** - `platforms/yosoy/historia-clinica/k8s/`
+- **isyours** - `platforms/isyours/k8s/`
+
+### **Comandos ArgoCD**
+```bash
+# Ver estado de aplicaciones
+kubectl get applications -n argocd
+
+# Sincronizar aplicación
+kubectl patch application authenticfarma-candidatos -n argocd \
+  --type merge -p '{"operation":{"sync":{"revision":"HEAD"}}}'
+
+# Forzar refresh
+kubectl annotate application authenticfarma-candidatos -n argocd \
+  argocd.argoproj.io/refresh=hard --overwrite
+```
+
+## 🛠️ Desarrollo y Deployment
+
+### **Build de Imagen Docker**
+```bash
+# Ejemplo: Candidatos
+cd apps/authenticfarma/candidatos
+docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/authenticfarma-repo/authentic-candidatos:latest .
+docker push $REGION-docker.pkg.dev/$PROJECT_ID/authenticfarma-repo/authentic-candidatos:latest
+```
+
+### **Deployment Manual**
+```bash
+# Aplicar manifiestos
+kubectl apply -f platforms/authenticfarma/candidatos/k8s/
+
+# Verificar deployment
+kubectl get pods -n authenticfarma-candidatos
+kubectl logs -f deployment/authentic-candidatos -n authenticfarma-candidatos
+```
+
+### **CI/CD Pipeline**
+El pipeline automático se ejecuta en:
+1. **Build** - Construcción de imagen Docker
+2. **Test** - Validación de aplicación
+3. **Deploy** - Actualización de manifiestos GitOps
+4. **Sync** - ArgoCD aplica cambios automáticamente
+
+## 🔐 Gestión de Secretos
+
+### **Secret Manager (GCP)**
+```bash
+# Crear secreto
+gcloud secrets create laravel-app-key --data-file=key.txt
+
+# Sincronizar a Kubernetes
+kubectl create secret generic laravel-secrets \
+  --from-literal=APP_KEY="$(gcloud secrets versions access latest --secret=laravel-app-key)" \
+  --namespace=authenticfarma-candidatos
+```
+
+### **Secretos Principales**
+- `laravel-secrets` - Credenciales de aplicación
+- `vertex-ai-secrets` - Credenciales de IA
+- `mysql-credentials` - Acceso a base de datos
+
+## 🌐 Dominios y SSL
+
+### **Dominios Configurados**
+- `candidatos.authenticfarma.com`
+- `yosoy.historia-clinica.com`
+- `isyours.platform.com`
+
+### **Certificados SSL**
+Gestionados automáticamente con:
+- **Google Managed Certificates**
+- **Let's Encrypt** (fallback)
+
+## 📊 Monitoreo y Observabilidad
+
+### **Health Checks**
+```bash
+# Estado de aplicaciones
+kubectl get pods -A
+kubectl get applications -n argocd
+
+# Logs de aplicación
+kubectl logs -f deployment/authentic-candidatos -n authenticfarma-candidatos -c app
+```
+
+### **Métricas**
+- **HPA** - Auto-escalado horizontal
+- **Metrics Server** - Métricas de recursos
+- **Google Cloud Monitoring** - Observabilidad completa
+
+## 🔄 Portabilidad Multi-Cloud
+
+### **AWS Migration Ready**
+- Terraform modules en `infra/aws/`
+- Configuración de EKS
+- RDS para MySQL
+- ECR para imágenes
+
+### **Estructura Cloud-Agnostic**
+- Kubernetes estándar
+- Helm charts
+- GitOps patterns
+- Container registry abstraction
+
+## 🆘 Troubleshooting
+
+### **Problemas Comunes**
+
+**ArgoCD Degraded**
+```bash
+# Verificar HPA target
+kubectl describe hpa -n authenticfarma-candidatos
+
+# Corregir deployment name
+kubectl patch hpa authenticfarma-candidatos-hpa -n authenticfarma-candidatos \
+  -p '{"spec":{"scaleTargetRef":{"name":"authentic-candidatos"}}}'
+```
+
+**Base de Datos Connection**
+```bash
+# Verificar Cloud SQL Proxy
+kubectl logs deployment/authentic-candidatos -n authenticfarma-candidatos -c cloud-sql-proxy
+
+# Verificar credenciales
+kubectl get secret laravel-secrets -n authenticfarma-candidatos -o yaml
+```
+
+**Vertex AI Issues**
+```bash
+# Verificar credenciales montadas
+kubectl exec deployment/authentic-candidatos -n authenticfarma-candidatos -c app -- \
+  ls -la /var/www/storage/app/credentials/
+```
+
+## 📝 Backup y Recovery
+
+### **Configuración de Backup**
+Sistema completo de backup disponible en `backups/authenticfarma-candidatos-working-config/`
 
 ```bash
-terraform apply -var="project_id=PROJECT_ID" -var="region=REGION"
+# Restaurar configuración
+cd backups/authenticfarma-candidatos-working-config/
+./restore-config.sh
 ```
+
+## 📞 Soporte
+
+Para soporte técnico:
+- **Documentación**: `docs/`
+- **Arquitectura**: Este README
+- **Issues**: GitHub Issues
+- **CI/CD**: `ci-cd/docs/`
 
 ---
 
-### 3️⃣ Configurar CI/CD
-
-* **GitHub Actions** o **GitLab CI** construye y publica imágenes Docker de cada app.
-* Las imágenes se almacenan en **Artifact Registry (GCP)** o **ECR (AWS)**.
-* Los manifiestos de Kubernetes (`infra/k8s-manifests/<app>`) contienen placeholders `IMAGE_TAG` que se actualizan automáticamente con el SHA de cada build.
-
----
-
-### 4️⃣ Configurar ArgoCD (GitOps)
-
-1. Instalar ArgoCD en GKE:
-
-```bash
-kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-```
-
-2. Crear **App of Apps**:
-
-```bash
-kubectl apply -f ci-cd/argo-apps/app-of-apps.yaml -n argocd
-```
-
-3. Cada app se desplegará automáticamente al sincronizar.
-
----
-
-### 5️⃣ Despliegue de aplicaciones
-
-1. Construir y push de la imagen Docker:
-
-```bash
-docker build -t REGION-docker.pkg.dev/PROJECT_ID/REPO/APP:SHA apps/APP
-docker push REGION-docker.pkg.dev/PROJECT_ID/REPO/APP:SHA
-```
-
-2. Actualizar manifiesto `deployment.yaml` con el nuevo `IMAGE_TAG`
-3. Git commit + push → ArgoCD detecta cambios y despliega automáticamente
-
----
-
-### 6️⃣ Configuración de secretos
-
-* Almacenar credenciales sensibles en **Secret Manager**
-* Sincronizar con Kubernetes usando **External Secrets Operator**:
-
-```yaml
-apiVersion: external-secrets.io/v1beta1
+**Última actualización**: Noviembre 2025  
+**Versión**: 2.0 - GitOps + Multi-Cloud  
+**Estado**: ✅ Producción - Todas las aplicaciones funcionando
 kind: ExternalSecret
 metadata:
   name: db-credentials

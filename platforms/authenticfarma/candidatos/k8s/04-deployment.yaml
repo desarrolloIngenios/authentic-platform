@@ -116,7 +116,7 @@ spec:
                   key: MAIL_PASSWORD
             # --- GOOGLE CLOUD STORAGE ---
             - name: GOOGLE_CLOUD_PROJECT_ID
-              value: "authenticfarma-QA"
+              value: "authentic-prod-464216"
             - name: GOOGLE_CLOUD_STORAGE_BUCKET
               value: "backups-qa"
             - name: GOOGLE_CLOUD_STORAGE_PATH_PREFIX
@@ -129,12 +129,9 @@ spec:
             - name: GEMINI_PROVIDER
               value: "vertex"
             - name: GEMINI_MODEL
-              value: "gemini-2.0-flash-lite"
+              value: "gemini-1.5-flash"
             - name: GOOGLE_APPLICATION_CREDENTIALS
-              valueFrom:
-                secretKeyRef:
-                  name: vertex-ai-secrets
-                  key: credentials-json
+              value: "/var/www/storage/app/credentials/vertex-ai-production.json"
             - name: GOOGLE_CLOUD_PROJECT
               value: "authentic-prod-464216"
             - name: GOOGLE_CLOUD_LOCATION
@@ -164,6 +161,10 @@ spec:
                 secretKeyRef:
                   name: laravel-secrets
                   key: APP_KEY
+          volumeMounts:
+            - mountPath: /var/www/storage/app/credentials
+              name: vertex-ai-credentials
+              readOnly: true
         - name: cloud-sql-proxy
           image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
           args:
@@ -179,3 +180,10 @@ spec:
             limits:
               cpu: "200m"
               memory: "256Mi"
+      volumes:
+        - name: vertex-ai-credentials
+          secret:
+            secretName: vertex-ai-secrets
+            items:
+              - key: credentials-json
+                path: vertex-ai-production.json
