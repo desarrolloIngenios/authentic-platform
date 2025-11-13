@@ -10,7 +10,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: authenticfarma-candidatos
+    name: authentic-candidatos
   minReplicas: 2
   maxReplicas: 10
   metrics:
