@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/desarrolloIngenios/authentic-platform.git
     targetRevision: dev
-    path: infra/k8s-manifests/apps/yosoy-historia-clinica
+    path: platforms/yosoy/historia-clinica/k8scandidatos/k8s
   destination:
     server: https://kubernetes.default.svc
     namespace: yosoy-historia-clinica
