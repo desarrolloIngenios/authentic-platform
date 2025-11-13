@@ -129,9 +129,12 @@ spec:
             - name: GEMINI_PROVIDER
               value: "vertex"
             - name: GEMINI_MODEL
-              value: "gemini-1.5-flash"
+              value: "gemini-2.0-flash-lite"
             - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: "/var/www/storage/app/credentials/vertex-ai-production.json"
+              valueFrom:
+                secretKeyRef:
+                  name: vertex-ai-secrets
+                  key: credentials-json
             - name: GOOGLE_CLOUD_PROJECT
               value: "authentic-prod-464216"
             - name: GOOGLE_CLOUD_LOCATION
