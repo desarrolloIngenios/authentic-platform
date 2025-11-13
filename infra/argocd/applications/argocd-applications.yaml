@@ -34,7 +34,7 @@ spec:
   source:
     repoURL: https://github.com/gcp-projects-deployment/authentic-farma-deployment.git
     targetRevision: HEAD
-    path: platforms/authenticfarma/candidatos
+  path: platforms/authenticfarma/candidatos/k8s
   destination:
     server: https://kubernetes.default.svc
     namespace: authenticfarma-candidatos
