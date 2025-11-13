@@ -20,7 +20,7 @@ spec:
       serviceAccountName: authenticfarma-candidatos-sa
       containers:
         - name: app
-          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v2025.11.13-ac2087e
           ports:
             - containerPort: 80
               name: http
