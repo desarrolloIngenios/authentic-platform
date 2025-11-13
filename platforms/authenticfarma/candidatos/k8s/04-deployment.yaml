@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: authenticfarma-candidatos
+  name: authentic-candidatos
   namespace: authenticfarma-candidatos
   labels:
     app: authenticfarma-candidatos
@@ -32,17 +32,21 @@ spec:
               cpu: "500m"
               memory: "512Mi"
           readinessProbe:
-            tcpSocket:
-              port: 80
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-          livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /login
               port: 80
             initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /login
+              port: 80
+            initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 5
+            failureThreshold: 3
           env:
             - name: APP_NAME
               value: "AuthenticFarma Candidatos"
