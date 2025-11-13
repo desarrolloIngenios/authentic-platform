@@ -4,7 +4,7 @@ metadata:
   name: yosoy-historia-clinica-frontend
   namespace: yosoy-historia-clinica
 spec:
-  replicas: 2
+  replicas: 1  # Usando imagen principal de yosoy-historia-clinica
   selector:
     matchLabels:
       app: yosoy-historia-clinica-frontend
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: gcr.io/authentic-prod-464216/yosoy-hc-frontend:latest
+        image: us-central1-docker.pkg.dev/authentic-prod-464216/yosoy-repo/yosoy-historia-clinica:v3
         ports:
         - containerPort: 80
         resources:
@@ -32,7 +32,7 @@ metadata:
   name: yosoy-historia-clinica-frontend-simple
   namespace: yosoy-historia-clinica
 spec:
-  replicas: 2
+  replicas: 1  # Usando imagen principal de yosoy-historia-clinica  
   selector:
     matchLabels:
       app: yosoy-historia-clinica-frontend-simple
@@ -43,7 +43,7 @@ spec:
     spec:
       containers:
       - name: frontend-simple
-        image: gcr.io/authentic-prod-464216/yosoy-hc-frontend-simple:latest
+        image: us-central1-docker.pkg.dev/authentic-prod-464216/yosoy-repo/yosoy-historia-clinica:v3
         ports:
         - containerPort: 80
         resources:
