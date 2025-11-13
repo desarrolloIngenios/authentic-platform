@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/desarrolloIngenios/authentic-platform.git
     targetRevision: dev  # Usar branch dev para desarrollo
-    path: apps/authenticfarma/candidatos/Kubernetes
+    path: platforms/authenticfarma/candidatos/k8s
   destination:
     server: https://kubernetes.default.svc
     namespace: authenticfarma-candidatos
