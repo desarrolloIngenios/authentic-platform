@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yosoy-historia-clinica-backend
+  namespace: yosoy-historia-clinica
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: yosoy-historia-clinica-backend
+  template:
+    metadata:
+      labels:
+        app: yosoy-historia-clinica-backend
+    spec:
+      containers:
+      - name: backend
+        image: gcr.io/authentic-prod-464216/yosoy-hc-backend:v3
+        ports:
+        - containerPort: 3001
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3001"
+        - name: JWT_SECRET
+          value: "yosoy-historia-clinica-jwt-secret-prod-2024"
+        - name: DB_TYPE
+          value: "sqlite"
+        - name: DB_PATH
+          value: "/app/data/yosoy_historia_clinica.db"
+        - name: CORS_ORIGIN
+          value: "https://hc.yo-soy.co"
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        volumeMounts:
+        - name: data-volume
+          mountPath: /app/data
+        - name: backend-config
+          mountPath: /app/server.js
+          subPath: server.js
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: yosoy-hc-backend-pvc
+      - name: backend-config
+        configMap:
+          name: yosoy-backend-real-schema

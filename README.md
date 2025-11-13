@@ -29,20 +29,40 @@ Agencia de agentes de IA para reclutamiento automatizado
 ```
 authentic-platform/
 ├── platforms/                    # ✅ Configuraciones GitOps principales
-│   ├── authenticfarma/
-│   │   └── candidatos/
-│   │       └── k8s/             # Manifiestos Kubernetes
-│   └── agents/
-├── infra/                        # Infraestructura como código
+│   ├── authenticfarma/candidatos/ # Sistema de candidatos
+│   ├── isyours/                 # Plataforma inmobiliaria
+│   └── yosoy/historia-clinica/  # Historias clínicas
+├── apps/                        # 📱 Código fuente aplicaciones
+│   ├── authenticfarma/candidatos/
+│   ├── isyours/
+│   ├── yosoy/historia-clinica/
+│   ├── moodle-elearning/
+│   └── agents/                  # Agentes IA
+├── infra/                       # 🏗️ Infraestructura como código  
 │   ├── gcp/                     # Google Cloud Platform
-│   ├── aws/                     # Amazon Web Services
-│   └── k8s-manifests/           # Recursos base K8s
-├── ci-cd/                       # Pipelines CI/CD
+│   ├── aws/                     # Amazon Web Services (portabilidad)
+│   ├── argocd/                  # Configuración ArgoCD
+│   └── cert-manager/            # Gestión SSL
+├── ci-cd/                       # 🔄 Pipelines CI/CD
 │   ├── argo-apps/               # Aplicaciones ArgoCD
+│   ├── environments/            # Configuraciones por entorno
 │   └── gitlab-ci/               # Templates GitLab CI
-├── docker/                      # Imágenes Docker personalizadas
-│   └── cloud-sql-proxy/         # Proxy para Cloud SQL
-└── scripts/                     # Scripts de automatización
+├── docker/                      # 🐳 Imágenes Docker personalizadas
+│   └── cloud-sql-proxy/         # Proxy optimizado para Cloud SQL
+├── scripts/                     # 🔧 Scripts organizados
+│   ├── secrets/                 # Gestión de secretos
+│   ├── validation/              # Validación y verificación
+│   ├── monitoring/              # Monitoreo
+│   └── legacy/                  # Scripts archivados
+├── templates/                   # 📋 Plantillas reutilizables
+│   ├── docker/                  # Templates Docker
+│   └── kubernetes/              # Templates K8s
+├── docs/                        # 📚 Documentación
+│   ├── api/                     # Documentación APIs
+│   ├── architecture/            # Arquitectura del sistema
+│   └── developers/              # Guías para desarrolladores
+└── backups/                     # 💾 Backups de configuración
+    └── authenticfarma-candidatos-working-config/
 ```
 
 ## 🚀 Tecnologías
