@@ -1,0 +1,2867 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2025-11-13T10:56:35Z"
+    generateName: authentic-candidatos-5cd496bd5c-
+    generation: 1
+    labels:
+      app: authenticfarma-candidatos
+      platform: authenticfarma
+      pod-template-hash: 5cd496bd5c
+    name: authentic-candidatos-5cd496bd5c-sxhgh
+    namespace: authenticfarma-candidatos
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: authentic-candidatos-5cd496bd5c
+      uid: ee3d3ff7-b70e-45ea-b105-40d772c044c7
+    resourceVersion: "1763031431677103006"
+    uid: 3a448b78-8ba4-4476-84da-e474f56cca1f
+  spec:
+    containers:
+    - args:
+      - --address=0.0.0.0
+      - --port=3306
+      - authenticfarma-425820:us-central1:authentic
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
+      imagePullPolicy: IfNotPresent
+      name: cloud-sql-proxy
+      resources:
+        limits:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 128Mi
+      securityContext:
+        capabilities:
+          drop:
+          - NET_RAW
+        runAsNonRoot: true
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-z8ppc
+        readOnly: true
+    - env:
+      - name: APP_NAME
+        value: AuthenticFarma Candidatos
+      - name: APP_ENV
+        value: production
+      - name: APP_DEBUG
+        value: "false"
+      - name: APP_URL
+        value: https://candidatos.authenticfarma.com
+      - name: LOG_CHANNEL
+        value: stack
+      - name: DB_CONNECTION
+        value: mysql
+      - name: DB_HOST
+        value: 127.0.0.1
+      - name: DB_PORT
+        value: "3306"
+      - name: DB_DATABASE
+        value: authentic
+      - name: DB_USERNAME
+        valueFrom:
+          secretKeyRef:
+            key: DB_USERNAME
+            name: laravel-secrets
+      - name: DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: DB_PASSWORD
+            name: laravel-secrets
+      - name: BROADCAST_DRIVER
+        value: log
+      - name: CACHE_DRIVER
+        value: database
+      - name: QUEUE_CONNECTION
+        value: sync
+      - name: SESSION_DRIVER
+        value: database
+      - name: SESSION_LIFETIME
+        value: "120"
+      - name: SESSION_COOKIE
+        value: authentic_session
+      - name: SESSION_SECURE_COOKIE
+        value: "true"
+      - name: SESSION_SAME_SITE
+        value: lax
+      - name: MAIL_MAILER
+        value: smtp
+      - name: MAIL_HOST
+        value: smtp.gmail.com
+      - name: MAIL_PORT
+        value: "587"
+      - name: MAIL_USERNAME
+        valueFrom:
+          secretKeyRef:
+            key: MAIL_USERNAME
+            name: laravel-secrets
+      - name: MAIL_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: MAIL_PASSWORD
+            name: laravel-secrets
+      - name: MAIL_ENCRYPTION
+        value: tls
+      - name: MAIL_FROM_ADDRESS
+        value: activacion@authenticfarma.com
+      - name: MAIL_FROM_NAME
+        value: Authentic Farma
+      - name: GOOGLE_CLOUD_PROJECT_ID
+        value: authenticfarma-QA
+      - name: GOOGLE_CLOUD_STORAGE_BUCKET
+        value: backups-qa
+      - name: GOOGLE_CLOUD_STORAGE_PATH_PREFIX
+        value: "null"
+      - name: GOOGLE_CLOUD_STORAGE_API_URI
+        value: "null"
+      - name: GOOGLE_CLOUD_KEY_FILE
+        value: keys/gcs-key.json
+      - name: GEMINI_PROVIDER
+        value: vertex
+      - name: GEMINI_MODEL
+        value: gemini-2.0-flash-lite
+      - name: GOOGLE_APPLICATION_CREDENTIALS
+        valueFrom:
+          secretKeyRef:
+            key: credentials-json
+            name: vertex-ai-secrets
+      - name: GOOGLE_CLOUD_PROJECT
+        value: authentic-prod-464216
+      - name: GOOGLE_CLOUD_LOCATION
+        value: us-central1
+      - name: PUSHER_APP_ID
+      - name: PUSHER_APP_KEY
+      - name: PUSHER_APP_SECRET
+      - name: PUSHER_APP_CLUSTER
+        value: mt1
+      - name: GOOGLE_CLIENT_ID
+        value: 1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com
+      - name: GOOGLE_CLIENT_SECRET
+        valueFrom:
+          secretKeyRef:
+            key: GOOGLE_CLIENT_SECRET
+            name: laravel-secrets
+      - name: GOOGLE_REDIRECT
+        value: https://candidatos.authenticfarma.com/google-auth/callback
+      - name: APP_KEY
+        valueFrom:
+          secretKeyRef:
+            key: APP_KEY
+            name: laravel-secrets
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /login
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 60
+        periodSeconds: 30
+        successThreshold: 1
+        timeoutSeconds: 5
+      name: app
+      ports:
+      - containerPort: 80
+        name: http
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 6
+        httpGet:
+          path: /login
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      resources:
+        limits:
+          cpu: 500m
+          ephemeral-storage: 1Gi
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - NET_RAW
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-z8ppc
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: gk3-multi-platform-clust-nap-lgux20la-6e25dbe8-6fkr
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: gke.io/optimize-utilization-scheduler
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+    serviceAccount: authenticfarma-candidatos-sa
+    serviceAccountName: authenticfarma-candidatos-sa
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoSchedule
+      key: kubernetes.io/arch
+      operator: Equal
+      value: amd64
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: kube-api-access-z8ppc
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:56:40Z"
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:56:35Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:57:11Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:57:11Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:56:35Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - allocatedResources:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 256Mi
+      containerID: containerd://6b32eacd959106ab61d2336dfd14bf4f7ec5a09cc1e9df7322838fa1d5c09587
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
+      imageID: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos@sha256:fd1753ad407ece6ffd8056c7a53c83dd028f14db4fcc6eae28848eb4606b5df2
+      lastState: {}
+      name: app
+      ready: true
+      resources:
+        limits:
+          cpu: 500m
+          ephemeral-storage: 1Gi
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2025-11-13T10:56:39Z"
+      user:
+        linux:
+          gid: 0
+          supplementalGroups:
+          - 0
+          uid: 0
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-z8ppc
+        readOnly: true
+        recursiveReadOnly: Disabled
+    - allocatedResources:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 128Mi
+      containerID: containerd://e00d4dda3646681d8b9d1378f487e709706db20ba3a7c742371e264c7ae2933a
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
+      imageID: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy@sha256:4c4277e6b19fb4e835f398228747788f36d849301e13600acd33efd4e0ce74cf
+      lastState: {}
+      name: cloud-sql-proxy
+      ready: true
+      resources:
+        limits:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 128Mi
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2025-11-13T10:56:38Z"
+      user:
+        linux:
+          gid: 65532
+          supplementalGroups:
+          - 65532
+          uid: 65532
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-z8ppc
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 10.0.0.237
+    hostIPs:
+    - ip: 10.0.0.237
+    phase: Running
+    podIP: 10.1.0.228
+    podIPs:
+    - ip: 10.1.0.228
+    qosClass: Burstable
+    startTime: "2025-11-13T10:56:35Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2025-11-13T10:56:34Z"
+    generateName: authentic-candidatos-5cd496bd5c-
+    generation: 1
+    labels:
+      app: authenticfarma-candidatos
+      platform: authenticfarma
+      pod-template-hash: 5cd496bd5c
+    name: authentic-candidatos-5cd496bd5c-tc45r
+    namespace: authenticfarma-candidatos
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: authentic-candidatos-5cd496bd5c
+      uid: ee3d3ff7-b70e-45ea-b105-40d772c044c7
+    resourceVersion: "1763031429690431023"
+    uid: edf74f0b-305e-45a5-9add-3a0ef504d4f0
+  spec:
+    containers:
+    - args:
+      - --address=0.0.0.0
+      - --port=3306
+      - authenticfarma-425820:us-central1:authentic
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
+      imagePullPolicy: IfNotPresent
+      name: cloud-sql-proxy
+      resources:
+        limits:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 128Mi
+      securityContext:
+        capabilities:
+          drop:
+          - NET_RAW
+        runAsNonRoot: true
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-7cjrf
+        readOnly: true
+    - env:
+      - name: APP_NAME
+        value: AuthenticFarma Candidatos
+      - name: APP_ENV
+        value: production
+      - name: APP_DEBUG
+        value: "false"
+      - name: APP_URL
+        value: https://candidatos.authenticfarma.com
+      - name: LOG_CHANNEL
+        value: stack
+      - name: DB_CONNECTION
+        value: mysql
+      - name: DB_HOST
+        value: 127.0.0.1
+      - name: DB_PORT
+        value: "3306"
+      - name: DB_DATABASE
+        value: authentic
+      - name: DB_USERNAME
+        valueFrom:
+          secretKeyRef:
+            key: DB_USERNAME
+            name: laravel-secrets
+      - name: DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: DB_PASSWORD
+            name: laravel-secrets
+      - name: BROADCAST_DRIVER
+        value: log
+      - name: CACHE_DRIVER
+        value: database
+      - name: QUEUE_CONNECTION
+        value: sync
+      - name: SESSION_DRIVER
+        value: database
+      - name: SESSION_LIFETIME
+        value: "120"
+      - name: SESSION_COOKIE
+        value: authentic_session
+      - name: SESSION_SECURE_COOKIE
+        value: "true"
+      - name: SESSION_SAME_SITE
+        value: lax
+      - name: MAIL_MAILER
+        value: smtp
+      - name: MAIL_HOST
+        value: smtp.gmail.com
+      - name: MAIL_PORT
+        value: "587"
+      - name: MAIL_USERNAME
+        valueFrom:
+          secretKeyRef:
+            key: MAIL_USERNAME
+            name: laravel-secrets
+      - name: MAIL_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: MAIL_PASSWORD
+            name: laravel-secrets
+      - name: MAIL_ENCRYPTION
+        value: tls
+      - name: MAIL_FROM_ADDRESS
+        value: activacion@authenticfarma.com
+      - name: MAIL_FROM_NAME
+        value: Authentic Farma
+      - name: GOOGLE_CLOUD_PROJECT_ID
+        value: authenticfarma-QA
+      - name: GOOGLE_CLOUD_STORAGE_BUCKET
+        value: backups-qa
+      - name: GOOGLE_CLOUD_STORAGE_PATH_PREFIX
+        value: "null"
+      - name: GOOGLE_CLOUD_STORAGE_API_URI
+        value: "null"
+      - name: GOOGLE_CLOUD_KEY_FILE
+        value: keys/gcs-key.json
+      - name: GEMINI_PROVIDER
+        value: vertex
+      - name: GEMINI_MODEL
+        value: gemini-2.0-flash-lite
+      - name: GOOGLE_APPLICATION_CREDENTIALS
+        valueFrom:
+          secretKeyRef:
+            key: credentials-json
+            name: vertex-ai-secrets
+      - name: GOOGLE_CLOUD_PROJECT
+        value: authentic-prod-464216
+      - name: GOOGLE_CLOUD_LOCATION
+        value: us-central1
+      - name: PUSHER_APP_ID
+      - name: PUSHER_APP_KEY
+      - name: PUSHER_APP_SECRET
+      - name: PUSHER_APP_CLUSTER
+        value: mt1
+      - name: GOOGLE_CLIENT_ID
+        value: 1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com
+      - name: GOOGLE_CLIENT_SECRET
+        valueFrom:
+          secretKeyRef:
+            key: GOOGLE_CLIENT_SECRET
+            name: laravel-secrets
+      - name: GOOGLE_REDIRECT
+        value: https://candidatos.authenticfarma.com/google-auth/callback
+      - name: APP_KEY
+        valueFrom:
+          secretKeyRef:
+            key: APP_KEY
+            name: laravel-secrets
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /login
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 60
+        periodSeconds: 30
+        successThreshold: 1
+        timeoutSeconds: 5
+      name: app
+      ports:
+      - containerPort: 80
+        name: http
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 6
+        httpGet:
+          path: /login
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      resources:
+        limits:
+          cpu: 500m
+          ephemeral-storage: 1Gi
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - NET_RAW
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-7cjrf
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: gk3-multi-platform-clust-nap-lgux20la-6e25dbe8-6fkr
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: gke.io/optimize-utilization-scheduler
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+    serviceAccount: authenticfarma-candidatos-sa
+    serviceAccountName: authenticfarma-candidatos-sa
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoSchedule
+      key: kubernetes.io/arch
+      operator: Equal
+      value: amd64
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: kube-api-access-7cjrf
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:56:37Z"
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:56:35Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:57:09Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:57:09Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:56:35Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - allocatedResources:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 256Mi
+      containerID: containerd://78cc9824dd442f1f3e1465ca60ca5ecc8692afc03e9547aeff12d56d2cd01458
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
+      imageID: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos@sha256:fd1753ad407ece6ffd8056c7a53c83dd028f14db4fcc6eae28848eb4606b5df2
+      lastState: {}
+      name: app
+      ready: true
+      resources:
+        limits:
+          cpu: 500m
+          ephemeral-storage: 1Gi
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2025-11-13T10:56:37Z"
+      user:
+        linux:
+          gid: 0
+          supplementalGroups:
+          - 0
+          uid: 0
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-7cjrf
+        readOnly: true
+        recursiveReadOnly: Disabled
+    - allocatedResources:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 128Mi
+      containerID: containerd://22603be453038b146d993e12f893d276aab0b5a2824418df67c6aba5e1b1b25a
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
+      imageID: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy@sha256:4c4277e6b19fb4e835f398228747788f36d849301e13600acd33efd4e0ce74cf
+      lastState: {}
+      name: cloud-sql-proxy
+      ready: true
+      resources:
+        limits:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 128Mi
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2025-11-13T10:56:36Z"
+      user:
+        linux:
+          gid: 65532
+          supplementalGroups:
+          - 65532
+          uid: 65532
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-7cjrf
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 10.0.0.237
+    hostIPs:
+    - ip: 10.0.0.237
+    phase: Running
+    podIP: 10.1.0.227
+    podIPs:
+    - ip: 10.1.0.227
+    qosClass: Burstable
+    startTime: "2025-11-13T10:56:35Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      iam.gke.io/gcp-service-account: authentic-candidatos-gsa@authentic-prod-464216.iam.gserviceaccount.com
+    creationTimestamp: "2025-11-13T10:59:14Z"
+    generateName: authenticfarma-candidatos-78cfc66c68-
+    generation: 1
+    labels:
+      app: authenticfarma-candidatos
+      managed-by: argocd
+      platform: authenticfarma
+      pod-template-hash: 78cfc66c68
+    name: authenticfarma-candidatos-78cfc66c68-h5tpz
+    namespace: authenticfarma-candidatos
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: authenticfarma-candidatos-78cfc66c68
+      uid: c1369d5f-6130-4a48-82f1-3d637984d66a
+    resourceVersion: "1763031570004111002"
+    uid: 3e025f00-4b42-4d9c-b295-754267135684
+  spec:
+    containers:
+    - args:
+      - --address=0.0.0.0
+      - --port=3306
+      - --auto-iam-authn
+      - --structured-logs
+      - --health-check
+      - --http-address=0.0.0.0
+      - --http-port=8090
+      - authenticfarma-425820:us-central1:authentic
+      command:
+      - /cloud-sql-proxy
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:latest
+      imagePullPolicy: Always
+      livenessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /liveness
+          port: 8090
+          scheme: HTTP
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 3
+      name: cloud-sql-proxy
+      ports:
+      - containerPort: 3306
+        name: mysql
+        protocol: TCP
+      - containerPort: 8090
+        name: health
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /readiness
+          port: 8090
+          scheme: HTTP
+        initialDelaySeconds: 10
+        periodSeconds: 5
+        successThreshold: 1
+        timeoutSeconds: 3
+      resources:
+        limits:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 128Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
+        runAsGroup: 65532
+        runAsNonRoot: true
+        runAsUser: 65532
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-wlhtb
+        readOnly: true
+    - env:
+      - name: APP_NAME
+        value: Authentic-candidatos
+      - name: APP_ENV
+        value: production
+      - name: APP_DEBUG
+        value: "false"
+      - name: APP_URL
+        value: https://candidatos.authenticfarma.com
+      - name: LOG_CHANNEL
+        value: stack
+      - name: DB_CONNECTION
+        value: mysql
+      - name: DB_HOST
+        value: 127.0.0.1
+      - name: DB_PORT
+        value: "3306"
+      - name: DB_DATABASE
+        value: authentic
+      - name: DB_USERNAME
+        value: candidatosuser
+      - name: BROADCAST_DRIVER
+        value: log
+      - name: CACHE_DRIVER
+        value: database
+      - name: QUEUE_CONNECTION
+        value: database
+      - name: SESSION_DRIVER
+        value: database
+      - name: SESSION_LIFETIME
+        value: "120"
+      - name: SESSION_DOMAIN
+        value: .authenticfarma.com
+      - name: SESSION_COOKIE
+        value: authentic_session
+      - name: SESSION_SECURE_COOKIE
+        value: "true"
+      - name: SESSION_SAME_SITE
+        value: none
+      - name: MAIL_MAILER
+        value: smtp
+      - name: MAIL_HOST
+        value: smtp.gmail.com
+      - name: MAIL_PORT
+        value: "587"
+      - name: MAIL_ENCRYPTION
+        value: tls
+      - name: MAIL_FROM_ADDRESS
+        value: activacion@authenticfarma.com
+      - name: MAIL_FROM_NAME
+        value: Authentic Farma
+      - name: GOOGLE_CLOUD_PROJECT_ID
+        value: authenticfarma-QA
+      - name: GOOGLE_CLOUD_STORAGE_BUCKET
+        value: backups-qa
+      - name: GOOGLE_CLOUD_STORAGE_PATH_PREFIX
+        value: "null"
+      - name: GOOGLE_CLOUD_STORAGE_API_URI
+        value: "null"
+      - name: GOOGLE_CLOUD_KEY_FILE
+        value: keys/gcs-key.json
+      - name: PUSHER_APP_ID
+      - name: PUSHER_APP_KEY
+      - name: PUSHER_APP_SECRET
+      - name: PUSHER_APP_CLUSTER
+        value: mt1
+      - name: GOOGLE_CLIENT_ID
+        value: 1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com
+      - name: GOOGLE_REDIRECT
+        value: https://candidatos.authenticfarma.com/google-auth/callback
+      - name: APP_KEY
+        valueFrom:
+          secretKeyRef:
+            key: APP_KEY
+            name: laravel-secrets
+      - name: DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: DB_PASSWORD
+            name: laravel-secrets
+      - name: MAIL_USERNAME
+        valueFrom:
+          secretKeyRef:
+            key: MAIL_USERNAME
+            name: laravel-secrets
+      - name: MAIL_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: MAIL_PASSWORD
+            name: laravel-secrets
+      - name: GOOGLE_CLIENT_SECRET
+        valueFrom:
+          secretKeyRef:
+            key: GOOGLE_CLIENT_SECRET
+            name: laravel-secrets
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+      imagePullPolicy: Always
+      livenessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /healthz
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 120
+        periodSeconds: 20
+        successThreshold: 1
+        timeoutSeconds: 5
+      name: authenticfarma-candidatos
+      ports:
+      - containerPort: 80
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /healthz
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 90
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      resources:
+        limits:
+          cpu: 800m
+          ephemeral-storage: 1Gi
+          memory: 1Gi
+        requests:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 400Mi
+      securityContext:
+        capabilities:
+          drop:
+          - NET_RAW
+      startupProbe:
+        failureThreshold: 36
+        httpGet:
+          path: /healthz
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 60
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/www/storage/app/credentials
+        name: vertex-ai-credentials
+        readOnly: true
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-wlhtb
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: gk3-multi-platform-clust-nap-lgux20la-2a281056-bbrt
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: gke.io/optimize-utilization-scheduler
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+    serviceAccount: authenticfarma-candidatos-sa
+    serviceAccountName: authenticfarma-candidatos-sa
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoSchedule
+      key: kubernetes.io/arch
+      operator: Equal
+      value: amd64
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: vertex-ai-credentials
+      secret:
+        defaultMode: 420
+        items:
+        - key: credentials-json
+          path: vertex-ai-production.json
+        secretName: vertex-ai-secrets
+    - name: kube-api-access-wlhtb
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:59:17Z"
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:59:14Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:59:14Z"
+      message: 'containers with unready status: [authenticfarma-candidatos]'
+      reason: ContainersNotReady
+      status: "False"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:59:14Z"
+      message: 'containers with unready status: [authenticfarma-candidatos]'
+      reason: ContainersNotReady
+      status: "False"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:59:14Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - allocatedResources:
+        cpu: 200m
+        ephemeral-storage: 1Gi
+        memory: 400Mi
+      containerID: containerd://54a32e82b45d6f3976361d3e4250591090e2dc6a02abbb516226217ad580e24f
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+      imageID: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos@sha256:7b83841a4c8de050ce02c05642941c4f031ffa45146440d7e7ecaf85ae0028cb
+      lastState: {}
+      name: authenticfarma-candidatos
+      ready: false
+      resources:
+        limits:
+          cpu: 800m
+          ephemeral-storage: 1Gi
+          memory: 1Gi
+        requests:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 400Mi
+      restartCount: 0
+      started: false
+      state:
+        running:
+          startedAt: "2025-11-13T10:59:16Z"
+      user:
+        linux:
+          gid: 0
+          supplementalGroups:
+          - 0
+          uid: 0
+      volumeMounts:
+      - mountPath: /var/www/storage/app/credentials
+        name: vertex-ai-credentials
+        readOnly: true
+        recursiveReadOnly: Disabled
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-wlhtb
+        readOnly: true
+        recursiveReadOnly: Disabled
+    - allocatedResources:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 128Mi
+      containerID: containerd://a333fd68540f3c7f8e58d4b63f7ff4e72853e44367600d27addee1fecc070064
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:latest
+      imageID: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy@sha256:3cf4b5a1a595eedbc71592b02131e259d946e56a8d1301daae5d9117c7309d36
+      lastState: {}
+      name: cloud-sql-proxy
+      ready: true
+      resources:
+        limits:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 128Mi
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2025-11-13T10:59:15Z"
+      user:
+        linux:
+          gid: 65532
+          supplementalGroups:
+          - 65532
+          uid: 65532
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-wlhtb
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 10.0.0.229
+    hostIPs:
+    - ip: 10.0.0.229
+    phase: Running
+    podIP: 10.1.1.140
+    podIPs:
+    - ip: 10.1.1.140
+    qosClass: Burstable
+    startTime: "2025-11-13T10:59:14Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      iam.gke.io/gcp-service-account: authentic-candidatos-gsa@authentic-prod-464216.iam.gserviceaccount.com
+    creationTimestamp: "2025-11-13T10:59:14Z"
+    generateName: authenticfarma-candidatos-78cfc66c68-
+    generation: 1
+    labels:
+      app: authenticfarma-candidatos
+      managed-by: argocd
+      platform: authenticfarma
+      pod-template-hash: 78cfc66c68
+    name: authenticfarma-candidatos-78cfc66c68-xlmfp
+    namespace: authenticfarma-candidatos
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: authenticfarma-candidatos-78cfc66c68
+      uid: c1369d5f-6130-4a48-82f1-3d637984d66a
+    resourceVersion: "1763031569873503020"
+    uid: 09a2b6fa-8a4e-41ce-8333-ce3dc25bbac6
+  spec:
+    containers:
+    - args:
+      - --address=0.0.0.0
+      - --port=3306
+      - --auto-iam-authn
+      - --structured-logs
+      - --health-check
+      - --http-address=0.0.0.0
+      - --http-port=8090
+      - authenticfarma-425820:us-central1:authentic
+      command:
+      - /cloud-sql-proxy
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:latest
+      imagePullPolicy: Always
+      livenessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /liveness
+          port: 8090
+          scheme: HTTP
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 3
+      name: cloud-sql-proxy
+      ports:
+      - containerPort: 3306
+        name: mysql
+        protocol: TCP
+      - containerPort: 8090
+        name: health
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /readiness
+          port: 8090
+          scheme: HTTP
+        initialDelaySeconds: 10
+        periodSeconds: 5
+        successThreshold: 1
+        timeoutSeconds: 3
+      resources:
+        limits:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 128Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
+        runAsGroup: 65532
+        runAsNonRoot: true
+        runAsUser: 65532
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-lzjkv
+        readOnly: true
+    - env:
+      - name: APP_NAME
+        value: Authentic-candidatos
+      - name: APP_ENV
+        value: production
+      - name: APP_DEBUG
+        value: "false"
+      - name: APP_URL
+        value: https://candidatos.authenticfarma.com
+      - name: LOG_CHANNEL
+        value: stack
+      - name: DB_CONNECTION
+        value: mysql
+      - name: DB_HOST
+        value: 127.0.0.1
+      - name: DB_PORT
+        value: "3306"
+      - name: DB_DATABASE
+        value: authentic
+      - name: DB_USERNAME
+        value: candidatosuser
+      - name: BROADCAST_DRIVER
+        value: log
+      - name: CACHE_DRIVER
+        value: database
+      - name: QUEUE_CONNECTION
+        value: database
+      - name: SESSION_DRIVER
+        value: database
+      - name: SESSION_LIFETIME
+        value: "120"
+      - name: SESSION_DOMAIN
+        value: .authenticfarma.com
+      - name: SESSION_COOKIE
+        value: authentic_session
+      - name: SESSION_SECURE_COOKIE
+        value: "true"
+      - name: SESSION_SAME_SITE
+        value: none
+      - name: MAIL_MAILER
+        value: smtp
+      - name: MAIL_HOST
+        value: smtp.gmail.com
+      - name: MAIL_PORT
+        value: "587"
+      - name: MAIL_ENCRYPTION
+        value: tls
+      - name: MAIL_FROM_ADDRESS
+        value: activacion@authenticfarma.com
+      - name: MAIL_FROM_NAME
+        value: Authentic Farma
+      - name: GOOGLE_CLOUD_PROJECT_ID
+        value: authenticfarma-QA
+      - name: GOOGLE_CLOUD_STORAGE_BUCKET
+        value: backups-qa
+      - name: GOOGLE_CLOUD_STORAGE_PATH_PREFIX
+        value: "null"
+      - name: GOOGLE_CLOUD_STORAGE_API_URI
+        value: "null"
+      - name: GOOGLE_CLOUD_KEY_FILE
+        value: keys/gcs-key.json
+      - name: PUSHER_APP_ID
+      - name: PUSHER_APP_KEY
+      - name: PUSHER_APP_SECRET
+      - name: PUSHER_APP_CLUSTER
+        value: mt1
+      - name: GOOGLE_CLIENT_ID
+        value: 1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com
+      - name: GOOGLE_REDIRECT
+        value: https://candidatos.authenticfarma.com/google-auth/callback
+      - name: APP_KEY
+        valueFrom:
+          secretKeyRef:
+            key: APP_KEY
+            name: laravel-secrets
+      - name: DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: DB_PASSWORD
+            name: laravel-secrets
+      - name: MAIL_USERNAME
+        valueFrom:
+          secretKeyRef:
+            key: MAIL_USERNAME
+            name: laravel-secrets
+      - name: MAIL_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: MAIL_PASSWORD
+            name: laravel-secrets
+      - name: GOOGLE_CLIENT_SECRET
+        valueFrom:
+          secretKeyRef:
+            key: GOOGLE_CLIENT_SECRET
+            name: laravel-secrets
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+      imagePullPolicy: Always
+      livenessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /healthz
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 120
+        periodSeconds: 20
+        successThreshold: 1
+        timeoutSeconds: 5
+      name: authenticfarma-candidatos
+      ports:
+      - containerPort: 80
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /healthz
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 90
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      resources:
+        limits:
+          cpu: 800m
+          ephemeral-storage: 1Gi
+          memory: 1Gi
+        requests:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 400Mi
+      securityContext:
+        capabilities:
+          drop:
+          - NET_RAW
+      startupProbe:
+        failureThreshold: 36
+        httpGet:
+          path: /healthz
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 60
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/www/storage/app/credentials
+        name: vertex-ai-credentials
+        readOnly: true
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-lzjkv
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: gk3-multi-platform-clust-nap-lgux20la-2a281056-bbrt
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: gke.io/optimize-utilization-scheduler
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+    serviceAccount: authenticfarma-candidatos-sa
+    serviceAccountName: authenticfarma-candidatos-sa
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoSchedule
+      key: kubernetes.io/arch
+      operator: Equal
+      value: amd64
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: vertex-ai-credentials
+      secret:
+        defaultMode: 420
+        items:
+        - key: credentials-json
+          path: vertex-ai-production.json
+        secretName: vertex-ai-secrets
+    - name: kube-api-access-lzjkv
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:59:17Z"
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:59:14Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:59:14Z"
+      message: 'containers with unready status: [authenticfarma-candidatos]'
+      reason: ContainersNotReady
+      status: "False"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:59:14Z"
+      message: 'containers with unready status: [authenticfarma-candidatos]'
+      reason: ContainersNotReady
+      status: "False"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2025-11-13T10:59:14Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - allocatedResources:
+        cpu: 200m
+        ephemeral-storage: 1Gi
+        memory: 400Mi
+      containerID: containerd://6de14cb898f35753b415bef3621ce30e25ba16924d58c45fd143099138a2e0c5
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+      imageID: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos@sha256:7b83841a4c8de050ce02c05642941c4f031ffa45146440d7e7ecaf85ae0028cb
+      lastState: {}
+      name: authenticfarma-candidatos
+      ready: false
+      resources:
+        limits:
+          cpu: 800m
+          ephemeral-storage: 1Gi
+          memory: 1Gi
+        requests:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 400Mi
+      restartCount: 0
+      started: false
+      state:
+        running:
+          startedAt: "2025-11-13T10:59:16Z"
+      user:
+        linux:
+          gid: 0
+          supplementalGroups:
+          - 0
+          uid: 0
+      volumeMounts:
+      - mountPath: /var/www/storage/app/credentials
+        name: vertex-ai-credentials
+        readOnly: true
+        recursiveReadOnly: Disabled
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-lzjkv
+        readOnly: true
+        recursiveReadOnly: Disabled
+    - allocatedResources:
+        cpu: 100m
+        ephemeral-storage: 1Gi
+        memory: 128Mi
+      containerID: containerd://51932633133b2fc6b5695b0c20784f0c7fcb39b76ac2cf3df4fb40094f6104b4
+      image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:latest
+      imageID: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy@sha256:3cf4b5a1a595eedbc71592b02131e259d946e56a8d1301daae5d9117c7309d36
+      lastState: {}
+      name: cloud-sql-proxy
+      ready: true
+      resources:
+        limits:
+          cpu: 200m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 1Gi
+          memory: 128Mi
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2025-11-13T10:59:15Z"
+      user:
+        linux:
+          gid: 65532
+          supplementalGroups:
+          - 65532
+          uid: 65532
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-lzjkv
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 10.0.0.229
+    hostIPs:
+    - ip: 10.0.0.229
+    phase: Running
+    podIP: 10.1.1.139
+    podIPs:
+    - ip: 10.1.1.139
+    qosClass: Burstable
+    startTime: "2025-11-13T10:59:14Z"
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"labels":{"app":"authenticfarma-candidatos","platform":"authenticfarma"},"name":"authenticfarma-candidatos-service","namespace":"authenticfarma-candidatos"},"spec":{"ports":[{"name":"http","port":80,"protocol":"TCP","targetPort":80}],"selector":{"app":"authenticfarma-candidatos"},"type":"ClusterIP"}}
+    creationTimestamp: "2025-11-02T20:14:06Z"
+    labels:
+      app: authenticfarma-candidatos
+      platform: authenticfarma
+    name: authenticfarma-candidatos-service
+    namespace: authenticfarma-candidatos
+    resourceVersion: "1762125007001967007"
+    uid: 26341836-d500-4a07-a944-9b08731cc725
+  spec:
+    clusterIP: 10.2.217.27
+    clusterIPs:
+    - 10.2.217.27
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    selector:
+      app: authenticfarma-candidatos
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      autopilot.gke.io/resource-adjustment: '{"input":{"containers":[{"limits":{"cpu":"200m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"},"name":"cloud-sql-proxy"},{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"},"name":"app"}]},"output":{"containers":[{"limits":{"cpu":"200m","ephemeral-storage":"1Gi","memory":"256Mi"},"requests":{"cpu":"100m","ephemeral-storage":"1Gi","memory":"128Mi"},"name":"cloud-sql-proxy"},{"limits":{"cpu":"500m","ephemeral-storage":"1Gi","memory":"512Mi"},"requests":{"cpu":"100m","ephemeral-storage":"1Gi","memory":"256Mi"},"name":"app"}]},"computeClassAtAdmission":"Default","modified":true}'
+      autopilot.gke.io/warden-version: 33.33.20-gke.0
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"labels":{"app":"authenticfarma-candidatos","platform":"authenticfarma"},"name":"authentic-candidatos","namespace":"authenticfarma-candidatos"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"authenticfarma-candidatos"}},"template":{"metadata":{"labels":{"app":"authenticfarma-candidatos","platform":"authenticfarma"}},"spec":{"containers":[{"args":["--address=0.0.0.0","--port=3306","authenticfarma-425820:us-central1:authentic"],"image":"us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0","name":"cloud-sql-proxy","resources":{"limits":{"cpu":"200m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"securityContext":{"runAsNonRoot":true}},{"env":[{"name":"APP_NAME","value":"AuthenticFarma Candidatos"},{"name":"APP_ENV","value":"production"},{"name":"APP_DEBUG","value":"false"},{"name":"APP_URL","value":"https://candidatos.authenticfarma.com"},{"name":"LOG_CHANNEL","value":"stack"},{"name":"DB_CONNECTION","value":"mysql"},{"name":"DB_HOST","value":"127.0.0.1"},{"name":"DB_PORT","value":"3306"},{"name":"DB_DATABASE","value":"authentic"},{"name":"DB_USERNAME","valueFrom":{"secretKeyRef":{"key":"DB_USERNAME","name":"laravel-secrets"}}},{"name":"DB_PASSWORD","valueFrom":{"secretKeyRef":{"key":"DB_PASSWORD","name":"laravel-secrets"}}},{"name":"BROADCAST_DRIVER","value":"log"},{"name":"CACHE_DRIVER","value":"database"},{"name":"QUEUE_CONNECTION","value":"sync"},{"name":"SESSION_DRIVER","value":"database"},{"name":"SESSION_LIFETIME","value":"120"},{"name":"SESSION_COOKIE","value":"authentic_session"},{"name":"SESSION_SECURE_COOKIE","value":"true"},{"name":"SESSION_SAME_SITE","value":"lax"},{"name":"MAIL_MAILER","value":"smtp"},{"name":"MAIL_HOST","value":"smtp.gmail.com"},{"name":"MAIL_PORT","value":"587"},{"name":"MAIL_USERNAME","valueFrom":{"secretKeyRef":{"key":"MAIL_USERNAME","name":"laravel-secrets"}}},{"name":"MAIL_PASSWORD","valueFrom":{"secretKeyRef":{"key":"MAIL_PASSWORD","name":"laravel-secrets"}}},{"name":"MAIL_ENCRYPTION","value":"tls"},{"name":"MAIL_FROM_ADDRESS","value":"activacion@authenticfarma.com"},{"name":"MAIL_FROM_NAME","value":"Authentic Farma"},{"name":"GOOGLE_CLOUD_PROJECT_ID","value":"authenticfarma-QA"},{"name":"GOOGLE_CLOUD_STORAGE_BUCKET","value":"backups-qa"},{"name":"GOOGLE_CLOUD_STORAGE_PATH_PREFIX","value":"null"},{"name":"GOOGLE_CLOUD_STORAGE_API_URI","value":"null"},{"name":"GOOGLE_CLOUD_KEY_FILE","value":"keys/gcs-key.json"},{"name":"GEMINI_PROVIDER","value":"vertex"},{"name":"GEMINI_MODEL","value":"gemini-2.0-flash-lite"},{"name":"GOOGLE_APPLICATION_CREDENTIALS","valueFrom":{"secretKeyRef":{"key":"credentials-json","name":"vertex-ai-secrets"}}},{"name":"GOOGLE_CLOUD_PROJECT","value":"authentic-prod-464216"},{"name":"GOOGLE_CLOUD_LOCATION","value":"us-central1"},{"name":"PUSHER_APP_ID","value":""},{"name":"PUSHER_APP_KEY","value":""},{"name":"PUSHER_APP_SECRET","value":""},{"name":"PUSHER_APP_CLUSTER","value":"mt1"},{"name":"GOOGLE_CLIENT_ID","value":"1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com"},{"name":"GOOGLE_CLIENT_SECRET","valueFrom":{"secretKeyRef":{"key":"GOOGLE_CLIENT_SECRET","name":"laravel-secrets"}}},{"name":"GOOGLE_REDIRECT","value":"https://candidatos.authenticfarma.com/google-auth/callback"},{"name":"APP_KEY","valueFrom":{"secretKeyRef":{"key":"APP_KEY","name":"laravel-secrets"}}}],"image":"us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/login","port":80},"initialDelaySeconds":60,"periodSeconds":30,"timeoutSeconds":5},"name":"app","ports":[{"containerPort":80,"name":"http"}],"readinessProbe":{"failureThreshold":6,"httpGet":{"path":"/login","port":80},"initialDelaySeconds":30,"periodSeconds":10,"timeoutSeconds":5},"resources":{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"}}}],"serviceAccountName":"authenticfarma-candidatos-sa"}}}}
+    creationTimestamp: "2025-11-13T10:55:42Z"
+    generation: 1
+    labels:
+      app: authenticfarma-candidatos
+      platform: authenticfarma
+    name: authentic-candidatos
+    namespace: authenticfarma-candidatos
+    resourceVersion: "1763031431750399016"
+    uid: 01e51c39-52a2-4ae3-93f8-d40798380b8d
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 2
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: authenticfarma-candidatos
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: authenticfarma-candidatos
+          platform: authenticfarma
+      spec:
+        containers:
+        - args:
+          - --address=0.0.0.0
+          - --port=3306
+          - authenticfarma-425820:us-central1:authentic
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
+          imagePullPolicy: IfNotPresent
+          name: cloud-sql-proxy
+          resources:
+            limits:
+              cpu: 200m
+              ephemeral-storage: 1Gi
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 1Gi
+              memory: 128Mi
+          securityContext:
+            capabilities:
+              drop:
+              - NET_RAW
+            runAsNonRoot: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        - env:
+          - name: APP_NAME
+            value: AuthenticFarma Candidatos
+          - name: APP_ENV
+            value: production
+          - name: APP_DEBUG
+            value: "false"
+          - name: APP_URL
+            value: https://candidatos.authenticfarma.com
+          - name: LOG_CHANNEL
+            value: stack
+          - name: DB_CONNECTION
+            value: mysql
+          - name: DB_HOST
+            value: 127.0.0.1
+          - name: DB_PORT
+            value: "3306"
+          - name: DB_DATABASE
+            value: authentic
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: DB_USERNAME
+                name: laravel-secrets
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: DB_PASSWORD
+                name: laravel-secrets
+          - name: BROADCAST_DRIVER
+            value: log
+          - name: CACHE_DRIVER
+            value: database
+          - name: QUEUE_CONNECTION
+            value: sync
+          - name: SESSION_DRIVER
+            value: database
+          - name: SESSION_LIFETIME
+            value: "120"
+          - name: SESSION_COOKIE
+            value: authentic_session
+          - name: SESSION_SECURE_COOKIE
+            value: "true"
+          - name: SESSION_SAME_SITE
+            value: lax
+          - name: MAIL_MAILER
+            value: smtp
+          - name: MAIL_HOST
+            value: smtp.gmail.com
+          - name: MAIL_PORT
+            value: "587"
+          - name: MAIL_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: MAIL_USERNAME
+                name: laravel-secrets
+          - name: MAIL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: MAIL_PASSWORD
+                name: laravel-secrets
+          - name: MAIL_ENCRYPTION
+            value: tls
+          - name: MAIL_FROM_ADDRESS
+            value: activacion@authenticfarma.com
+          - name: MAIL_FROM_NAME
+            value: Authentic Farma
+          - name: GOOGLE_CLOUD_PROJECT_ID
+            value: authenticfarma-QA
+          - name: GOOGLE_CLOUD_STORAGE_BUCKET
+            value: backups-qa
+          - name: GOOGLE_CLOUD_STORAGE_PATH_PREFIX
+            value: "null"
+          - name: GOOGLE_CLOUD_STORAGE_API_URI
+            value: "null"
+          - name: GOOGLE_CLOUD_KEY_FILE
+            value: keys/gcs-key.json
+          - name: GEMINI_PROVIDER
+            value: vertex
+          - name: GEMINI_MODEL
+            value: gemini-2.0-flash-lite
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                key: credentials-json
+                name: vertex-ai-secrets
+          - name: GOOGLE_CLOUD_PROJECT
+            value: authentic-prod-464216
+          - name: GOOGLE_CLOUD_LOCATION
+            value: us-central1
+          - name: PUSHER_APP_ID
+          - name: PUSHER_APP_KEY
+          - name: PUSHER_APP_SECRET
+          - name: PUSHER_APP_CLUSTER
+            value: mt1
+          - name: GOOGLE_CLIENT_ID
+            value: 1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com
+          - name: GOOGLE_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: GOOGLE_CLIENT_SECRET
+                name: laravel-secrets
+          - name: GOOGLE_REDIRECT
+            value: https://candidatos.authenticfarma.com/google-auth/callback
+          - name: APP_KEY
+            valueFrom:
+              secretKeyRef:
+                key: APP_KEY
+                name: laravel-secrets
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /login
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: app
+          ports:
+          - containerPort: 80
+            name: http
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /login
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 500m
+              ephemeral-storage: 1Gi
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 1Gi
+              memory: 256Mi
+          securityContext:
+            capabilities:
+              drop:
+              - NET_RAW
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          seccompProfile:
+            type: RuntimeDefault
+        serviceAccount: authenticfarma-candidatos-sa
+        serviceAccountName: authenticfarma-candidatos-sa
+        terminationGracePeriodSeconds: 30
+        tolerations:
+        - effect: NoSchedule
+          key: kubernetes.io/arch
+          operator: Equal
+          value: amd64
+  status:
+    availableReplicas: 2
+    conditions:
+    - lastTransitionTime: "2025-11-13T10:57:11Z"
+      lastUpdateTime: "2025-11-13T10:57:11Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    - lastTransitionTime: "2025-11-13T10:55:42Z"
+      lastUpdateTime: "2025-11-13T10:57:11Z"
+      message: ReplicaSet "authentic-candidatos-5cd496bd5c" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    observedGeneration: 1
+    readyReplicas: 2
+    replicas: 2
+    updatedReplicas: 2
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      argocd.argoproj.io/tracking-id: authenticfarma-candidatos:apps/Deployment:authenticfarma-candidatos/authenticfarma-candidatos
+      autopilot.gke.io/resource-adjustment: '{"input":{"containers":[{"limits":{"cpu":"200m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"},"name":"cloud-sql-proxy"},{"limits":{"cpu":"800m","memory":"1Gi"},"requests":{"cpu":"200m","memory":"400Mi"},"name":"authenticfarma-candidatos"}]},"output":{"containers":[{"limits":{"cpu":"200m","ephemeral-storage":"1Gi","memory":"256Mi"},"requests":{"cpu":"100m","ephemeral-storage":"1Gi","memory":"128Mi"},"name":"cloud-sql-proxy"},{"limits":{"cpu":"800m","ephemeral-storage":"1Gi","memory":"1Gi"},"requests":{"cpu":"200m","ephemeral-storage":"1Gi","memory":"400Mi"},"name":"authenticfarma-candidatos"}]},"computeClassAtAdmission":"Default","modified":true}'
+      autopilot.gke.io/warden-version: 33.33.20-gke.0
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"authenticfarma-candidatos:apps/Deployment:authenticfarma-candidatos/authenticfarma-candidatos"},"labels":{"app":"authenticfarma-candidatos","managed-by":"argocd","platform":"authenticfarma"},"name":"authenticfarma-candidatos","namespace":"authenticfarma-candidatos"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"authenticfarma-candidatos","managed-by":"argocd","platform":"authenticfarma"}},"template":{"metadata":{"annotations":{"iam.gke.io/gcp-service-account":"authentic-candidatos-gsa@authentic-prod-464216.iam.gserviceaccount.com"},"labels":{"app":"authenticfarma-candidatos","managed-by":"argocd","platform":"authenticfarma"}},"spec":{"containers":[{"args":["--address=0.0.0.0","--port=3306","--auto-iam-authn","--structured-logs","--health-check","--http-address=0.0.0.0","--http-port=8090","authenticfarma-425820:us-central1:authentic"],"command":["/cloud-sql-proxy"],"image":"us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:latest","imagePullPolicy":"Always","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/liveness","port":8090},"initialDelaySeconds":30,"periodSeconds":10,"timeoutSeconds":3},"name":"cloud-sql-proxy","ports":[{"containerPort":3306,"name":"mysql"},{"containerPort":8090,"name":"health"}],"readinessProbe":{"failureThreshold":3,"httpGet":{"path":"/readiness","port":8090},"initialDelaySeconds":10,"periodSeconds":5,"timeoutSeconds":3},"resources":{"limits":{"cpu":"200m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":65532,"runAsNonRoot":true,"runAsUser":65532}},{"env":[{"name":"APP_NAME","value":"Authentic-candidatos"},{"name":"APP_ENV","value":"production"},{"name":"APP_DEBUG","value":"false"},{"name":"APP_URL","value":"https://candidatos.authenticfarma.com"},{"name":"LOG_CHANNEL","value":"stack"},{"name":"DB_CONNECTION","value":"mysql"},{"name":"DB_HOST","value":"127.0.0.1"},{"name":"DB_PORT","value":"3306"},{"name":"DB_DATABASE","value":"authentic"},{"name":"DB_USERNAME","value":"candidatosuser"},{"name":"BROADCAST_DRIVER","value":"log"},{"name":"CACHE_DRIVER","value":"database"},{"name":"QUEUE_CONNECTION","value":"database"},{"name":"SESSION_DRIVER","value":"database"},{"name":"SESSION_LIFETIME","value":"120"},{"name":"SESSION_DOMAIN","value":".authenticfarma.com"},{"name":"SESSION_COOKIE","value":"authentic_session"},{"name":"SESSION_SECURE_COOKIE","value":"true"},{"name":"SESSION_SAME_SITE","value":"none"},{"name":"MAIL_MAILER","value":"smtp"},{"name":"MAIL_HOST","value":"smtp.gmail.com"},{"name":"MAIL_PORT","value":"587"},{"name":"MAIL_ENCRYPTION","value":"tls"},{"name":"MAIL_FROM_ADDRESS","value":"activacion@authenticfarma.com"},{"name":"MAIL_FROM_NAME","value":"Authentic Farma"},{"name":"GOOGLE_CLOUD_PROJECT_ID","value":"authenticfarma-QA"},{"name":"GOOGLE_CLOUD_STORAGE_BUCKET","value":"backups-qa"},{"name":"GOOGLE_CLOUD_STORAGE_PATH_PREFIX","value":"null"},{"name":"GOOGLE_CLOUD_STORAGE_API_URI","value":"null"},{"name":"GOOGLE_CLOUD_KEY_FILE","value":"keys/gcs-key.json"},{"name":"PUSHER_APP_ID","value":""},{"name":"PUSHER_APP_KEY","value":""},{"name":"PUSHER_APP_SECRET","value":""},{"name":"PUSHER_APP_CLUSTER","value":"mt1"},{"name":"GOOGLE_CLIENT_ID","value":"1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com"},{"name":"GOOGLE_REDIRECT","value":"https://candidatos.authenticfarma.com/google-auth/callback"},{"name":"APP_KEY","valueFrom":{"secretKeyRef":{"key":"APP_KEY","name":"laravel-secrets"}}},{"name":"DB_PASSWORD","valueFrom":{"secretKeyRef":{"key":"DB_PASSWORD","name":"laravel-secrets"}}},{"name":"MAIL_USERNAME","valueFrom":{"secretKeyRef":{"key":"MAIL_USERNAME","name":"laravel-secrets"}}},{"name":"MAIL_PASSWORD","valueFrom":{"secretKeyRef":{"key":"MAIL_PASSWORD","name":"laravel-secrets"}}},{"name":"GOOGLE_CLIENT_SECRET","valueFrom":{"secretKeyRef":{"key":"GOOGLE_CLIENT_SECRET","name":"laravel-secrets"}}}],"image":"us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/healthz","port":80},"initialDelaySeconds":120,"periodSeconds":20,"timeoutSeconds":5},"name":"authenticfarma-candidatos","ports":[{"containerPort":80}],"readinessProbe":{"failureThreshold":3,"httpGet":{"path":"/healthz","port":80},"initialDelaySeconds":90,"periodSeconds":10,"timeoutSeconds":5},"resources":{"limits":{"cpu":"800m","memory":"1Gi"},"requests":{"cpu":"200m","memory":"400Mi"}},"startupProbe":{"failureThreshold":36,"httpGet":{"path":"/healthz","port":80},"initialDelaySeconds":60,"periodSeconds":10,"timeoutSeconds":5},"volumeMounts":[{"mountPath":"/var/www/storage/app/credentials","name":"vertex-ai-credentials","readOnly":true}]}],"serviceAccountName":"authenticfarma-candidatos-sa","volumes":[{"name":"vertex-ai-credentials","secret":{"items":[{"key":"credentials-json","path":"vertex-ai-production.json"}],"secretName":"vertex-ai-secrets"}}]}}}}
+    creationTimestamp: "2025-11-13T10:59:14Z"
+    generation: 1
+    labels:
+      app: authenticfarma-candidatos
+      managed-by: argocd
+      platform: authenticfarma
+    name: authenticfarma-candidatos
+    namespace: authenticfarma-candidatos
+    resourceVersion: "1763031554725279009"
+    uid: a2ed5770-530e-48cd-9c9d-553047dbcac7
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 2
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: authenticfarma-candidatos
+        managed-by: argocd
+        platform: authenticfarma
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          iam.gke.io/gcp-service-account: authentic-candidatos-gsa@authentic-prod-464216.iam.gserviceaccount.com
+        creationTimestamp: null
+        labels:
+          app: authenticfarma-candidatos
+          managed-by: argocd
+          platform: authenticfarma
+      spec:
+        containers:
+        - args:
+          - --address=0.0.0.0
+          - --port=3306
+          - --auto-iam-authn
+          - --structured-logs
+          - --health-check
+          - --http-address=0.0.0.0
+          - --http-port=8090
+          - authenticfarma-425820:us-central1:authentic
+          command:
+          - /cloud-sql-proxy
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /liveness
+              port: 8090
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: cloud-sql-proxy
+          ports:
+          - containerPort: 3306
+            name: mysql
+            protocol: TCP
+          - containerPort: 8090
+            name: health
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /readiness
+              port: 8090
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          resources:
+            limits:
+              cpu: 200m
+              ephemeral-storage: 1Gi
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 1Gi
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 65532
+            runAsNonRoot: true
+            runAsUser: 65532
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        - env:
+          - name: APP_NAME
+            value: Authentic-candidatos
+          - name: APP_ENV
+            value: production
+          - name: APP_DEBUG
+            value: "false"
+          - name: APP_URL
+            value: https://candidatos.authenticfarma.com
+          - name: LOG_CHANNEL
+            value: stack
+          - name: DB_CONNECTION
+            value: mysql
+          - name: DB_HOST
+            value: 127.0.0.1
+          - name: DB_PORT
+            value: "3306"
+          - name: DB_DATABASE
+            value: authentic
+          - name: DB_USERNAME
+            value: candidatosuser
+          - name: BROADCAST_DRIVER
+            value: log
+          - name: CACHE_DRIVER
+            value: database
+          - name: QUEUE_CONNECTION
+            value: database
+          - name: SESSION_DRIVER
+            value: database
+          - name: SESSION_LIFETIME
+            value: "120"
+          - name: SESSION_DOMAIN
+            value: .authenticfarma.com
+          - name: SESSION_COOKIE
+            value: authentic_session
+          - name: SESSION_SECURE_COOKIE
+            value: "true"
+          - name: SESSION_SAME_SITE
+            value: none
+          - name: MAIL_MAILER
+            value: smtp
+          - name: MAIL_HOST
+            value: smtp.gmail.com
+          - name: MAIL_PORT
+            value: "587"
+          - name: MAIL_ENCRYPTION
+            value: tls
+          - name: MAIL_FROM_ADDRESS
+            value: activacion@authenticfarma.com
+          - name: MAIL_FROM_NAME
+            value: Authentic Farma
+          - name: GOOGLE_CLOUD_PROJECT_ID
+            value: authenticfarma-QA
+          - name: GOOGLE_CLOUD_STORAGE_BUCKET
+            value: backups-qa
+          - name: GOOGLE_CLOUD_STORAGE_PATH_PREFIX
+            value: "null"
+          - name: GOOGLE_CLOUD_STORAGE_API_URI
+            value: "null"
+          - name: GOOGLE_CLOUD_KEY_FILE
+            value: keys/gcs-key.json
+          - name: PUSHER_APP_ID
+          - name: PUSHER_APP_KEY
+          - name: PUSHER_APP_SECRET
+          - name: PUSHER_APP_CLUSTER
+            value: mt1
+          - name: GOOGLE_CLIENT_ID
+            value: 1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com
+          - name: GOOGLE_REDIRECT
+            value: https://candidatos.authenticfarma.com/google-auth/callback
+          - name: APP_KEY
+            valueFrom:
+              secretKeyRef:
+                key: APP_KEY
+                name: laravel-secrets
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: DB_PASSWORD
+                name: laravel-secrets
+          - name: MAIL_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: MAIL_USERNAME
+                name: laravel-secrets
+          - name: MAIL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: MAIL_PASSWORD
+                name: laravel-secrets
+          - name: GOOGLE_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: GOOGLE_CLIENT_SECRET
+                name: laravel-secrets
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: authenticfarma-candidatos
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 800m
+              ephemeral-storage: 1Gi
+              memory: 1Gi
+            requests:
+              cpu: 200m
+              ephemeral-storage: 1Gi
+              memory: 400Mi
+          securityContext:
+            capabilities:
+              drop:
+              - NET_RAW
+          startupProbe:
+            failureThreshold: 36
+            httpGet:
+              path: /healthz
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/www/storage/app/credentials
+            name: vertex-ai-credentials
+            readOnly: true
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          seccompProfile:
+            type: RuntimeDefault
+        serviceAccount: authenticfarma-candidatos-sa
+        serviceAccountName: authenticfarma-candidatos-sa
+        terminationGracePeriodSeconds: 30
+        tolerations:
+        - effect: NoSchedule
+          key: kubernetes.io/arch
+          operator: Equal
+          value: amd64
+        volumes:
+        - name: vertex-ai-credentials
+          secret:
+            defaultMode: 420
+            items:
+            - key: credentials-json
+              path: vertex-ai-production.json
+            secretName: vertex-ai-secrets
+  status:
+    conditions:
+    - lastTransitionTime: "2025-11-13T10:59:14Z"
+      lastUpdateTime: "2025-11-13T10:59:14Z"
+      message: Deployment does not have minimum availability.
+      reason: MinimumReplicasUnavailable
+      status: "False"
+      type: Available
+    - lastTransitionTime: "2025-11-13T10:59:14Z"
+      lastUpdateTime: "2025-11-13T10:59:14Z"
+      message: ReplicaSet "authenticfarma-candidatos-78cfc66c68" is progressing.
+      reason: ReplicaSetUpdated
+      status: "True"
+      type: Progressing
+    observedGeneration: 1
+    replicas: 2
+    unavailableReplicas: 2
+    updatedReplicas: 2
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      autopilot.gke.io/resource-adjustment: '{"input":{"containers":[{"limits":{"cpu":"200m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"},"name":"cloud-sql-proxy"},{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"},"name":"app"}]},"output":{"containers":[{"limits":{"cpu":"200m","ephemeral-storage":"1Gi","memory":"256Mi"},"requests":{"cpu":"100m","ephemeral-storage":"1Gi","memory":"128Mi"},"name":"cloud-sql-proxy"},{"limits":{"cpu":"500m","ephemeral-storage":"1Gi","memory":"512Mi"},"requests":{"cpu":"100m","ephemeral-storage":"1Gi","memory":"256Mi"},"name":"app"}]},"computeClassAtAdmission":"Default","modified":true}'
+      autopilot.gke.io/warden-version: 33.33.20-gke.0
+      deployment.kubernetes.io/desired-replicas: "2"
+      deployment.kubernetes.io/max-replicas: "3"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: "2025-11-13T10:55:42Z"
+    generation: 1
+    labels:
+      app: authenticfarma-candidatos
+      platform: authenticfarma
+      pod-template-hash: 5cd496bd5c
+    name: authentic-candidatos-5cd496bd5c
+    namespace: authenticfarma-candidatos
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: authentic-candidatos
+      uid: 01e51c39-52a2-4ae3-93f8-d40798380b8d
+    resourceVersion: "1763031431716895003"
+    uid: ee3d3ff7-b70e-45ea-b105-40d772c044c7
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: authenticfarma-candidatos
+        pod-template-hash: 5cd496bd5c
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: authenticfarma-candidatos
+          platform: authenticfarma
+          pod-template-hash: 5cd496bd5c
+      spec:
+        containers:
+        - args:
+          - --address=0.0.0.0
+          - --port=3306
+          - authenticfarma-425820:us-central1:authentic
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
+          imagePullPolicy: IfNotPresent
+          name: cloud-sql-proxy
+          resources:
+            limits:
+              cpu: 200m
+              ephemeral-storage: 1Gi
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 1Gi
+              memory: 128Mi
+          securityContext:
+            capabilities:
+              drop:
+              - NET_RAW
+            runAsNonRoot: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        - env:
+          - name: APP_NAME
+            value: AuthenticFarma Candidatos
+          - name: APP_ENV
+            value: production
+          - name: APP_DEBUG
+            value: "false"
+          - name: APP_URL
+            value: https://candidatos.authenticfarma.com
+          - name: LOG_CHANNEL
+            value: stack
+          - name: DB_CONNECTION
+            value: mysql
+          - name: DB_HOST
+            value: 127.0.0.1
+          - name: DB_PORT
+            value: "3306"
+          - name: DB_DATABASE
+            value: authentic
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: DB_USERNAME
+                name: laravel-secrets
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: DB_PASSWORD
+                name: laravel-secrets
+          - name: BROADCAST_DRIVER
+            value: log
+          - name: CACHE_DRIVER
+            value: database
+          - name: QUEUE_CONNECTION
+            value: sync
+          - name: SESSION_DRIVER
+            value: database
+          - name: SESSION_LIFETIME
+            value: "120"
+          - name: SESSION_COOKIE
+            value: authentic_session
+          - name: SESSION_SECURE_COOKIE
+            value: "true"
+          - name: SESSION_SAME_SITE
+            value: lax
+          - name: MAIL_MAILER
+            value: smtp
+          - name: MAIL_HOST
+            value: smtp.gmail.com
+          - name: MAIL_PORT
+            value: "587"
+          - name: MAIL_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: MAIL_USERNAME
+                name: laravel-secrets
+          - name: MAIL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: MAIL_PASSWORD
+                name: laravel-secrets
+          - name: MAIL_ENCRYPTION
+            value: tls
+          - name: MAIL_FROM_ADDRESS
+            value: activacion@authenticfarma.com
+          - name: MAIL_FROM_NAME
+            value: Authentic Farma
+          - name: GOOGLE_CLOUD_PROJECT_ID
+            value: authenticfarma-QA
+          - name: GOOGLE_CLOUD_STORAGE_BUCKET
+            value: backups-qa
+          - name: GOOGLE_CLOUD_STORAGE_PATH_PREFIX
+            value: "null"
+          - name: GOOGLE_CLOUD_STORAGE_API_URI
+            value: "null"
+          - name: GOOGLE_CLOUD_KEY_FILE
+            value: keys/gcs-key.json
+          - name: GEMINI_PROVIDER
+            value: vertex
+          - name: GEMINI_MODEL
+            value: gemini-2.0-flash-lite
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                key: credentials-json
+                name: vertex-ai-secrets
+          - name: GOOGLE_CLOUD_PROJECT
+            value: authentic-prod-464216
+          - name: GOOGLE_CLOUD_LOCATION
+            value: us-central1
+          - name: PUSHER_APP_ID
+          - name: PUSHER_APP_KEY
+          - name: PUSHER_APP_SECRET
+          - name: PUSHER_APP_CLUSTER
+            value: mt1
+          - name: GOOGLE_CLIENT_ID
+            value: 1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com
+          - name: GOOGLE_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: GOOGLE_CLIENT_SECRET
+                name: laravel-secrets
+          - name: GOOGLE_REDIRECT
+            value: https://candidatos.authenticfarma.com/google-auth/callback
+          - name: APP_KEY
+            valueFrom:
+              secretKeyRef:
+                key: APP_KEY
+                name: laravel-secrets
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /login
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: app
+          ports:
+          - containerPort: 80
+            name: http
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /login
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 500m
+              ephemeral-storage: 1Gi
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 1Gi
+              memory: 256Mi
+          securityContext:
+            capabilities:
+              drop:
+              - NET_RAW
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          seccompProfile:
+            type: RuntimeDefault
+        serviceAccount: authenticfarma-candidatos-sa
+        serviceAccountName: authenticfarma-candidatos-sa
+        terminationGracePeriodSeconds: 30
+        tolerations:
+        - effect: NoSchedule
+          key: kubernetes.io/arch
+          operator: Equal
+          value: amd64
+  status:
+    availableReplicas: 2
+    fullyLabeledReplicas: 2
+    observedGeneration: 1
+    readyReplicas: 2
+    replicas: 2
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      argocd.argoproj.io/tracking-id: authenticfarma-candidatos:apps/Deployment:authenticfarma-candidatos/authenticfarma-candidatos
+      autopilot.gke.io/resource-adjustment: '{"input":{"containers":[{"limits":{"cpu":"200m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"},"name":"cloud-sql-proxy"},{"limits":{"cpu":"800m","memory":"1Gi"},"requests":{"cpu":"200m","memory":"400Mi"},"name":"authenticfarma-candidatos"}]},"output":{"containers":[{"limits":{"cpu":"200m","ephemeral-storage":"1Gi","memory":"256Mi"},"requests":{"cpu":"100m","ephemeral-storage":"1Gi","memory":"128Mi"},"name":"cloud-sql-proxy"},{"limits":{"cpu":"800m","ephemeral-storage":"1Gi","memory":"1Gi"},"requests":{"cpu":"200m","ephemeral-storage":"1Gi","memory":"400Mi"},"name":"authenticfarma-candidatos"}]},"computeClassAtAdmission":"Default","modified":true}'
+      autopilot.gke.io/warden-version: 33.33.20-gke.0
+      deployment.kubernetes.io/desired-replicas: "2"
+      deployment.kubernetes.io/max-replicas: "3"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: "2025-11-13T10:59:14Z"
+    generation: 1
+    labels:
+      app: authenticfarma-candidatos
+      managed-by: argocd
+      platform: authenticfarma
+      pod-template-hash: 78cfc66c68
+    name: authenticfarma-candidatos-78cfc66c68
+    namespace: authenticfarma-candidatos
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: authenticfarma-candidatos
+      uid: a2ed5770-530e-48cd-9c9d-553047dbcac7
+    resourceVersion: "1763031554683007010"
+    uid: c1369d5f-6130-4a48-82f1-3d637984d66a
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: authenticfarma-candidatos
+        managed-by: argocd
+        platform: authenticfarma
+        pod-template-hash: 78cfc66c68
+    template:
+      metadata:
+        annotations:
+          iam.gke.io/gcp-service-account: authentic-candidatos-gsa@authentic-prod-464216.iam.gserviceaccount.com
+        creationTimestamp: null
+        labels:
+          app: authenticfarma-candidatos
+          managed-by: argocd
+          platform: authenticfarma
+          pod-template-hash: 78cfc66c68
+      spec:
+        containers:
+        - args:
+          - --address=0.0.0.0
+          - --port=3306
+          - --auto-iam-authn
+          - --structured-logs
+          - --health-check
+          - --http-address=0.0.0.0
+          - --http-port=8090
+          - authenticfarma-425820:us-central1:authentic
+          command:
+          - /cloud-sql-proxy
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /liveness
+              port: 8090
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: cloud-sql-proxy
+          ports:
+          - containerPort: 3306
+            name: mysql
+            protocol: TCP
+          - containerPort: 8090
+            name: health
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /readiness
+              port: 8090
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          resources:
+            limits:
+              cpu: 200m
+              ephemeral-storage: 1Gi
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 1Gi
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 65532
+            runAsNonRoot: true
+            runAsUser: 65532
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        - env:
+          - name: APP_NAME
+            value: Authentic-candidatos
+          - name: APP_ENV
+            value: production
+          - name: APP_DEBUG
+            value: "false"
+          - name: APP_URL
+            value: https://candidatos.authenticfarma.com
+          - name: LOG_CHANNEL
+            value: stack
+          - name: DB_CONNECTION
+            value: mysql
+          - name: DB_HOST
+            value: 127.0.0.1
+          - name: DB_PORT
+            value: "3306"
+          - name: DB_DATABASE
+            value: authentic
+          - name: DB_USERNAME
+            value: candidatosuser
+          - name: BROADCAST_DRIVER
+            value: log
+          - name: CACHE_DRIVER
+            value: database
+          - name: QUEUE_CONNECTION
+            value: database
+          - name: SESSION_DRIVER
+            value: database
+          - name: SESSION_LIFETIME
+            value: "120"
+          - name: SESSION_DOMAIN
+            value: .authenticfarma.com
+          - name: SESSION_COOKIE
+            value: authentic_session
+          - name: SESSION_SECURE_COOKIE
+            value: "true"
+          - name: SESSION_SAME_SITE
+            value: none
+          - name: MAIL_MAILER
+            value: smtp
+          - name: MAIL_HOST
+            value: smtp.gmail.com
+          - name: MAIL_PORT
+            value: "587"
+          - name: MAIL_ENCRYPTION
+            value: tls
+          - name: MAIL_FROM_ADDRESS
+            value: activacion@authenticfarma.com
+          - name: MAIL_FROM_NAME
+            value: Authentic Farma
+          - name: GOOGLE_CLOUD_PROJECT_ID
+            value: authenticfarma-QA
+          - name: GOOGLE_CLOUD_STORAGE_BUCKET
+            value: backups-qa
+          - name: GOOGLE_CLOUD_STORAGE_PATH_PREFIX
+            value: "null"
+          - name: GOOGLE_CLOUD_STORAGE_API_URI
+            value: "null"
+          - name: GOOGLE_CLOUD_KEY_FILE
+            value: keys/gcs-key.json
+          - name: PUSHER_APP_ID
+          - name: PUSHER_APP_KEY
+          - name: PUSHER_APP_SECRET
+          - name: PUSHER_APP_CLUSTER
+            value: mt1
+          - name: GOOGLE_CLIENT_ID
+            value: 1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com
+          - name: GOOGLE_REDIRECT
+            value: https://candidatos.authenticfarma.com/google-auth/callback
+          - name: APP_KEY
+            valueFrom:
+              secretKeyRef:
+                key: APP_KEY
+                name: laravel-secrets
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: DB_PASSWORD
+                name: laravel-secrets
+          - name: MAIL_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: MAIL_USERNAME
+                name: laravel-secrets
+          - name: MAIL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: MAIL_PASSWORD
+                name: laravel-secrets
+          - name: GOOGLE_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: GOOGLE_CLIENT_SECRET
+                name: laravel-secrets
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: authenticfarma-candidatos
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 800m
+              ephemeral-storage: 1Gi
+              memory: 1Gi
+            requests:
+              cpu: 200m
+              ephemeral-storage: 1Gi
+              memory: 400Mi
+          securityContext:
+            capabilities:
+              drop:
+              - NET_RAW
+          startupProbe:
+            failureThreshold: 36
+            httpGet:
+              path: /healthz
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/www/storage/app/credentials
+            name: vertex-ai-credentials
+            readOnly: true
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          seccompProfile:
+            type: RuntimeDefault
+        serviceAccount: authenticfarma-candidatos-sa
+        serviceAccountName: authenticfarma-candidatos-sa
+        terminationGracePeriodSeconds: 30
+        tolerations:
+        - effect: NoSchedule
+          key: kubernetes.io/arch
+          operator: Equal
+          value: amd64
+        volumes:
+        - name: vertex-ai-credentials
+          secret:
+            defaultMode: 420
+            items:
+            - key: credentials-json
+              path: vertex-ai-production.json
+            secretName: vertex-ai-secrets
+  status:
+    fullyLabeledReplicas: 2
+    observedGeneration: 1
+    replicas: 2
+- apiVersion: autoscaling/v2
+  kind: HorizontalPodAutoscaler
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"autoscaling/v2","kind":"HorizontalPodAutoscaler","metadata":{"annotations":{},"labels":{"app":"authenticfarma-candidatos","platform":"authenticfarma"},"name":"authenticfarma-candidatos-hpa","namespace":"authenticfarma-candidatos"},"spec":{"behavior":{"scaleDown":{"policies":[{"periodSeconds":60,"type":"Percent","value":10}],"stabilizationWindowSeconds":300},"scaleUp":{"policies":[{"periodSeconds":15,"type":"Percent","value":100}],"stabilizationWindowSeconds":60}},"maxReplicas":10,"metrics":[{"resource":{"name":"cpu","target":{"averageUtilization":70,"type":"Utilization"}},"type":"Resource"},{"resource":{"name":"memory","target":{"averageUtilization":80,"type":"Utilization"}},"type":"Resource"}],"minReplicas":2,"scaleTargetRef":{"apiVersion":"apps/v1","kind":"Deployment","name":"authenticfarma-candidatos"}}}
+    creationTimestamp: "2025-11-02T20:14:08Z"
+    labels:
+      app: authenticfarma-candidatos
+      platform: authenticfarma
+    name: authenticfarma-candidatos-hpa
+    namespace: authenticfarma-candidatos
+    resourceVersion: "1763031772855295010"
+    uid: 5a9fb592-7d22-4723-8ca3-f469a19d61e2
+  spec:
+    behavior:
+      scaleDown:
+        policies:
+        - periodSeconds: 60
+          type: Percent
+          value: 10
+        selectPolicy: Max
+        stabilizationWindowSeconds: 300
+      scaleUp:
+        policies:
+        - periodSeconds: 15
+          type: Percent
+          value: 100
+        selectPolicy: Max
+        stabilizationWindowSeconds: 60
+    maxReplicas: 10
+    metrics:
+    - resource:
+        name: cpu
+        target:
+          averageUtilization: 70
+          type: Utilization
+      type: Resource
+    - resource:
+        name: memory
+        target:
+          averageUtilization: 80
+          type: Utilization
+      type: Resource
+    minReplicas: 2
+    scaleTargetRef:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: authenticfarma-candidatos
+  status:
+    conditions:
+    - lastTransitionTime: "2025-11-13T03:31:18Z"
+      message: recommended size matches current size
+      reason: ReadyForNewScale
+      status: "True"
+      type: AbleToScale
+    - lastTransitionTime: "2025-11-13T11:02:52Z"
+      message: 'the HPA was unable to compute the replica count: No recommendation'
+      reason: FailedGetResourceMetric
+      status: "False"
+      type: ScalingActive
+    - lastTransitionTime: "2025-11-13T03:32:29Z"
+      message: the desired count is within the acceptable range
+      reason: DesiredWithinRange
+      status: "False"
+      type: ScalingLimited
+    currentMetrics:
+    - type: ""
+    - resource:
+        current:
+          averageUtilization: 13
+          averageValue: "75651072"
+          value: "151302144"
+        name: memory
+      type: Resource
+    currentReplicas: 2
+    desiredReplicas: 2
+    lastScaleTime: "2025-11-02T23:07:06Z"
+- apiVersion: v1
+  data:
+    tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZGekNDQS8rZ0F3SUJBZ0lTQlZYTXI1UVIxblVScDlhaE1ZcmdWVmJlTUEwR0NTcUdTSWIzRFFFQkN3VUEKTURNeEN6QUpCZ05WQkFZVEFsVlRNUll3RkFZRFZRUUtFdzFNWlhRbmN5QkZibU55ZVhCME1Rd3dDZ1lEVlFRRApFd05TTVRJd0hoY05NalV4TVRBeU1qSXpNVE01V2hjTk1qWXdNVE14TWpJek1UTTRXakFvTVNZd0pBWURWUVFECkV4MWpZVzVrYVdSaGRHOXpMbUYxZEdobGJuUnBZMlpoY20xaExtTnZiVENDQVNJd0RRWUpLb1pJaHZjTkFRRUIKQlFBRGdnRVBBRENDQVFvQ2dnRUJBTFAyaW9WcUtQTnhEZXdtSXRvNXRuSG54UjNlYjJMTmdUeHJOUHBjVWl2eAo4V1VrSUtXUFZsOS9uRC9ISzA5OGhhdm5qelVBbFlBek5mYmdNUjFVQjNzd0JXVDFXTkM1VGsyNFYvdCt4Q01hCkRsVGppUy9VZW9JbEZDY2VXcXZsVllzV0tHV01VMTN1a2FUVnlsU05PbE5ScHVUeTREd1pxRGFlQkRHWkVvYkQKREUxcHRuR3c5ZmZQWkt1S1lvQkhEQ1BIcmdKRHhtTUplYU55cy9zSkl3VkNQa1BEdjl3UzFRK1dnRGlsbUhURApyRTlBVXo3bkorUFo1Zit6RnQxQzFaOEdLUUwrS0ZOTzBHNVV0WWdWSmJxRzNGTnBienNST0x2Y0g3WHArSGwwCnFnNTB5dVY3d1NOSkJGUzJQL21BVUg2Q2pBWVVFWmpqZXlnWnh5c2drL01DQXdFQUFhT0NBaTR3Z2dJcU1BNEcKQTFVZER3RUIvd1FFQXdJRm9EQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0RBUVlJS3dZQkJRVUhBd0l3REFZRApWUjBUQVFIL0JBSXdBREFkQmdOVkhRNEVGZ1FVY1ZZSnVZalNYSHpEa1c1US9jSlk5Y05aREJJd0h3WURWUjBqCkJCZ3dGb0FVQUxVcDhpMk9iekhvbTB5dGVENzYzT2tNMGRJd013WUlLd1lCQlFVSEFRRUVKekFsTUNNR0NDc0cKQVFVRkJ6QUNoaGRvZEhSd09pOHZjakV5TG1rdWJHVnVZM0l1YjNKbkx6QW9CZ05WSFJFRUlUQWZnaDFqWVc1awphV1JoZEc5ekxtRjFkR2hsYm5ScFkyWmhjbTFoTG1OdmJUQVRCZ05WSFNBRUREQUtNQWdHQm1lQkRBRUNBVEF1CkJnTlZIUjhFSnpBbE1DT2dJYUFmaGgxb2RIUndPaTh2Y2pFeUxtTXViR1Z1WTNJdWIzSm5MemsxTG1OeWJEQ0MKQVFVR0Npc0dBUVFCMW5rQ0JBSUVnZllFZ2ZNQThRQjJBQm1HMU1jb3FtLyt1Z052ZUNwTkFaR3F6aTF5TVErdQp6bDF3UVMwbFRNZlVBQUFCbWtib0lzc0FBQVFEQUVjd1JRSWhBTTNiNGNXQWlXK1g0a2twSVJMMXFqVk9lTEtQCkErbFJhWUo5QXVuL0tMT2NBaUExbk82dSs1VDNqVk0rTGVYQTA3VytRdjN1NnpSbTdxNlRUekpUNW9jYU93QjMKQUphWFpMOVZXSmV0OTBPSGFEY0lRbmZwOERyVjlxVHpObTVHcEQ4UHlxbkdBQUFCbWtib0kyWUFBQVFEQUVndwpSZ0loQU8zWWhnTStRSFQrVVV2SGo5VkpwVC9KaUh3UjBVTFFkbGF0RGRoSER3WXNBaUVBby9OejZTWDdTby9TCmQ3eTU1L3NRaFB1Skd1K0M4NVNIQjJMZTd4eUw4TG93RFFZSktvWklodmNOQVFFTEJRQURnZ0VCQU1wMTMxbFMKTnBweHNyUm4zL1dXeWtJK05ISURPUGtjbHNCUm1xZ3YwWXBxU0pGekZZbGdmU0dCMDZpeGFPcU9GWDIxMmZKaQoxWmFiVmNLdTZGNDRZQ1B2b0tCODRPSWlzanJtSU5YRmpsVVNZczl1K3J2SC90VmluaEFtM040NS9LQ25DaWViCjBSNWl5cEw5TnF6Q1lXQlNTRWpiQVlWSmlGemt0cjZOTGpLM3JwV3FNZG5QSFVZRjJFUklNQXRJbDJHdVJ6eHUKcEdsa1hEdE1tRGtuZ2ErR2h1ZFYrQjhpUXRnSkZCM2lSM1VYV1MxUXhmV056di9HTGc0dHp6TVJab0pKMVlScApNT3hBR3lQTEhJUjAwRXdxSHBLdHhNTmsrbnBwcmVDN2FpSTYxcjRvbC9hYzJRVFJjTzdFeEVWU3FiRGJoQVRQCldTNVZKUkFlZGRpSTFvRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KTUlJRkJqQ0NBdTZnQXdJQkFnSVJBTUlTTWt0d3FiU1JjZHhBOStLRkpqd3dEUVlKS29aSWh2Y05BUUVMQlFBdwpUekVMTUFrR0ExVUVCaE1DVlZNeEtUQW5CZ05WQkFvVElFbHVkR1Z5Ym1WMElGTmxZM1Z5YVhSNUlGSmxjMlZoCmNtTm9JRWR5YjNWd01SVXdFd1lEVlFRREV3eEpVMUpISUZKdmIzUWdXREV3SGhjTk1qUXdNekV6TURBd01EQXcKV2hjTk1qY3dNekV5TWpNMU9UVTVXakF6TVFzd0NRWURWUVFHRXdKVlV6RVdNQlFHQTFVRUNoTU5UR1YwSjNNZwpSVzVqY25sd2RERU1NQW9HQTFVRUF4TURVakV5TUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCCkNnS0NBUUVBMnBnb2RLMitsUDQ3NEI3aTVVdDFxeXdTZisybkF6SitOcGZzNkRHUHBST05DNWt1SHMwQlVUMU0KNVNodUNWVXhxcVVpWFhMMExRZkNUVUE4M3dFanVYZzM5UnBsTWpUbWhuR2RCTytFQ0Z1OUFocVo2NllCQUpwegprRzJQb2dlZzBKZlQya1ZoZ1RVOUZQbkV3RjlxM0F1V0dyQ2Y0eXJxdlNyV21NZWJjYXM3ZEE4ODI3Smd2bHBMClRoanAyeXB6WElsaFpaNys3VHlteTA1djVKNzVBRWF6L3hsTkttT3pqbWJHR0lWd3gxQmxienQwNVVpRER3aFkKWFMwam5WNmovdWpiQUtIUzlPTVpUZkx1ZXZZbm51WE5uQzJpOG4rY0Y2M3ZFemM1MGJUSUxFSFdoc0RwN0NINApXUnQvdVRwOG4xd0JuV0lFd2lpOUNxMDh5aERzR3dJREFRQUJvNEg0TUlIMU1BNEdBMVVkRHdFQi93UUVBd0lCCmhqQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0RBZ1lJS3dZQkJRVUhBd0V3RWdZRFZSMFRBUUgvQkFnd0JnRUIKL3dJQkFEQWRCZ05WSFE0RUZnUVVBTFVwOGkyT2J6SG9tMHl0ZUQ3NjNPa00wZEl3SHdZRFZSMGpCQmd3Rm9BVQplYlJaNW51MjVlUUJjNEFJaU1nYVdQYnBtMjR3TWdZSUt3WUJCUVVIQVFFRUpqQWtNQ0lHQ0NzR0FRVUZCekFDCmhoWm9kSFJ3T2k4dmVERXVhUzVzWlc1amNpNXZjbWN2TUJNR0ExVWRJQVFNTUFvd0NBWUdaNEVNQVFJQk1DY0cKQTFVZEh3UWdNQjR3SEtBYW9CaUdGbWgwZEhBNkx5OTRNUzVqTG14bGJtTnlMbTl5Wnk4d0RRWUpLb1pJaHZjTgpBUUVMQlFBRGdnSUJBSTkxMEFuUGFuWklaVEtTM3JWRXlJVjI5QldFakFLL2R1dXo4ZUw1Ym9Tb1ZwSGhra3YzCjRlb0FlRWlQZFpMajVFWjdHMkFySUsrZ3poVGxSUTFxNEZLR3BQUGFGQlNwcVYveGJVYjVVbEFYUU9ua0huM20KRlZqK3FZdjg3L1dlWStCbTRzTjNPeDhCaHlhVTdVQVEzTGVaN04xWDAxeHhRZTR3SUFBRTNKVkxVQ2lIbVpMKwpxb0NVdGdZSUZQZ2NnMzUwUU1VSVdneFBYTkdFbmNUOTIxbmU3bmx1STAyVjhwTFVtQ2xxWE9zQ3dVTHcrUFZPClpDQjdxT014eE1Cb0NVZUwyTGw0b01wT1NyNXBKQ3BMTjN0UkEyczZQMUtMczlUU3JWaE9rKzdMWDI4Tk1VbEkKdXNRL254TEpJRDBSaEFlRnRQanlPQ09zY1FCQTUzK05SalNDYWs3UDRBNWpYN3BwbWtjSkVDTCtTMGkza1hWVQp5NU1lNUJiclU4OTczalpOdi9heDYrWks2VE04aldtaW1MNm9mNk9yWDdaVTZFMldxYXp6c0ZyTEczbzJreVNiCnpsaFNnSjgxQ2w0dHYzU2JZaVlYbkpFeEtRdnpmODNEWW90b3gzZjBmd3Y3eGxuMUEyWkxwbENiME8rbC9BSzAKWUUwRFMyRlB4U0FIaTBpd01mVzJuTkhKclhjWTNMTEhENzdnUmdqZTRFdmV1YmkyeHhhK05tay9obWhMZElFVAppVkRGYW5vQ3JNVklwUTU5WFdIa3pkRm1vSFhIQlY3b2liVmpHU083VUxTUTdNSjFOejUxcGh1REpTZ0FJVTdBCjB6ckxuT3JBai9kZnJsRVdSaEN2QWdidXdMWlgxQTJzak5qWG9QT0hic1BpeStsTzFLRjgvWFk3Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBcy9hS2hXb284M0VON0NZaTJqbTJjZWZGSGQ1dllzMkJQR3MwK2x4U0svSHhaU1FnCnBZOVdYMytjUDhjclQzeUZxK2VQTlFDVmdETTE5dUF4SFZRSGV6QUZaUFZZMExsT1RiaFgrMzdFSXhvT1ZPT0oKTDlSNmdpVVVKeDVhcStWVml4WW9aWXhUWGU2UnBOWEtWSTA2VTFHbTVQTGdQQm1vTnA0RU1aa1Noc01NVFdtMgpjYkQxOTg5a3E0cGlnRWNNSThldUFrUEdZd2w1bzNLeit3a2pCVUkrUThPLzNCTFZENWFBT0tXWWRNT3NUMEJUClB1Y240OW5sLzdNVzNVTFZud1lwQXY0b1UwN1FibFMxaUJVbHVvYmNVMmx2T3hFNHU5d2Z0ZW40ZVhTcURuVEsKNVh2Qkkwa0VWTFkvK1lCUWZvS01CaFFSbU9ON0tCbkhLeUNUOHdJREFRQUJBb0lCQVFDVUlFNitKN1pUUW0vNgpPeDJlejdnYkkzRTg5NVJwRjh2VEprN3g3OEYzQ0dyd0cvOS9KbThxcGNlL096bXI4RXU2Umh1NnZhTlFaVlo2CndPZk1ReGp4VFlKektmc1R1aUw0bDg1YlpHa2VsMWpLaUlxbnd0V2ZmOU9KcTFOb2Y1aWNwZjFVTUYrQ1JsYTgKL1hmUGhudEdqME8yMlM2MmFVdnF3TCtrNzJDdmFFTjdXTCtUN2RuOEtEVnBvS3A1cWNCcHpESUN6SHNpVFZaMwp2WCsrbmUyeXhJSE5sWXpSN2dULzlkU3dScHFZbUZ5L0pyRlpGclMxZTNEcDZlZERyTnNaeTlPUEMyWFRENC9wCnBGV3hxL0R1WDFVOGN2MDlRbFc0ZUFlV092R3NDaVV0cjR3NGFnUndoVWtQbmV5cmVXUkVSanZqRzB3Y3VWZzkKNEFCUzY4SHhBb0dCQU1VVHlqeWJjbXBOblRYMmFxYjhSdFVacEc2VjBkcnpKYys4K2xDNTg1ckx5SWRkeVNLWApDRlUzRmhtaGFhdVpreEFFWFFKb3hvTlJWNFRyMzNnZVg0V0UzUnpaMVhnUFhHWWN6bjhqNkVzSXU5VU05aXhHCnRDNjErRE04aE5vNFBVL05aUlBIYzh0MXFTcFp0WlVlZnl6M1ZaVlNWV3RIeXdSMWYzZkJMbDM3QW9HQkFPbkUKMVcwTWNyL05OWkYyYlc4bFBKTnB1N0pHaWRIUTE3NVNKRm8zd0RLQ0ducVFzUUJIS3ZtVEJSUlFMTEVrN0wvWgptWjNjYWxYNDZGcWdWSWN2WEpVRmlTRFdyLy8vSUlHVGoybXlsTnY1Y0R3TndHOEVoUjM2MVh0dDMrRzMwWEQzCjFmU0plQkNDRlY0ai9lRmFrZVpPQUU5bUNYUzFtQm5NYnNmL3ZaaHBBb0dBTEMxeWdVR0xWVjhPcGNFV1NWWjEKL21FZ0poWDVrKzQ3aEtUbEsrRnpSVGozTzdqL1ZIeXN4b1Z4czg4bUkreHFOZ1gwWDR6akt4NjUwcmNaUWhEMAo4clpFNXFuQ0c0YTkvTG5xWkQvRlc4U2FibmpZV2phRFA1RlZFUTg0N0wzOHFIM3ZjWTZkVzNlRnMxT215OFdwClZvZ2ZMRGpub3dQVjg2cnZKd1lzQWE4Q2dZQkVHNXJxK0pOK0dqV2ZPZGZNYUJic0JBUXhmcWVzdjZIN3kwYlkKR2lJZkZSVE4zTllVOUtjcXE1RHhTQ0tkUWRyUVVuK1ZKS0MraDVSNnd2ZWRvMGpnQ2dyWHpIVGVxdUEzb0Z4SwpPVU54aTQwTmtod2N2RDVrYTY1REZkSUNtMkdqL2pFUjIvTmxLK0U1MmxhZmo1bXVkYzlWVXE4eWw2M0c1bTdvClNqUmM4UUtCZ0JHYlAzbkRTTTV4Uy9XdytoUkt6SEtUa0dkZHkzbTdwMXIyZHprY01CaDU2TEIxTUxlM2FHWGgKNGJ4N2pLaHFSTitVNjEzckZLSmZDUGZ0Y09tdFd5RFRGSFdJbWNvYVEwT1hkekNVZjF1RkYzYUd3OG9BMFBZWQpjcFBuVXkxUjZQSTlwR3E5Rkt5VlN0WS9jR3pNS3ZCZ2pLd3VteU1UeFl5a2hPc0hmNEN0Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
+  kind: Secret
+  metadata:
+    annotations:
+      cert-manager.io/alt-names: candidatos.authenticfarma.com
+      cert-manager.io/certificate-name: candidatos-authenticfarma-tls
+      cert-manager.io/common-name: candidatos.authenticfarma.com
+      cert-manager.io/ip-sans: ""
+      cert-manager.io/issuer-group: cert-manager.io
+      cert-manager.io/issuer-kind: ClusterIssuer
+      cert-manager.io/issuer-name: letsencrypt-prod
+      cert-manager.io/uri-sans: ""
+    creationTimestamp: "2025-11-02T23:30:10Z"
+    labels:
+      controller.cert-manager.io/fao: "true"
+    name: candidatos-authenticfarma-tls
+    namespace: authenticfarma-candidatos
+    resourceVersion: "1762126210540287003"
+    uid: e1a652f6-cf9b-45b2-8af0-5eb95def870f
+  type: kubernetes.io/tls
+- apiVersion: v1
+  data:
+    APP_KEY: YmFzZTY0OjJCK1gzR2t4cVhLbndBTGpSeXU5dkJ3MmJsc25Ddk5uK3pHbUFqRzVVRm89
+    DB_PASSWORD: N09YKjowNWFvTDZ7Q2c1RQ==
+    DB_USERNAME: Y2FuZGlkYXRvc3VzZXI=
+    GOOGLE_CLIENT_SECRET: R09DU1BYLVZkM0ZRakJJbzNabWlJdHBiam9IM1l6UjJJZjI=
+    MAIL_PASSWORD: amdoeXVjZ3VmZWFoaW15bg==
+    MAIL_USERNAME: c3RhY2suZGV2QGF1dGhlbnRpYy5jb20uY28=
+  kind: Secret
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","data":{"APP_KEY":"YmFzZTY0OjJCK1gzR2t4cVhLbndBTGpSeXU5dkJ3MmJsc25Ddk5uK3pHbUFqRzVVRm89","DB_PASSWORD":"L0hvXTdxOzpJMmU6bVNGMA==","DB_USERNAME":"Y2FuZGlkYXRvc3VzZXI=","GOOGLE_CLIENT_SECRET":"R09DU1BYLVZkM0ZRakJJbzNabWlJdHBiam9IM1l6UjJJZjI=","MAIL_PASSWORD":"amdoeXVjZ3VmZWFoaW15bg==","MAIL_USERNAME":"c3RhY2suZGV2QGF1dGhlbnRpYy5jb20uY28="},"kind":"Secret","metadata":{"annotations":{},"creationTimestamp":null,"name":"laravel-secrets","namespace":"authenticfarma-candidatos"}}
+    creationTimestamp: "2025-11-02T20:14:05Z"
+    name: laravel-secrets
+    namespace: authenticfarma-candidatos
+    resourceVersion: "1763003833263279013"
+    uid: ed37500e-dece-4686-9022-ae9a60114c04
+  type: Opaque
+- apiVersion: v1
+  data:
+    credentials-json: ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAiYXV0aGVudGljLXByb2QtNDY0MjE2IiwKICAicHJpdmF0ZV9rZXlfaWQiOiAiZTllODY4ZmIzN2FjMDRlZmU1ODc3MjZlNjFhNGNjYjM0NWMwNTQxOSIsCiAgInByaXZhdGVfa2V5IjogIi0tLS0tQkVHSU4gUFJJVkFURSBLRVktLS0tLVxuTUlJRXZRSUJBREFOQmdrcWhraUc5dzBCQVFFRkFBU0NCS2N3Z2dTakFnRUFBb0lCQVFDTW9aVjVzalQyQ0JKNVxuZk1sSzdQVVN6cnVnS2lhWHczcWJVSHgrN3FJbkN5WS90VkVybkJvalhqcDJObjNaT3Z6andxVWYrdDZCRkplTFxueTk0LzNsMmNLanFSUGFsbHVOYXZmdDF1UkZLaW9oMDlwWW12RHNDMHhWUVFuTklKc0d5T1ltVWNqSy90WEVpNlxuNTRzd29FSDQvTVNmVUFzSnkrWGZ0OUkvMWpMSXNKdE15OXVYL0NrMTR1a0tzUENvMEg3R0JiMTY0MHpMRWlZL1xuaFV6QlkwZTdYVzdMNC9MUjhTU3NHalpOMTNNZzRNWDA3Y2Z3YXNSQW41VGNWS1JOR3BtZ2QzeUxCQ3J5WVBWOVxudkd6Z0twcVFZV2NUZjJhemNHaVNOSkVuNVlkN1BVb3lvZXU4OVlMcE14YlFkVEl0SEJlejZPSEZ3MjVoSzdVTFxuOG9TejFLQVJBZ01CQUFFQ2dnRUFBOTJIeDVTSHNzdCtBU3VBNGplcEgzU01pNnZIbG5HZnM4SitsQzZTODcwY1xuREFibWVFQmpmTjFnMWZ4TUcrWEIxYkRLbG0vRmRkN1BCalNsb3pQRmR1bGlPcmtWMHQ5RnZLL0wva3FQeXVYblxuSlM2Zzg0TFZvU0piVzlRem9iaUxyZmplWVVQWFYyV0FuNWZhL09IVmJtRTVpNkllUU9LdDFYeFpUR1U0SXNsTlxuZFdyd2hFUzJEVU9OTzhzWnRGRUczNnJZM3dyVE11Z1MyMEs5SW0yRHJFQ2Zjb1V2UEFZd0I5ZG5LczRlU2JEMVxuNGx5cjJaM0lMWjdjUmwzaUhNYXljQ05tSGpMNTg1Nlc2SzNCdjZjQlBPNHFoMmN4RnY1NE9yRVA4aGVVam90aFxuK001cHFHQURBYlZwV1dGZTdOSDA2TmIxaDE5MjdlK2VxVXBycTRHZFVRS0JnUURHSWhtVmdkWktTWXUrS0ZIRlxuOTdzZ21xOWVZWlk5YjNlWmV5eWlDTldXR2J6YVpiRGJrRkJQMHk2RWFlaU9OM1dTeFI0eTc3SEtUMkQ5Rkg2elxuaDQwMWRkclpwblVQajYyK0tsYjJNTU5CdGV0QkoxQnBlWFF5ZjBpRG9UOGxidzFsY0pEd3gyR0NrVVNKVXlINVxuekI3N2ZnRDRJa1lOQ3R2RmwyZjdNY240ZndLQmdRQzF0RFdCSVZmQmRnK1FpeWpDampWUkwzTjU3V0gyMjJ4QVxuNEZxQmI1cEgxYkhkcWZKcVJUZEhNekswYXp3OWJpc0Yvcis2dzlxanowWG5NUk1UMUFjbnNnWnQvTmo4Z2tTU1xuOC8wV3l2Wkk4Z3I1VysxYkY0K09CWGxxZnZLLzYvdUZhd2s5Yyt0eG1tSVY1MjUybVZUSmt5YytrODk3R1IrNFxuWDd1cTlwV2Zid0tCZ1FDT3FiME1OdW5xb1p3NmR1T3lqUmN6ZWMzdVFvd2dmbU42b3dOWFJNOHQvaWhLaFZCY1xuT0VScnhkN0h2MDZSSUlQTEE1NGtCUTFhWTkrdE94V2tCV1Y2NmZxRUgyUklxU2JzTjZaWUxISmJuVGJndWdNZlxuZnpGWXJ1ZXl4K2NrK0JxSVFRNU1JUFFvUkpzNTJoOHJzM3RYa0xuMzhRM0psRmo4cEhGZG9OTVIxd0tCZ0RFMlxuYTc5Ym5uOEJVTm5mTnR6cTB6bjMxaGpSMkZTWnZVb2MrYVpRNmNKRytIT0cwZWRDYytSTzA0N1Y5R3pXNThRcFxuNlJmV2IrTXFBazdKbGRjcTkvMGlWR2Q1c2ZOQi9QeW9KSVlGMW9xUE03V3gxaWx6eWllM0I5bDJKSjBpZHU3OVxudkhUdWJuaElUZ1NNdC9oYk13R2RYMld0ZHVacU9aTWdLcDMxUnpUMUFvR0FBdUw2STAxb2dRVm1MSkIxdEgzd1xuWjlxT2l2WFA1WUlEaHBOR1lSZXc5QW92ODc3S3dJY281YXprYlNuQmdOeDA4d3FqVm9IRUhtMmE3OXR6TzR0M1xuYzVsSVplWUlqMVU0SW5odVBrMjZVMllGcHhvbkdhbWQ4S0U5eHVwQTRlY3NPWjJMT2pUYllGaDlTVXpJcGJpWFxuQmxVSUFPZUpZdkphSVJSaSttNHlxRnc9XG4tLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tXG4iLAogICJjbGllbnRfZW1haWwiOiAibGFyYXZlbC1nZW1pbmktcHJvZEBhdXRoZW50aWMtcHJvZC00NjQyMTYuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLAogICJjbGllbnRfaWQiOiAiMTAxNzgzODMyNDAyMDIyMTA5MDM4IiwKICAiYXV0aF91cmkiOiAiaHR0cHM6Ly9hY2NvdW50cy5nb29nbGUuY29tL28vb2F1dGgyL2F1dGgiLAogICJ0b2tlbl91cmkiOiAiaHR0cHM6Ly9vYXV0aDIuZ29vZ2xlYXBpcy5jb20vdG9rZW4iLAogICJhdXRoX3Byb3ZpZGVyX3g1MDlfY2VydF91cmwiOiAiaHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vb2F1dGgyL3YxL2NlcnRzIiwKICAiY2xpZW50X3g1MDlfY2VydF91cmwiOiAiaHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vcm9ib3QvdjEvbWV0YWRhdGEveDUwOS9sYXJhdmVsLWdlbWluaS1wcm9kJTQwYXV0aGVudGljLXByb2QtNDY0MjE2LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwKICAidW5pdmVyc2VfZG9tYWluIjogImdvb2dsZWFwaXMuY29tIgp9Cg==
+  kind: Secret
+  metadata:
+    creationTimestamp: "2025-11-10T03:46:50Z"
+    name: vertex-ai-secrets
+    namespace: authenticfarma-candidatos
+    resourceVersion: "1762746411000159015"
+    uid: 5f558c1d-c6f3-4b74-bbf0-f59cfecce17d
+  type: Opaque
+- apiVersion: v1
+  data:
+    ca.crt: |
+      -----BEGIN CERTIFICATE-----
+      MIIELTCCApWgAwIBAgIRAJSpTFU2I+0hGxy0TvKoqfkwDQYJKoZIhvcNAQELBQAw
+      LzEtMCsGA1UEAxMkZmMyNDdjNWYtMTJmOC00OWYyLWI2MDQtZjUxMzhiZGM1ZDRj
+      MCAXDTI1MDcyODEzMDczOFoYDzIwNTUwNzIxMTQwNzM4WjAvMS0wKwYDVQQDEyRm
+      YzI0N2M1Zi0xMmY4LTQ5ZjItYjYwNC1mNTEzOGJkYzVkNGMwggGiMA0GCSqGSIb3
+      DQEBAQUAA4IBjwAwggGKAoIBgQCoHQrYv4pJXY75AgdIY31y8WaGUxgj0/IZCAOz
+      6WgKPvbzev3xliV+lAF1Cdb/10LpzYn3SdFVy5jb6PG5ZML/UhqCqqfGsJjXlH+s
+      3LkgHGppY1pfgjyyW+rpyMypp3W7CbBPP1TVresZx4QWXP6Z1snOcdnVrYBJLSU/
+      TYDB+gs4DMlF8SNnv8CatoPOSttoMKtdDuqzjZuVoTEAcfy0BXWIN2CCmwGJvc1X
+      2EwUKksONdDdTzr38VyYcgyYGQ3E8QChKWkJk57OitY+pE/W81hFJ4D1/YPQ9C4X
+      S3SVGMmEWCX8UpdYwUP4HWAiUZVAhS+PZtn2P9jcz5fyQyt0iiFZlGjnZghamkhA
+      9AHt5V0jK6ZdOvUQRiq84V5Yt3WDVphhdZSYBSj5LgyEDF3M19ki/nYeyfUHZH80
+      kYDUBqCLNGoehfbEykEaml++m1M6DExzv0TFFqMdDgMRI2TnHw+BQAvuJhP+HH0B
+      zrLV2HqLqqNQuL67sSg0CC8sxKkCAwEAAaNCMEAwDgYDVR0PAQH/BAQDAgIEMA8G
+      A1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFFyw4ClLjRUEAafrApJ3eKfmwoQ4MA0G
+      CSqGSIb3DQEBCwUAA4IBgQAavPlSxqN0ylkbAELAUS9Rc1X84AsJc2IsE6Mofuri
+      +i2005WffQ8aC6oJZG9oZa1Fda2alWdH7ZjigHd61yd8b+axdY2SZlKcIcQeFmln
+      Bwpazy8OvMTEcVQiCvyxEVvGDlrv7T+sPI1NG57ono4diIhMiHwmLhnGmljpFIbp
+      IpfmHD6zEwt4P14M67NkQnVvq57II2n+h8PhBTSfUXaWnz4YTIRbayWbkJbddiR9
+      HpnH4XRZsG/5G+ohpEvlsFHKuE93/ug9w8hBfDd2HANRqoW/qt1fryAl5QFyompW
+      3m3bmvKYNNaFu8Z7mVyKXZkyzsbm1z+XxjbDPoaJMfk3YQLSNLFgx9n1zjbQ5aet
+      ZWSVI4GMvPxNpY8QQ/QoLsIw9e+AxRZst8wWGwbIgr8s4uZXqMkT/+x6WeNduW3d
+      WLS1dUbxr1iDcjnCtEhA71oiH0zBSLyj1E2JN2KgjF+5Am53KJylYexb3z3y8Ftm
+      lcTCIQiT/j/xLdPBrWNMWQo=
+      -----END CERTIFICATE-----
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubernetes.io/description: Contains a CA bundle that can be used to verify the
+        kube-apiserver when using internal endpoints such as the internal service
+        IP or kubernetes.default.svc. No other usage is guaranteed across distributions
+        of Kubernetes clusters.
+    creationTimestamp: "2025-11-02T20:13:56Z"
+    name: kube-root-ca.crt
+    namespace: authenticfarma-candidatos
+    resourceVersion: "1762114436691663017"
+    uid: 0c2c4493-1c42-4f6c-b63b-93f23347bc66
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cloud.google.com/backend-config: '{"default": "authenticfarma-candidatos-backendconfig"}'
+      ingress.gcp.kubernetes.io/pre-shared-cert: mcrt-daa83720-343a-428d-90a4-0154d6222327
+      ingress.kubernetes.io/backends: '{"k8s-be-30422--1de083502cc6c821":"HEALTHY","k8s1-1de08350-authenticfarma-c-authenticfarma-candid-8-2b6c81a3":"UNHEALTHY"}'
+      ingress.kubernetes.io/https-forwarding-rule: k8s2-fs-dv98x33l-authenticfarma-c-authenticfarma-candi-hza02nsr
+      ingress.kubernetes.io/https-target-proxy: k8s2-ts-dv98x33l-authenticfarma-c-authenticfarma-candi-hza02nsr
+      ingress.kubernetes.io/ssl-cert: mcrt-daa83720-343a-428d-90a4-0154d6222327
+      ingress.kubernetes.io/url-map: k8s2-um-dv98x33l-authenticfarma-c-authenticfarma-candi-hza02nsr
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cloud.google.com/backend-config":"{\"default\": \"authenticfarma-candidatos-backendconfig\"}","kubernetes.io/ingress.allow-http":"false","kubernetes.io/ingress.class":"gce","kubernetes.io/ingress.global-static-ip-name":"candidatos-authenticfarma-ip","networking.gke.io/managed-certificates":"authenticfarma-candidatos-ssl"},"labels":{"app":"authenticfarma-candidatos","platform":"authenticfarma"},"name":"authenticfarma-candidatos-ingress","namespace":"authenticfarma-candidatos"},"spec":{"rules":[{"host":"candidatos.authenticfarma.com","http":{"paths":[{"backend":{"service":{"name":"authenticfarma-candidatos-service","port":{"number":80}}},"path":"/*","pathType":"ImplementationSpecific"}]}}]}}
+      kubernetes.io/ingress.allow-http: "false"
+      kubernetes.io/ingress.class: gce
+      kubernetes.io/ingress.global-static-ip-name: candidatos-authenticfarma-ip
+      networking.gke.io/managed-certificates: authenticfarma-candidatos-ssl
+    creationTimestamp: "2025-11-02T20:14:07Z"
+    finalizers:
+    - networking.gke.io/ingress-finalizer-V2
+    generation: 1
+    labels:
+      app: authenticfarma-candidatos
+      platform: authenticfarma
+    name: authenticfarma-candidatos-ingress
+    namespace: authenticfarma-candidatos
+    resourceVersion: "1762120046559775015"
+    uid: 3454ed6f-87de-4e5b-b2b8-8ad633d0d4ef
+  spec:
+    rules:
+    - host: candidatos.authenticfarma.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: authenticfarma-candidatos-service
+              port:
+                number: 80
+          path: /*
+          pathType: ImplementationSpecific
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 34.111.75.74
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","nginx.ingress.kubernetes.io/backend-protocol":"HTTP","nginx.ingress.kubernetes.io/ssl-redirect":"true","nginx.ingress.kubernetes.io/use-forwarded-headers":"true"},"name":"authenticfarma-candidatos-ingress-nginx","namespace":"authenticfarma-candidatos"},"spec":{"ingressClassName":"nginx","rules":[{"host":"candidatos.authenticfarma.com","http":{"paths":[{"backend":{"service":{"name":"authenticfarma-candidatos-service","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["candidatos.authenticfarma.com"],"secretName":"candidatos-authenticfarma-tls"}]}}
+      nginx.ingress.kubernetes.io/backend-protocol: HTTP
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    creationTimestamp: "2025-11-02T22:46:15Z"
+    generation: 2
+    name: authenticfarma-candidatos-ingress-nginx
+    namespace: authenticfarma-candidatos
+    resourceVersion: "1762447821177775005"
+    uid: 49fb6d29-8a01-4644-82a5-0e14e2707c7b
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: candidatos.authenticfarma.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: authenticfarma-candidatos-service
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - candidatos.authenticfarma.com
+      secretName: candidatos-authenticfarma-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 34.16.17.77
+kind: List
+metadata:
+  resourceVersion: ""

@@ -1,10 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: authenticfarma-candidatos
+  name: authentic-candidatos
   namespace: authenticfarma-candidatos
   labels:
     app: authenticfarma-candidatos
+    platform: authenticfarma
 spec:
   replicas: 2
   selector:
@@ -14,15 +15,12 @@ spec:
     metadata:
       labels:
         app: authenticfarma-candidatos
-      annotations:
-        iam.gke.io/gcp-service-account: authentic-candidatos-gsa@authentic-prod-464216.iam.gserviceaccount.com
+        platform: authenticfarma
     spec:
       serviceAccountName: authenticfarma-candidatos-sa
       containers:
         - name: cloud-sql-proxy
           image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
-          command:
-            - "/cloud-sql-proxy"
           args:
             - "--address=0.0.0.0"
             - "--port=3306"
@@ -31,50 +29,43 @@ spec:
             runAsNonRoot: true
           resources:
             requests:
-              memory: "100Mi"
-              cpu: "50m"
+              memory: "128Mi"
+              cpu: "100m"
             limits:
-              memory: "200Mi"
-              cpu: "150m"
-        - name: authenticfarma-candidatos
-          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+              memory: "256Mi"
+              cpu: "200m"
+        - name: app
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
           ports:
             - containerPort: 80
+              name: http
           resources:
             requests:
-              cpu: "200m"
-              memory: "400Mi"
+              cpu: "100m"
+              memory: "256Mi"
             limits:
-              cpu: "800m"
-              memory: "1Gi"
+              cpu: "500m"
+              memory: "512Mi"
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /login
               port: 80
-            initialDelaySeconds: 90
+            initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 3
+            failureThreshold: 6
           livenessProbe:
             httpGet:
-              path: /healthz
-              port: 80
-            initialDelaySeconds: 120
-            periodSeconds: 20
-            timeoutSeconds: 5
-            failureThreshold: 3
-          startupProbe:
-            httpGet:
-              path: /healthz
+              path: /login
               port: 80
             initialDelaySeconds: 60
-            periodSeconds: 10
+            periodSeconds: 30
             timeoutSeconds: 5
-            failureThreshold: 36
+            failureThreshold: 3
           env:
             # --- BASIC APP CONFIG ---
             - name: APP_NAME
-              value: "Authentic-candidatos"
+              value: "AuthenticFarma Candidatos"
             - name: APP_ENV
               value: "production"
             - name: APP_DEBUG
@@ -93,26 +84,34 @@ spec:
             - name: DB_DATABASE
               value: "authentic"
             - name: DB_USERNAME
-              value: "candidatosuser"
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: DB_PASSWORD
             # --- APP DRIVERS ---
             - name: BROADCAST_DRIVER
               value: "log"
             - name: CACHE_DRIVER
               value: "database"
             - name: QUEUE_CONNECTION
-              value: "database"
+              value: "sync"
             - name: SESSION_DRIVER
               value: "database"
             - name: SESSION_LIFETIME
               value: "120"
-            - name: SESSION_DOMAIN
-              value: ".authenticfarma.com"
+            # - name: SESSION_DOMAIN
+            #   value: ""
             - name: SESSION_COOKIE
               value: "authentic_session"
             - name: SESSION_SECURE_COOKIE
               value: "true"
             - name: SESSION_SAME_SITE
-              value: "none"
+              value: "lax"
             # --- MAIL CONFIG ---
             - name: MAIL_MAILER
               value: "smtp"
@@ -120,6 +119,16 @@ spec:
               value: "smtp.gmail.com"
             - name: MAIL_PORT
               value: "587"
+            - name: MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: MAIL_USERNAME
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: MAIL_PASSWORD
             - name: MAIL_ENCRYPTION
               value: "tls"
             - name: MAIL_FROM_ADDRESS
@@ -137,6 +146,20 @@ spec:
               value: "null"
             - name: GOOGLE_CLOUD_KEY_FILE
               value: "keys/gcs-key.json"
+            # --- VERTEX AI / GEMINI CONFIG ---
+            - name: GEMINI_PROVIDER
+              value: "vertex"
+            - name: GEMINI_MODEL
+              value: "gemini-2.0-flash-lite"
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              valueFrom:
+                secretKeyRef:
+                  name: vertex-ai-secrets
+                  key: credentials-json
+            - name: GOOGLE_CLOUD_PROJECT
+              value: "authentic-prod-464216"
+            - name: GOOGLE_CLOUD_LOCATION
+              value: "us-central1"
             # --- PUSHER ---
             - name: PUSHER_APP_ID
               value: ""
@@ -149,6 +172,11 @@ spec:
             # --- GOOGLE OAUTH ---
             - name: GOOGLE_CLIENT_ID
               value: "1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com"
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: GOOGLE_CLIENT_SECRET
             - name: GOOGLE_REDIRECT
               value: "https://candidatos.authenticfarma.com/google-auth/callback"
             # --- SECRET REFERENCES ---
@@ -157,23 +185,3 @@ spec:
                 secretKeyRef:
                   name: laravel-secrets
                   key: APP_KEY
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: laravel-secrets
-                  key: DB_PASSWORD
-            - name: MAIL_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: laravel-secrets
-                  key: MAIL_USERNAME
-            - name: MAIL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: laravel-secrets
-                  key: MAIL_PASSWORD
-            - name: GOOGLE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: laravel-secrets
-                  key: GOOGLE_CLIENT_SECRET

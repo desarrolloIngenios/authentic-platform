@@ -1,0 +1,245 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    autopilot.gke.io/resource-adjustment: '{"input":{"containers":[{"limits":{"cpu":"200m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"},"name":"cloud-sql-proxy"},{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"},"name":"app"}]},"output":{"containers":[{"limits":{"cpu":"200m","ephemeral-storage":"1Gi","memory":"256Mi"},"requests":{"cpu":"100m","ephemeral-storage":"1Gi","memory":"128Mi"},"name":"cloud-sql-proxy"},{"limits":{"cpu":"500m","ephemeral-storage":"1Gi","memory":"512Mi"},"requests":{"cpu":"100m","ephemeral-storage":"1Gi","memory":"256Mi"},"name":"app"}]},"computeClassAtAdmission":"Default","modified":true}'
+    autopilot.gke.io/warden-version: 33.33.20-gke.0
+    deployment.kubernetes.io/revision: "1"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"labels":{"app":"authenticfarma-candidatos","platform":"authenticfarma"},"name":"authentic-candidatos","namespace":"authenticfarma-candidatos"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"authenticfarma-candidatos"}},"template":{"metadata":{"labels":{"app":"authenticfarma-candidatos","platform":"authenticfarma"}},"spec":{"containers":[{"args":["--address=0.0.0.0","--port=3306","authenticfarma-425820:us-central1:authentic"],"image":"us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0","name":"cloud-sql-proxy","resources":{"limits":{"cpu":"200m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"securityContext":{"runAsNonRoot":true}},{"env":[{"name":"APP_NAME","value":"AuthenticFarma Candidatos"},{"name":"APP_ENV","value":"production"},{"name":"APP_DEBUG","value":"false"},{"name":"APP_URL","value":"https://candidatos.authenticfarma.com"},{"name":"LOG_CHANNEL","value":"stack"},{"name":"DB_CONNECTION","value":"mysql"},{"name":"DB_HOST","value":"127.0.0.1"},{"name":"DB_PORT","value":"3306"},{"name":"DB_DATABASE","value":"authentic"},{"name":"DB_USERNAME","valueFrom":{"secretKeyRef":{"key":"DB_USERNAME","name":"laravel-secrets"}}},{"name":"DB_PASSWORD","valueFrom":{"secretKeyRef":{"key":"DB_PASSWORD","name":"laravel-secrets"}}},{"name":"BROADCAST_DRIVER","value":"log"},{"name":"CACHE_DRIVER","value":"database"},{"name":"QUEUE_CONNECTION","value":"sync"},{"name":"SESSION_DRIVER","value":"database"},{"name":"SESSION_LIFETIME","value":"120"},{"name":"SESSION_COOKIE","value":"authentic_session"},{"name":"SESSION_SECURE_COOKIE","value":"true"},{"name":"SESSION_SAME_SITE","value":"lax"},{"name":"MAIL_MAILER","value":"smtp"},{"name":"MAIL_HOST","value":"smtp.gmail.com"},{"name":"MAIL_PORT","value":"587"},{"name":"MAIL_USERNAME","valueFrom":{"secretKeyRef":{"key":"MAIL_USERNAME","name":"laravel-secrets"}}},{"name":"MAIL_PASSWORD","valueFrom":{"secretKeyRef":{"key":"MAIL_PASSWORD","name":"laravel-secrets"}}},{"name":"MAIL_ENCRYPTION","value":"tls"},{"name":"MAIL_FROM_ADDRESS","value":"activacion@authenticfarma.com"},{"name":"MAIL_FROM_NAME","value":"Authentic Farma"},{"name":"GOOGLE_CLOUD_PROJECT_ID","value":"authenticfarma-QA"},{"name":"GOOGLE_CLOUD_STORAGE_BUCKET","value":"backups-qa"},{"name":"GOOGLE_CLOUD_STORAGE_PATH_PREFIX","value":"null"},{"name":"GOOGLE_CLOUD_STORAGE_API_URI","value":"null"},{"name":"GOOGLE_CLOUD_KEY_FILE","value":"keys/gcs-key.json"},{"name":"GEMINI_PROVIDER","value":"vertex"},{"name":"GEMINI_MODEL","value":"gemini-2.0-flash-lite"},{"name":"GOOGLE_APPLICATION_CREDENTIALS","valueFrom":{"secretKeyRef":{"key":"credentials-json","name":"vertex-ai-secrets"}}},{"name":"GOOGLE_CLOUD_PROJECT","value":"authentic-prod-464216"},{"name":"GOOGLE_CLOUD_LOCATION","value":"us-central1"},{"name":"PUSHER_APP_ID","value":""},{"name":"PUSHER_APP_KEY","value":""},{"name":"PUSHER_APP_SECRET","value":""},{"name":"PUSHER_APP_CLUSTER","value":"mt1"},{"name":"GOOGLE_CLIENT_ID","value":"1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com"},{"name":"GOOGLE_CLIENT_SECRET","valueFrom":{"secretKeyRef":{"key":"GOOGLE_CLIENT_SECRET","name":"laravel-secrets"}}},{"name":"GOOGLE_REDIRECT","value":"https://candidatos.authenticfarma.com/google-auth/callback"},{"name":"APP_KEY","valueFrom":{"secretKeyRef":{"key":"APP_KEY","name":"laravel-secrets"}}}],"image":"us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/login","port":80},"initialDelaySeconds":60,"periodSeconds":30,"timeoutSeconds":5},"name":"app","ports":[{"containerPort":80,"name":"http"}],"readinessProbe":{"failureThreshold":6,"httpGet":{"path":"/login","port":80},"initialDelaySeconds":30,"periodSeconds":10,"timeoutSeconds":5},"resources":{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"}}}],"serviceAccountName":"authenticfarma-candidatos-sa"}}}}
+  creationTimestamp: "2025-11-13T10:55:42Z"
+  generation: 1
+  labels:
+    app: authenticfarma-candidatos
+    platform: authenticfarma
+  name: authentic-candidatos
+  namespace: authenticfarma-candidatos
+  resourceVersion: "1763031431750399016"
+  uid: 01e51c39-52a2-4ae3-93f8-d40798380b8d
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: authenticfarma-candidatos
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: authenticfarma-candidatos
+        platform: authenticfarma
+    spec:
+      containers:
+      - args:
+        - --address=0.0.0.0
+        - --port=3306
+        - authenticfarma-425820:us-central1:authentic
+        image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
+        imagePullPolicy: IfNotPresent
+        name: cloud-sql-proxy
+        resources:
+          limits:
+            cpu: 200m
+            ephemeral-storage: 1Gi
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            ephemeral-storage: 1Gi
+            memory: 128Mi
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+          runAsNonRoot: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      - env:
+        - name: APP_NAME
+          value: AuthenticFarma Candidatos
+        - name: APP_ENV
+          value: production
+        - name: APP_DEBUG
+          value: "false"
+        - name: APP_URL
+          value: https://candidatos.authenticfarma.com
+        - name: LOG_CHANNEL
+          value: stack
+        - name: DB_CONNECTION
+          value: mysql
+        - name: DB_HOST
+          value: 127.0.0.1
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_DATABASE
+          value: authentic
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: DB_USERNAME
+              name: laravel-secrets
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: DB_PASSWORD
+              name: laravel-secrets
+        - name: BROADCAST_DRIVER
+          value: log
+        - name: CACHE_DRIVER
+          value: database
+        - name: QUEUE_CONNECTION
+          value: sync
+        - name: SESSION_DRIVER
+          value: database
+        - name: SESSION_LIFETIME
+          value: "120"
+        - name: SESSION_COOKIE
+          value: authentic_session
+        - name: SESSION_SECURE_COOKIE
+          value: "true"
+        - name: SESSION_SAME_SITE
+          value: lax
+        - name: MAIL_MAILER
+          value: smtp
+        - name: MAIL_HOST
+          value: smtp.gmail.com
+        - name: MAIL_PORT
+          value: "587"
+        - name: MAIL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: MAIL_USERNAME
+              name: laravel-secrets
+        - name: MAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: MAIL_PASSWORD
+              name: laravel-secrets
+        - name: MAIL_ENCRYPTION
+          value: tls
+        - name: MAIL_FROM_ADDRESS
+          value: activacion@authenticfarma.com
+        - name: MAIL_FROM_NAME
+          value: Authentic Farma
+        - name: GOOGLE_CLOUD_PROJECT_ID
+          value: authenticfarma-QA
+        - name: GOOGLE_CLOUD_STORAGE_BUCKET
+          value: backups-qa
+        - name: GOOGLE_CLOUD_STORAGE_PATH_PREFIX
+          value: "null"
+        - name: GOOGLE_CLOUD_STORAGE_API_URI
+          value: "null"
+        - name: GOOGLE_CLOUD_KEY_FILE
+          value: keys/gcs-key.json
+        - name: GEMINI_PROVIDER
+          value: vertex
+        - name: GEMINI_MODEL
+          value: gemini-2.0-flash-lite
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          valueFrom:
+            secretKeyRef:
+              key: credentials-json
+              name: vertex-ai-secrets
+        - name: GOOGLE_CLOUD_PROJECT
+          value: authentic-prod-464216
+        - name: GOOGLE_CLOUD_LOCATION
+          value: us-central1
+        - name: PUSHER_APP_ID
+        - name: PUSHER_APP_KEY
+        - name: PUSHER_APP_SECRET
+        - name: PUSHER_APP_CLUSTER
+          value: mt1
+        - name: GOOGLE_CLIENT_ID
+          value: 1087239389819-5eck0eo7e3o5f1nku8gumb0mitgl6ag5.apps.googleusercontent.com
+        - name: GOOGLE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: GOOGLE_CLIENT_SECRET
+              name: laravel-secrets
+        - name: GOOGLE_REDIRECT
+          value: https://candidatos.authenticfarma.com/google-auth/callback
+        - name: APP_KEY
+          valueFrom:
+            secretKeyRef:
+              key: APP_KEY
+              name: laravel-secrets
+        image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:v4.2.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /login
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: app
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 6
+          httpGet:
+            path: /login
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 500m
+            ephemeral-storage: 1Gi
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            ephemeral-storage: 1Gi
+            memory: 256Mi
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccount: authenticfarma-candidatos-sa
+      serviceAccountName: authenticfarma-candidatos-sa
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: kubernetes.io/arch
+        operator: Equal
+        value: amd64
+status:
+  availableReplicas: 2
+  conditions:
+  - lastTransitionTime: "2025-11-13T10:57:11Z"
+    lastUpdateTime: "2025-11-13T10:57:11Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2025-11-13T10:55:42Z"
+    lastUpdateTime: "2025-11-13T10:57:11Z"
+    message: ReplicaSet "authentic-candidatos-5cd496bd5c" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  observedGeneration: 1
+  readyReplicas: 2
+  replicas: 2
+  updatedReplicas: 2

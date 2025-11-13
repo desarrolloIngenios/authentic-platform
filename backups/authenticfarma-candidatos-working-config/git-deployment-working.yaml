@@ -20,9 +20,9 @@ spec:
       serviceAccountName: authenticfarma-candidatos-sa
       containers:
         - name: cloud-sql-proxy
-          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
           args:
-            - "--structured-logs"
+            - "--address=0.0.0.0"
             - "--port=3306"
             - "authenticfarma-425820:us-central1:authentic"
           securityContext:
