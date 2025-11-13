@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: us-central1-docker.pkg.dev/authentic-prod-464216/yosoy-repo/yosoy-historia-clinica:v3
+        image: us-central1-docker.pkg.dev/authentic-prod-464216/yosoy-repo/yosoy-historia-clinica:v4
         ports:
         - containerPort: 80
         resources:
@@ -43,7 +43,7 @@ spec:
     spec:
       containers:
       - name: frontend-simple
-        image: us-central1-docker.pkg.dev/authentic-prod-464216/yosoy-repo/yosoy-historia-clinica:v3
+        image: us-central1-docker.pkg.dev/authentic-prod-464216/yosoy-repo/yosoy-historia-clinica:v4
         ports:
         - containerPort: 80
         resources:
