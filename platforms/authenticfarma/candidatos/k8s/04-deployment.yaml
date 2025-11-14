@@ -53,7 +53,7 @@ spec:
             - name: APP_ENV
               value: "production"
             - name: APP_DEBUG
-              value: "false"
+              value: "true"
             - name: APP_URL
               value: "https://candidatos.authenticfarma.com"
             - name: APP_KEY
