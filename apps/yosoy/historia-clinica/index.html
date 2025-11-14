@@ -3,1448 +3,2122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YoSoy Historia Clínica - Sistema Médico para Mujeres</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>YoSoy Historia Clínica - Sistema Médico Digital</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-            margin: 0; padding: 0; 
-        }
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .loading { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(147, 51, 234, 0.15); }
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .medical-gradient { background: linear-gradient(135deg, #d63384 0%, #9333ea 100%); }
-        .print-area { background: white; }
-        .no-print { display: block; }
-        @media print {
-            .no-print { display: none !important; }
-            .print-area { margin: 0; padding: 20px; }
-            body { background: white; }
-        }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .medical-form { background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%); }
+        .form-section { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+        .medical-card { transition: all 0.3s ease; }
+        .medical-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(147, 51, 234, 0.1); }
+        .stat-card { background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%); }
+        .search-highlight { background-color: #c084fc; }
+        .yosoy-purple { color: #9333ea; }
+        .yosoy-bg-purple { background-color: #9333ea; }
+        .yosoy-bg-light-purple { background-color: #f3e8ff; }
+        .yosoy-border-purple { border-color: #9333ea; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-50 to-pink-50">
-    <!-- Header -->
-    <header class="medical-gradient text-white shadow-xl">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                        <i class="fas fa-stethoscope text-2xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold">YoSoy Historia Clínica</h1>
-                        <p class="text-pink-100 text-sm">Sistema Médico Especializado para Mujeres</p>
-                    </div>
-                </div>
-                <div id="user-info" class="hidden">
-                    <div class="flex items-center space-x-4">
-                        <div class="text-right">
-                            <span id="welcome-text" class="block font-medium"></span>
-                            <span id="user-specialty" class="block text-sm text-pink-100"></span>
-                        </div>
-                        <button onclick="logout()" class="bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded-lg transition-colors">
-                            <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+<body>
+    <div id="app"></div>
 
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="flex items-center justify-center min-h-screen">
-        <div class="text-center">
-            <div class="loading w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full mx-auto mb-4"></div>
-            <h2 class="text-xl text-purple-900">Cargando Sistema Médico</h2>
-            <p id="loading-status" class="text-purple-600 mt-2">Inicializando plataforma para salud femenina...</p>
-        </div>
-    </div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { createRoot } = ReactDOM;
 
-    <!-- Login Form -->
-    <div id="login-form" class="hidden min-h-screen flex items-center justify-center">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md fade-in">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 medical-gradient rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-stethoscope text-3xl text-white"></i>
-                </div>
-                <h2 class="text-3xl font-bold text-gray-800">Acceso Médico</h2>
-                <p class="text-gray-600 mt-2">Sistema especializado en salud femenina</p>
-            </div>
-            
-            <form id="auth-form" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-user mr-2"></i>Usuario Médico
-                    </label>
-                    <input type="text" id="username" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Ingrese su usuario">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-lock mr-2"></i>Contraseña
-                    </label>
-                    <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Ingrese su contraseña">
-                </div>
-                <button type="submit" class="w-full medical-gradient text-white py-3 rounded-lg hover:opacity-90 transition-opacity">
-                    <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
-                </button>
+        // Utilidades de seguridad
+        const SecurityUtils = {
+            encrypt: (data) => {
+                try {
+                    return btoa(JSON.stringify(data));
+                } catch (e) {
+                    console.error('Error al encriptar:', e);
+                    return null;
+                }
+            },
+            decrypt: (encryptedData) => {
+                try {
+                    return JSON.parse(atob(encryptedData));
+                } catch (e) {
+                    console.error('Error al desencriptar:', e);
+                    return null;
+                }
+            },
+            hashPassword: (password) => {
+                return btoa(password + 'salt_secure_2024');
+            },
+            generateSessionToken: () => {
+                return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+        };
+
+        // Sistema de auditoria simplificado
+        const AuditSystem = {
+            log: (action, userId, details) => {
+                const logEntry = {
+                    timestamp: new Date().toISOString(),
+                    action,
+                    userId,
+                    details,
+                    sessionId: sessionStorage.getItem('sessionId')
+                };
                 
-                <div class="text-center text-sm text-gray-500 mt-4 p-4 bg-purple-50 rounded-lg">
-                    <p class="font-medium text-purple-800 mb-2">Usuarios de demo:</p>
-                    <p><strong>admin</strong> / admin123 (Administrador)</p>
-                    <p><strong>dra.sofia</strong> / gine123 (Ginecóloga)</p>
-                    <p><strong>dra.maria</strong> / medico123 (Medicina General)</p>
-                </div>
-            </form>
-        </div>
-    </div>
+                const existingLogs = SecurityUtils.decrypt(localStorage.getItem('auditLogs')) || [];
+                existingLogs.push(logEntry);
+                localStorage.setItem('auditLogs', SecurityUtils.encrypt(existingLogs));
+            }
+        };
 
-    <!-- Main Dashboard -->
-    <div id="dashboard" class="hidden">
-        <div class="container mx-auto px-4 py-6">
-            <!-- Navigation Tabs -->
-            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <div class="flex flex-wrap gap-4 justify-center">
-                    <button onclick="showTab('registro')" class="tab-btn bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
-                        <i class="fas fa-user-plus mr-2"></i>Registro Paciente
-                    </button>
-                    <button onclick="showTab('busqueda')" class="tab-btn bg-gradient-to-r from-purple-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
-                        <i class="fas fa-search mr-2"></i>Buscar Paciente
-                    </button>
-                    <button onclick="showTab('historia')" class="tab-btn bg-gradient-to-r from-blue-500 to-green-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
-                        <i class="fas fa-clipboard-list mr-2"></i>Historia Clínica
-                    </button>
-                    <button onclick="showTab('formula')" class="tab-btn bg-gradient-to-r from-green-500 to-teal-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
-                        <i class="fas fa-prescription-bottle-alt mr-2"></i>Fórmula Médica
-                    </button>
-                    <button onclick="showTab('calendario')" class="tab-btn bg-gradient-to-r from-teal-500 to-cyan-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
-                        <i class="fas fa-calendar-alt mr-2"></i>Calendario
-                    </button>
-                    <button onclick="showTab('dashboard-stats')" class="tab-btn bg-gradient-to-r from-cyan-500 to-indigo-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
-                        <i class="fas fa-chart-bar mr-2"></i>Dashboard
-                    </button>
-                </div>
-            </div>
+        // Configuración de API
+        const API_CONFIG = {
+            baseURL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:3001/api' 
+                : 'https://api.hc.yo-soy.co/api',
+            timeout: 10000,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
 
-            <!-- Content Sections -->
-            <div id="content-area" class="fade-in">
-                <!-- Registro de Paciente -->
-                <div id="tab-registro" class="hidden">
-                    <div class="bg-white rounded-xl shadow-lg p-8">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <i class="fas fa-venus mr-3 text-pink-500"></i>Registro Nueva Paciente
-                        </h3>
-                        <form id="patient-form" class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombres Completos *</label>
-                                    <input type="text" name="nombres" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos Completos *</label>
-                                    <input type="text" name="apellidos" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Número de Identificación *</label>
-                                    <input type="text" name="identificacion" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Nacimiento *</label>
-                                    <input type="date" name="fechaNacimiento" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
-                                    <input type="tel" name="telefono" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                                    <input type="email" name="email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Estado Civil</label>
-                                    <select name="estadoCivil" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                        <option value="">Seleccione...</option>
-                                        <option value="soltera">Soltera</option>
-                                        <option value="casada">Casada</option>
-                                        <option value="union_libre">Unión Libre</option>
-                                        <option value="divorciada">Divorciada</option>
-                                        <option value="viuda">Viuda</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Ocupación</label>
-                                    <input type="text" name="ocupacion" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                </div>
-                            </div>
+        // Utilidad para hacer peticiones HTTP
+        const httpClient = {
+            async request(endpoint, options = {}) {
+                const url = `${API_CONFIG.baseURL}${endpoint}`;
+                const token = sessionStorage.getItem('authToken');
+                
+                const config = {
+                    ...options,
+                    headers: {
+                        ...API_CONFIG.headers,
+                        ...(token && { Authorization: `Bearer ${token}` }),
+                        ...options.headers
+                    }
+                };
+
+                try {
+                    const response = await fetch(url, config);
+                    
+                    if (!response.ok) {
+                        const error = await response.json().catch(() => ({ error: 'Error de red' }));
+                        throw new Error(error.error || `HTTP ${response.status}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('API request failed:', error);
+                    throw error;
+                }
+            },
+
+            get(endpoint) {
+                return this.request(endpoint, { method: 'GET' });
+            },
+
+            post(endpoint, data) {
+                return this.request(endpoint, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+            },
+
+            put(endpoint, data) {
+                return this.request(endpoint, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+            },
+
+            delete(endpoint) {
+                return this.request(endpoint, { method: 'DELETE' });
+            }
+        };
+
+        // Usuarios del sistema
+        const SYSTEM_USERS = [
+            {
+                id: 1,
+                username: 'admin',
+                password: SecurityUtils.hashPassword('admin123'),
+                role: 'administrador',
+                name: 'Dr. Admin',
+                email: 'admin@clinica.com',
+                permissions: ['all']
+            },
+            {
+                id: 2,
+                username: 'doctor',
+                password: SecurityUtils.hashPassword('doctor123'),
+                role: 'doctor',
+                name: 'Dr. García',
+                email: 'doctor@clinica.com',
+                permissions: ['read_patients', 'write_patients', 'create_prescriptions']
+            },
+            {
+                id: 3,
+                username: 'anamaria',
+                password: SecurityUtils.hashPassword('anamaria2025'),
+                role: 'doctor',
+                name: 'Dra. Ana María Rodríguez',
+                email: 'anamariar@yo-soy.co',
+                especialidad: 'Medicina General y Salud Femenina',
+                registro: 'RM-58421',
+                telefono: '+57 310 643 3823',
+                permissions: ['read_patients', 'write_patients', 'create_prescriptions', 'telehealth']
+            }
+        ];
+
+        // Hook de autenticación actualizado
+        const useAuth = () => {
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+            useEffect(() => {
+                const handleOnline = () => setIsOnline(true);
+                const handleOffline = () => setIsOnline(false);
+                
+                window.addEventListener('online', handleOnline);
+                window.addEventListener('offline', handleOffline);
+                
+                return () => {
+                    window.removeEventListener('online', handleOnline);
+                    window.removeEventListener('offline', handleOffline);
+                };
+            }, []);
+
+            useEffect(() => {
+                const sessionToken = sessionStorage.getItem('authToken');
+                const encryptedUser = sessionStorage.getItem('currentUser');
+                
+                if (sessionToken && encryptedUser) {
+                    const userData = SecurityUtils.decrypt(encryptedUser);
+                    if (userData) {
+                        setUser(userData);
+                        AuditSystem.log('SESSION_RESTORED', userData.id, { username: userData.username });
+                    }
+                }
+                setLoading(false);
+            }, []);
+
+            const login = async (username, password) => {
+                try {
+                    setLoading(true);
+                    
+                    if (isOnline) {
+                        // Intentar login con API
+                        try {
+                            const response = await httpClient.post('/auth/login', { username, password });
                             
+                            const userData = {
+                                id: response.user.id,
+                                username: response.user.username,
+                                name: response.user.nombre,
+                                role: response.user.rol === 'admin' ? 'administrador' : response.user.rol,
+                                email: response.user.email,
+                                especialidad: response.user.especialidad
+                            };
+
+                            sessionStorage.setItem('authToken', response.token);
+                            sessionStorage.setItem('currentUser', SecurityUtils.encrypt(userData));
+                            sessionStorage.setItem('sessionId', `session_${userData.id}_${Date.now()}`);
+                            
+                            setUser(userData);
+                            AuditSystem.log('LOGIN_SUCCESS_API', userData.id, { username: userData.username });
+                            
+                            setLoading(false);
+                            return true;
+                        } catch (apiError) {
+                            console.warn('API login failed, falling back to local auth:', apiError);
+                            // Fallback a autenticación local
+                        }
+                    }
+
+                    // Autenticación local (fallback)
+                    const user = SYSTEM_USERS.find(u => 
+                        u.username === username && u.password === SecurityUtils.hashPassword(password)
+                    );
+                    
+                    if (user) {
+                        const sessionToken = SecurityUtils.generateSessionToken();
+                        const userSession = { ...user };
+                        delete userSession.password;
+                        
+                        sessionStorage.setItem('sessionToken', sessionToken);
+                        sessionStorage.setItem('sessionId', sessionToken);
+                        sessionStorage.setItem('currentUser', SecurityUtils.encrypt(userSession));
+                        
+                        setUser(userSession);
+                        AuditSystem.log('LOGIN_SUCCESS_LOCAL', user.id, { username: user.username });
+                        setLoading(false);
+                        return true;
+                    }
+                    
+                    setLoading(false);
+                    AuditSystem.log('LOGIN_FAILED', null, { username });
+                    return false;
+                } catch (error) {
+                    setLoading(false);
+                    console.error('Login error:', error);
+                    return false;
+                }
+            };
+
+            const logout = () => {
+                if (user) {
+                    AuditSystem.log('LOGOUT', user.id, { username: user.username });
+                }
+                sessionStorage.removeItem('authToken');
+                sessionStorage.removeItem('sessionToken');
+                sessionStorage.removeItem('currentUser');
+                sessionStorage.removeItem('sessionId');
+                setUser(null);
+            };
+
+            return { user, login, logout, loading, isOnline };
+        };
+
+        // Hook para datos médicos
+        const useMedicalData = () => {
+            const [historias, setHistorias] = useState([]);
+            const [formulas, setFormulas] = useState([]);
+            const [citas, setCitas] = useState([]);
+
+            useEffect(() => {
+                const loadedHistorias = SecurityUtils.decrypt(localStorage.getItem('historias_clinicas')) || [];
+                const loadedFormulas = SecurityUtils.decrypt(localStorage.getItem('formulas_medicas')) || [];
+                const loadedCitas = SecurityUtils.decrypt(localStorage.getItem('citas_medicas')) || [];
+                
+                setHistorias(loadedHistorias);
+                setFormulas(loadedFormulas);
+                setCitas(loadedCitas);
+            }, []);
+
+            const saveHistoria = (historia) => {
+                const newHistoria = {
+                    ...historia,
+                    id: Date.now(),
+                    fechaCreacion: new Date().toISOString(),
+                    userId: sessionStorage.getItem('sessionId')
+                };
+                
+                const updatedHistorias = [...historias, newHistoria];
+                setHistorias(updatedHistorias);
+                localStorage.setItem('historias_clinicas', SecurityUtils.encrypt(updatedHistorias));
+                
+                AuditSystem.log('HISTORIA_CREATED', newHistoria.userId, { 
+                    paciente: newHistoria.nombrePaciente,
+                    historiaId: newHistoria.id 
+                });
+            };
+
+            const saveFormula = (formula) => {
+                const newFormula = {
+                    ...formula,
+                    id: Date.now(),
+                    fechaCreacion: new Date().toISOString(),
+                    userId: sessionStorage.getItem('sessionId')
+                };
+                
+                const updatedFormulas = [...formulas, newFormula];
+                setFormulas(updatedFormulas);
+                localStorage.setItem('formulas_medicas', SecurityUtils.encrypt(updatedFormulas));
+                
+                AuditSystem.log('FORMULA_CREATED', newFormula.userId, { 
+                    paciente: newFormula.nombrePaciente,
+                    formulaId: newFormula.id 
+                });
+            };
+
+            const saveCita = (cita) => {
+                const newCita = {
+                    ...cita,
+                    id: Date.now(),
+                    fechaCreacion: new Date().toISOString(),
+                    userId: sessionStorage.getItem('sessionId')
+                };
+                
+                const updatedCitas = [...citas, newCita];
+                setCitas(updatedCitas);
+                localStorage.setItem('citas_medicas', SecurityUtils.encrypt(updatedCitas));
+                
+                AuditSystem.log('CITA_CREATED', newCita.userId, { 
+                    paciente: newCita.paciente,
+                    citaId: newCita.id 
+                });
+            };
+
+            return {
+                historias,
+                formulas,
+                citas,
+                saveHistoria,
+                saveFormula,
+                saveCita
+            };
+        };
+
+        // Funciones para videoconsultas avanzadas
+        const generateAdvancedMeetLink = (cita) => {
+            // Genera un enlace de Google Meet único para la cita
+            const meetId = `hc-${cita.id || Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            return `https://meet.google.com/${meetId}`;
+        };
+
+        const generateMeetLink = (cita) => {
+            return generateAdvancedMeetLink(cita);
+        };
+
+        const initiateVideoCall = async (cita) => {
+            try {
+                const meetLink = generateAdvancedMeetLink(cita);
+                
+                // Simular notificación al paciente
+                if (cita.notificarPaciente) {
+                    await sendMeetInvitation(cita, meetLink);
+                }
+                
+                // Abrir la videollamada
+                window.open(meetLink, '_blank');
+                
+                // Log de auditoría
+                AuditSystem.log('VIDEOCALL_INITIATED', sessionStorage.getItem('sessionId'), { 
+                    paciente: cita.paciente,
+                    citaId: cita.id,
+                    meetLink 
+                });
+                
+                return meetLink;
+            } catch (error) {
+                console.error('Error al iniciar videollamada:', error);
+                alert('Error al iniciar la videollamada. Por favor, inténtelo de nuevo.');
+                return null;
+            }
+        };
+
+        const sendMeetInvitation = async (cita, meetLink) => {
+            try {
+                // Simular envío de invitación por email
+                const invitation = {
+                    to: cita.emailPaciente || `${cita.paciente.toLowerCase().replace(/\s+/g, '')}@email.com`,
+                    subject: `Videoconsulta programada - ${cita.fecha}`,
+                    body: `
+                        Estimado/a ${cita.paciente},
+                        
+                        Su videoconsulta ha sido programada para:
+                        📅 Fecha: ${cita.fecha}
+                        🕒 Hora: ${cita.hora}
+                        ⏱️ Duración: ${cita.duracion} minutos
+                        
+                        Enlace de la videollamada: ${meetLink}
+                        
+                        ${cita.notas ? `Notas: ${cita.notas}` : ''}
+                        
+                        Por favor, únase a la videollamada 5 minutos antes de la hora programada.
+                        
+                        Saludos cordiales,
+                        YoSoy - Sistema de Historias Clínicas
+                    `
+                };
+                
+                console.log('Invitación enviada:', invitation);
+                
+                // En un sistema real, aquí se enviaría el email
+                alert(`Invitación enviada exitosamente a ${invitation.to}`);
+                
+                return true;
+            } catch (error) {
+                console.error('Error al enviar invitación:', error);
+                return false;
+            }
+        };
+
+        // Componente de login
+        const LoginForm = ({ onLogin }) => {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (onLogin(username, password)) {
+                    setError('');
+                } else {
+                    setError('Credenciales inválidas');
+                }
+            };
+
+            return (
+                <div className="min-h-screen medical-form flex items-center justify-center p-4">
+                    <div className="form-section border border-white/20 rounded-xl p-8 w-full max-w-md">
+                        <h2 className="text-white text-2xl font-bold mb-6 text-center">
+                            Sistema Médico - Historia Clínica
+                        </h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Dirección Completa</label>
-                                <textarea name="direccion" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"></textarea>
+                                <input
+                                    type="text"
+                                    placeholder="Usuario"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/70"
+                                    required
+                                />
                             </div>
-
-                            <div class="bg-pink-50 p-6 rounded-lg">
-                                <h4 class="font-semibold text-gray-800 mb-4 flex items-center">
-                                    <i class="fas fa-heartbeat mr-2 text-pink-500"></i>Información Ginecológica
-                                </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Última Menstruación</label>
-                                        <input type="date" name="ultimaMenstruacion" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Embarazos Previos</label>
-                                        <input type="number" name="embarazosPrevios" min="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Partos</label>
-                                        <input type="number" name="partos" min="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Abortos</label>
-                                        <input type="number" name="abortos" min="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                                    </div>
-                                </div>
+                            <div>
+                                <input
+                                    type="password"
+                                    placeholder="Contraseña"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/70"
+                                    required
+                                />
                             </div>
-
-                            <button type="submit" class="w-full medical-gradient text-white py-4 rounded-lg hover:opacity-90 transition-opacity font-semibold">
-                                <i class="fas fa-save mr-2"></i>Registrar Paciente
+                            {error && (
+                                <div className="text-red-300 text-sm text-center">{error}</div>
+                            )}
+                            <button
+                                type="submit"
+                                className="w-full bg-white/20 hover:bg-white/30 text-white font-bold py-3 px-4 rounded-lg transition duration-300"
+                            >
+                                Iniciar Sesión
                             </button>
                         </form>
+                        <div className="mt-4 text-white/70 text-sm text-center">
+                            <p>Usuarios de prueba:</p>
+                            <p>admin / admin123</p>
+                            <p>doctor / doctor123</p>
+                        </div>
                     </div>
                 </div>
+            );
+        };
 
-                <!-- Búsqueda de Paciente -->
-                <div id="tab-busqueda" class="hidden">
-                    <div class="bg-white rounded-xl shadow-lg p-8">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <i class="fas fa-search mr-3 text-blue-500"></i>Buscar Paciente
-                        </h3>
-                        
-                        <div class="mb-6">
-                            <div class="flex gap-4">
-                                <input type="text" id="search-input" placeholder="Buscar por nombre, apellido o identificación..." 
-                                       class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                <button onclick="searchPatients()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
-                                    <i class="fas fa-search mr-2"></i>Buscar
-                                </button>
+        // Formulario de Historia Clínica
+        const HistoriaClinicaForm = ({ onSave }) => {
+            const [formData, setFormData] = useState({
+                nombrePaciente: '',
+                fechaNacimiento: '',
+                edad: '',
+                motivoConsulta: '',
+                antecedentes: '',
+                examenFisico: '',
+                diagnostico: '',
+                analisis: '',
+                planManejo: ''
+            });
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+
+                // Calcular edad automáticamente
+                if (name === 'fechaNacimiento' && value) {
+                    const today = new Date();
+                    const birthDate = new Date(value);
+                    const age = today.getFullYear() - birthDate.getFullYear();
+                    const monthDiff = today.getMonth() - birthDate.getMonth();
+                    
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+                    
+                    setFormData(prev => ({
+                        ...prev,
+                        edad: age.toString()
+                    }));
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSave(formData);
+                setFormData({
+                    nombrePaciente: '',
+                    fechaNacimiento: '',
+                    edad: '',
+                    motivoConsulta: '',
+                    antecedentes: '',
+                    examenFisico: '',
+                    diagnostico: '',
+                    analisis: '',
+                    planManejo: ''
+                });
+                alert('Historia clínica guardada exitosamente');
+            };
+
+            return (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Historia Clínica</h3>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Nombre del paciente:
+                                </label>
+                                <input
+                                    type="text"
+                                    name="nombrePaciente"
+                                    value={formData.nombrePaciente}
+                                    onChange={handleChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Fecha de nacimiento:
+                                </label>
+                                <input
+                                    type="date"
+                                    name="fechaNacimiento"
+                                    value={formData.fechaNacimiento}
+                                    onChange={handleChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Edad:
+                                </label>
+                                <input
+                                    type="number"
+                                    name="edad"
+                                    value={formData.edad}
+                                    onChange={handleChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                    required
+                                />
                             </div>
                         </div>
 
-                        <div id="search-results" class="space-y-4">
-                            <!-- Resultados aparecerán aquí -->
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Motivo de consulta:
+                            </label>
+                            <textarea
+                                name="motivoConsulta"
+                                value={formData.motivoConsulta}
+                                onChange={handleChange}
+                                rows="3"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                required
+                            />
                         </div>
-                    </div>
-                </div>
 
-                <!-- Historia Clínica -->
-                <div id="tab-historia" class="hidden">
-                    <div class="bg-white rounded-xl shadow-lg p-8">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <i class="fas fa-clipboard-list mr-3 text-green-500"></i>Historia Clínica
-                        </h3>
-                        <div id="historia-content">
-                            <p class="text-gray-600 text-center py-8">Seleccione una paciente para ver o crear su historia clínica</p>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Antecedentes:
+                            </label>
+                            <textarea
+                                name="antecedentes"
+                                value={formData.antecedentes}
+                                onChange={handleChange}
+                                rows="3"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                required
+                            />
                         </div>
-                    </div>
-                </div>
 
-                <!-- Fórmula Médica -->
-                <div id="tab-formula" class="hidden">
-                    <div class="bg-white rounded-xl shadow-lg p-8">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <i class="fas fa-prescription-bottle-alt mr-3 text-teal-500"></i>Fórmula Médica
-                        </h3>
-                        <div id="formula-content">
-                            <p class="text-gray-600 text-center py-8">Seleccione una paciente para crear una fórmula médica</p>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Examen físico:
+                            </label>
+                            <textarea
+                                name="examenFisico"
+                                value={formData.examenFisico}
+                                onChange={handleChange}
+                                rows="3"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                required
+                            />
                         </div>
-                    </div>
-                </div>
 
-                <!-- Calendario -->
-                <div id="tab-calendario" class="hidden">
-                    <div class="bg-white rounded-xl shadow-lg p-8">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <i class="fas fa-calendar-alt mr-3 text-cyan-500"></i>Calendario de Citas
-                        </h3>
-                        <div id="calendario-content">
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <div class="lg:col-span-2">
-                                    <div id="calendar-view" class="bg-gray-50 rounded-lg p-4 min-h-96">
-                                        <p class="text-center text-gray-600 py-16">Vista de calendario en desarrollo</p>
-                                    </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Diagnóstico:
+                            </label>
+                            <textarea
+                                name="diagnostico"
+                                value={formData.diagnostico}
+                                onChange={handleChange}
+                                rows="2"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Análisis:
+                            </label>
+                            <textarea
+                                name="analisis"
+                                value={formData.analisis}
+                                onChange={handleChange}
+                                rows="3"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Plan de manejo:
+                            </label>
+                            <textarea
+                                name="planManejo"
+                                value={formData.planManejo}
+                                onChange={handleChange}
+                                rows="3"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                required
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+                        >
+                            🔒 Guardar Historia Clínica
+                        </button>
+                    </form>
+                </div>
+            );
+        };
+
+        // Formulario de Fórmula Médica Mejorado
+        const FormulaMedicaForm = ({ onSave, currentUser }) => {
+            const [formData, setFormData] = useState({
+                nombrePaciente: '',
+                cedula: '',
+                edad: '',
+                fecha: new Date().toISOString().split('T')[0],
+                medicamentos: '',
+                indicaciones: '',
+                diagnostico: '',
+                recomendaciones: '',
+                proximaConsulta: ''
+            });
+
+            const [medicamentosList, setMedicamentosList] = useState([
+                { nombre: '', dosis: '', frecuencia: '', duracion: '', indicaciones: '' }
+            ]);
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            };
+
+            const handleMedicamentoChange = (index, field, value) => {
+                const updatedMedicamentos = [...medicamentosList];
+                updatedMedicamentos[index][field] = value;
+                setMedicamentosList(updatedMedicamentos);
+            };
+
+            const addMedicamento = () => {
+                setMedicamentosList([...medicamentosList, 
+                    { nombre: '', dosis: '', frecuencia: '', duracion: '', indicaciones: '' }
+                ]);
+            };
+
+            const removeMedicamento = (index) => {
+                if (medicamentosList.length > 1) {
+                    const updatedMedicamentos = medicamentosList.filter((_, i) => i !== index);
+                    setMedicamentosList(updatedMedicamentos);
+                }
+            };
+
+            const generateProfessionalPDF = (formulaData, doctorInfo) => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Header con logo YoSoy
+                doc.setFillColor(147, 51, 234);
+                doc.rect(0, 0, 210, 30, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(24);
+                doc.text('YoSoy Historia Clínica', 20, 20);
+                
+                doc.setFontSize(12);
+                doc.text('Sistema Médico Digital', 150, 20);
+
+                // Información del doctor actual
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(14);
+                doc.text(`${doctorInfo.name} - ${doctorInfo.especialidad || 'Medicina General'}`, 20, 45);
+                doc.setFontSize(10);
+                doc.text(`Registro Médico: ${doctorInfo.registro || 'RM-12345'}`, 20, 52);
+                doc.text(`${doctorInfo.email} | ${doctorInfo.telefono || 'hc.yo-soy.co'}`, 20, 58);
+
+                // Título de prescripción
+                doc.setFontSize(18);
+                doc.setTextColor(147, 51, 234);
+                doc.text('PRESCRIPCIÓN MÉDICA', 20, 75);
+
+                // Información del paciente
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(12);
+                doc.text('DATOS DEL PACIENTE:', 20, 90);
+                doc.setFontSize(10);
+                doc.text(`Nombre: ${formulaData.nombrePaciente}`, 20, 100);
+                doc.text(`Cédula: ${formulaData.cedula || 'No especificada'}`, 20, 107);
+                doc.text(`Edad: ${formulaData.edad || 'No especificada'}`, 20, 114);
+                doc.text(`Fecha: ${new Date(formulaData.fecha).toLocaleDateString()}`, 120, 100);
+                doc.text(`Diagnóstico: ${formulaData.diagnostico || 'No especificado'}`, 20, 121);
+
+                // Línea separadora
+                doc.setDrawColor(147, 51, 234);
+                doc.line(20, 130, 190, 130);
+
+                // Medicamentos
+                doc.setFontSize(12);
+                doc.setTextColor(147, 51, 234);
+                doc.text('MEDICAMENTOS PRESCRITOS:', 20, 145);
+
+                let yPosition = 155;
+                medicamentosList.forEach((med, index) => {
+                    if (med.nombre.trim()) {
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFontSize(11);
+                        doc.text(`${index + 1}. ${med.nombre}`, 25, yPosition);
+                        yPosition += 7;
+                        
+                        if (med.dosis) {
+                            doc.setFontSize(9);
+                            doc.text(`   Dosis: ${med.dosis}`, 25, yPosition);
+                            yPosition += 6;
+                        }
+                        
+                        if (med.frecuencia) {
+                            doc.text(`   Frecuencia: ${med.frecuencia}`, 25, yPosition);
+                            yPosition += 6;
+                        }
+                        
+                        if (med.duracion) {
+                            doc.text(`   Duración: ${med.duracion}`, 25, yPosition);
+                            yPosition += 6;
+                        }
+                        
+                        if (med.indicaciones) {
+                            doc.text(`   Indicaciones: ${med.indicaciones}`, 25, yPosition);
+                            yPosition += 6;
+                        }
+                        
+                        yPosition += 3;
+                    }
+                });
+
+                // Recomendaciones
+                if (formulaData.recomendaciones) {
+                    doc.setFontSize(12);
+                    doc.setTextColor(147, 51, 234);
+                    doc.text('RECOMENDACIONES:', 20, yPosition + 10);
+                    
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(10);
+                    const recomendacionesLines = doc.splitTextToSize(formulaData.recomendaciones, 170);
+                    doc.text(recomendacionesLines, 20, yPosition + 20);
+                    yPosition += 20 + (recomendacionesLines.length * 5);
+                }
+
+                // Próxima consulta
+                if (formulaData.proximaConsulta) {
+                    doc.setFontSize(10);
+                    doc.text(`Próxima consulta: ${formulaData.proximaConsulta}`, 20, yPosition + 15);
+                }
+
+                // Footer
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Este documento fue generado digitalmente por YoSoy Historia Clínica', 20, 280);
+                doc.text(`Fecha de generación: ${new Date().toLocaleString()}`, 20, 285);
+
+                // Firma digital
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text('_________________________', 120, 250);
+                doc.text(doctorInfo.name, 120, 260);
+                doc.text(doctorInfo.especialidad || 'Medicina General', 120, 265);
+
+                doc.save(`prescripcion-${formulaData.nombrePaciente}-${formulaData.fecha}.pdf`);
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                
+                // Convertir medicamentos a string
+                const medicamentosString = medicamentosList
+                    .filter(med => med.nombre.trim())
+                    .map(med => `${med.nombre} - ${med.dosis} - ${med.frecuencia} - ${med.duracion}`)
+                    .join('; ');
+
+                const formulaCompleta = {
+                    ...formData,
+                    medicamentos: medicamentosString,
+                    medicamentosList: medicamentosList
+                };
+
+                onSave(formulaCompleta);
+                generateProfessionalPDF(formulaCompleta, currentUser);
+                
+                setFormData({
+                    nombrePaciente: '',
+                    cedula: '',
+                    edad: '',
+                    fecha: new Date().toISOString().split('T')[0],
+                    medicamentos: '',
+                    indicaciones: '',
+                    diagnostico: '',
+                    recomendaciones: '',
+                    proximaConsulta: ''
+                });
+                
+                setMedicamentosList([
+                    { nombre: '', dosis: '', frecuencia: '', duracion: '', indicaciones: '' }
+                ]);
+                
+                alert('Fórmula médica guardada y PDF generado exitosamente');
+            };
+
+            return (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-2xl font-bold text-purple-800 mb-6">💊 Prescripción Médica Profesional</h3>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Información del paciente */}
+                        <div className="bg-purple-50 p-4 rounded-lg">
+                            <h4 className="text-lg font-semibold text-purple-800 mb-3">Datos del Paciente</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Nombre completo:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="nombrePaciente"
+                                        value={formData.nombrePaciente}
+                                        onChange={handleChange}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                        required
+                                    />
                                 </div>
                                 <div>
-                                    <div class="bg-blue-50 p-4 rounded-lg">
-                                        <h4 class="font-semibold text-blue-800 mb-3">Próximas Citas</h4>
-                                        <div id="upcoming-appointments" class="space-y-2">
-                                            <!-- Citas próximas aparecerán aquí -->
-                                        </div>
-                                    </div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Cédula:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="cedula"
+                                        value={formData.cedula}
+                                        onChange={handleChange}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Edad:
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="edad"
+                                        value={formData.edad}
+                                        onChange={handleChange}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                    />
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Dashboard Estadísticas -->
-                <div id="tab-dashboard-stats" class="hidden">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2">
-                            <div class="bg-white rounded-xl shadow-lg p-8">
-                                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                                    <i class="fas fa-chart-bar mr-3 text-indigo-500"></i>Dashboard Médico
-                                </h3>
-                                <div id="dashboard-stats-content">
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div class="bg-pink-50 p-4 rounded-lg text-center">
-                                            <i class="fas fa-female text-3xl text-pink-500 mb-2"></i>
-                                            <h4 class="font-semibold">Total Pacientes</h4>
-                                            <p class="text-2xl font-bold text-pink-600" id="total-patients">0</p>
-                                        </div>
-                                        <div class="bg-purple-50 p-4 rounded-lg text-center">
-                                            <i class="fas fa-heartbeat text-3xl text-purple-500 mb-2"></i>
-                                            <h4 class="font-semibold">Consultas Mes</h4>
-                                            <p class="text-2xl font-bold text-purple-600" id="monthly-consultations">0</p>
-                                        </div>
-                                    </div>
-                                </div>
+                        {/* Información médica */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Fecha:
+                                </label>
+                                <input
+                                    type="date"
+                                    name="fecha"
+                                    value={formData.fecha}
+                                    onChange={handleChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Próxima consulta:
+                                </label>
+                                <input
+                                    type="date"
+                                    name="proximaConsulta"
+                                    value={formData.proximaConsulta}
+                                    onChange={handleChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                />
                             </div>
                         </div>
+
                         <div>
-                            <div class="bg-white rounded-xl shadow-lg p-6">
-                                <h4 class="font-semibold text-gray-800 mb-4">Pacientes por Prioridad</h4>
-                                <div id="priority-patients" class="space-y-3">
-                                    <!-- Prioridades aparecerán aquí -->
-                                </div>
-                            </div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Diagnóstico:
+                            </label>
+                            <input
+                                type="text"
+                                name="diagnostico"
+                                value={formData.diagnostico}
+                                onChange={handleChange}
+                                placeholder="Diagnóstico principal"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            />
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Toast Notifications -->
-    <div id="toast-container" class="fixed top-4 right-4 space-y-2 z-50"></div>
-
-    <!-- Modals -->
-    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" onclick="closeModal()">
-        <div id="modal-content" class="fixed inset-4 bg-white rounded-lg p-6 overflow-auto" onclick="event.stopPropagation()">
-            <!-- Modal content will be inserted here -->
-        </div>
-    </div>
-
-    <script>
-        // Variables globales
-        let currentUser = null;
-        let selectedPatient = null;
-        let patients = [];
-        let historias = [];
-        let formulas = [];
-        let citas = [];
-
-        // API Configuration
-        const API_BASE = '/api';
-
-        // Elementos del DOM
-        const loadingScreen = document.getElementById('loading-screen');
-        const loginForm = document.getElementById('login-form');
-        const dashboard = document.getElementById('dashboard');
-        const userInfo = document.getElementById('user-info');
-        const welcomeText = document.getElementById('welcome-text');
-        const userSpecialty = document.getElementById('user-specialty');
-        const loadingStatus = document.getElementById('loading-status');
-
-        // Función para mostrar notificaciones
-        function showNotification(title, message, type = 'info') {
-            const toast = document.createElement('div');
-            const colors = {
-                success: 'bg-green-500',
-                error: 'bg-red-500',
-                warning: 'bg-yellow-500',
-                info: 'bg-blue-500'
-            };
-            
-            toast.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full opacity-0`;
-            toast.innerHTML = `<strong>${title}</strong><br>${message}`;
-            
-            document.getElementById('toast-container').appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.remove('translate-x-full', 'opacity-0');
-            }, 100);
-            
-            setTimeout(() => {
-                toast.classList.add('translate-x-full', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        // Función para mostrar diferentes pantallas
-        function showScreen(screen) {
-            loadingScreen.classList.add('hidden');
-            loginForm.classList.add('hidden');
-            dashboard.classList.add('hidden');
-            
-            document.getElementById(screen).classList.remove('hidden');
-        }
-
-        // Función para cambiar tabs
-        function showTab(tabName) {
-            // Ocultar todas las tabs
-            const tabs = ['registro', 'busqueda', 'historia', 'formula', 'calendario', 'dashboard-stats'];
-            tabs.forEach(tab => {
-                document.getElementById(`tab-${tab}`).classList.add('hidden');
-            });
-            
-            // Mostrar la tab seleccionada
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            
-            // Si es búsqueda, cargar pacientes
-            if (tabName === 'busqueda') {
-                loadPatients();
-            }
-            
-            // Si es dashboard, cargar estadísticas
-            if (tabName === 'dashboard-stats') {
-                loadDashboardStats();
-            }
-        }
-
-        // Función de login
-        async function handleLogin(username, password) {
-            try {
-                loadingStatus.textContent = 'Verificando credenciales...';
-                showScreen('loading-screen');
-                
-                const response = await fetch(`${API_BASE}/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Credenciales incorrectas');
-                }
-
-                const data = await response.json();
-                currentUser = data.user;
-                localStorage.setItem('authToken', data.token);
-                localStorage.setItem('authUser', JSON.stringify(data.user));
-                
-                // Mostrar dashboard
-                loadingStatus.textContent = 'Cargando dashboard...';
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                welcomeText.textContent = `Dra. ${currentUser.name}`;
-                userSpecialty.textContent = currentUser.especialidad || 'Médico General';
-                userInfo.classList.remove('hidden');
-                showScreen('dashboard');
-                showTab('registro');
-                
-                showNotification('Login exitoso', `Bienvenida ${currentUser.name}`, 'success');
-            } catch (error) {
-                showScreen('login-form');
-                showNotification('Error de login', error.message, 'error');
-            }
-        }
-
-        // Función para registrar paciente
-        async function registerPatient(formData) {
-            try {
-                const token = localStorage.getItem('authToken');
-                const response = await fetch(`${API_BASE}/patients`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al registrar paciente');
-                }
-
-                const result = await response.json();
-                showNotification('Éxito', 'Paciente registrada exitosamente', 'success');
-                document.getElementById('patient-form').reset();
-                return result;
-            } catch (error) {
-                showNotification('Error', error.message, 'error');
-            }
-        }
-
-        // Función para cargar pacientes
-        async function loadPatients() {
-            try {
-                const token = localStorage.getItem('authToken');
-                const response = await fetch(`${API_BASE}/patients`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    patients = await response.json();
-                    displayPatients(patients);
-                }
-            } catch (error) {
-                console.error('Error cargando pacientes:', error);
-            }
-        }
-
-        // Función para mostrar pacientes
-        function displayPatients(patientList) {
-            const resultsContainer = document.getElementById('search-results');
-            
-            if (patientList.length === 0) {
-                resultsContainer.innerHTML = '<p class="text-gray-600 text-center py-8">No se encontraron pacientes</p>';
-                return;
-            }
-
-            resultsContainer.innerHTML = patientList.map(patient => `
-                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <h4 class="font-semibold text-gray-800">${patient.nombres} ${patient.apellidos}</h4>
-                            <p class="text-gray-600">ID: ${patient.identificacion}</p>
-                            <p class="text-gray-600">Edad: ${calculateAge(patient.fechaNacimiento)} años</p>
-                            <p class="text-gray-600">Teléfono: ${patient.telefono || 'No registrado'}</p>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <button onclick="selectPatient(${patient.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
-                                Ver Historia
-                            </button>
-                            <button onclick="createFormula(${patient.id})" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
-                                Nueva Fórmula
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Función para buscar pacientes
-        function searchPatients() {
-            const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            const filtered = patients.filter(patient => 
-                patient.nombres.toLowerCase().includes(searchTerm) ||
-                patient.apellidos.toLowerCase().includes(searchTerm) ||
-                patient.identificacion.includes(searchTerm)
-            );
-            displayPatients(filtered);
-        }
-
-        // Función para calcular edad
-        function calculateAge(birthDate) {
-            const today = new Date();
-            const birth = new Date(birthDate);
-            let age = today.getFullYear() - birth.getFullYear();
-            const monthDiff = today.getMonth() - birth.getMonth();
-            
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-                age--;
-            }
-            
-            return age;
-        }
-
-        // Función para seleccionar paciente
-        function selectPatient(patientId) {
-            selectedPatient = patients.find(p => p.id === patientId);
-            showTab('historia');
-            loadPatientHistory(patientId);
-        }
-
-        // Función para cargar historia de paciente
-        async function loadPatientHistory(patientId) {
-            // Implementar carga de historia clínica
-            const historiaContent = document.getElementById('historia-content');
-            historiaContent.innerHTML = `
-                <div class="space-y-6">
-                    <div class="bg-pink-50 p-6 rounded-lg">
-                        <h4 class="font-semibold text-pink-800 mb-4">Paciente Seleccionada</h4>
-                        <p><strong>Nombre:</strong> ${selectedPatient.nombres} ${selectedPatient.apellidos}</p>
-                        <p><strong>Identificación:</strong> ${selectedPatient.identificacion}</p>
-                        <p><strong>Edad:</strong> ${calculateAge(selectedPatient.fechaNacimiento)} años</p>
-                    </div>
-                    
-                    <div class="flex gap-4 mb-6">
-                        <button onclick="createNewHistory()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
-                            <i class="fas fa-plus mr-2"></i>Nueva Historia Clínica
-                        </button>
-                        <button onclick="viewHistoryList()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                            <i class="fas fa-list mr-2"></i>Ver Historias Anteriores
-                        </button>
-                    </div>
-                    
-                    <div id="history-details">
-                        <p class="text-gray-600 text-center py-8">Seleccione una opción para continuar</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Función para crear nueva historia clínica
-        function createNewHistory() {
-            const historyDetails = document.getElementById('history-details');
-            historyDetails.innerHTML = `
-                <form id="history-form" class="space-y-6">
-                    <div class="bg-white border rounded-lg p-6">
-                        <h5 class="font-semibold text-gray-800 mb-4">Nueva Historia Clínica</h5>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Motivo de Consulta *</label>
-                                <textarea name="motivoConsulta" required rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Síntomas Actuales</label>
-                                <textarea name="sintomasActuales" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Examen Físico</label>
-                                <textarea name="examenFisico" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Signos Vitales</label>
-                                <div class="space-y-2">
-                                    <input type="text" name="presionArterial" placeholder="Presión Arterial" class="w-full p-2 border border-gray-300 rounded">
-                                    <input type="text" name="frecuenciaCardiaca" placeholder="Frecuencia Cardíaca" class="w-full p-2 border border-gray-300 rounded">
-                                    <input type="text" name="temperatura" placeholder="Temperatura" class="w-full p-2 border border-gray-300 rounded">
-                                    <input type="text" name="peso" placeholder="Peso (kg)" class="w-full p-2 border border-gray-300 rounded">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Diagnóstico *</label>
-                            <textarea name="diagnostico" required rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Plan de Tratamiento</label>
-                            <textarea name="planTratamiento" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones</label>
-                            <textarea name="observaciones" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
-                        </div>
-                        
-                        <div class="flex gap-4 mt-6">
-                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
-                                <i class="fas fa-save mr-2"></i>Guardar Historia Clínica
-                            </button>
-                            <button type="button" onclick="generateHistoryPDF()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg">
-                                <i class="fas fa-file-pdf mr-2"></i>Generar PDF
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            `;
-            
-            // Event listener para el formulario
-            document.getElementById('history-form').addEventListener('submit', handleHistorySubmit);
-        }
-
-        // Función para manejar envío de historia clínica
-        async function handleHistorySubmit(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const historyData = {
-                paciente_id: selectedPatient.id,
-                motivo_consulta: formData.get('motivoConsulta'),
-                diagnostico: formData.get('diagnostico'),
-                tratamiento: formData.get('planTratamiento'),
-                observaciones: formData.get('observaciones')
-            };
-            
-            try {
-                const token = localStorage.getItem('authToken');
-                const response = await fetch(`${API_BASE}/historias`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(historyData)
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al guardar historia clínica');
-                }
-
-                showNotification('Éxito', 'Historia clínica guardada exitosamente', 'success');
-                viewHistoryList(); // Recargar lista
-            } catch (error) {
-                showNotification('Error', error.message, 'error');
-            }
-        }
-
-        // Función para generar PDF de historia clínica
-        function generateHistoryPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // Encabezado
-            doc.setFontSize(18);
-            doc.text('HISTORIA CLÍNICA', 20, 20);
-            doc.setFontSize(12);
-            doc.text(`Paciente: ${selectedPatient.nombres} ${selectedPatient.apellidos}`, 20, 35);
-            doc.text(`Identificación: ${selectedPatient.identificacion}`, 20, 45);
-            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 20, 55);
-            
-            // Contenido del formulario
-            const form = document.getElementById('history-form');
-            const formData = new FormData(form);
-            
-            let yPosition = 70;
-            
-            const addText = (label, value, multiline = false) => {
-                doc.text(`${label}:`, 20, yPosition);
-                yPosition += 10;
-                if (value) {
-                    if (multiline) {
-                        const lines = doc.splitTextToSize(value, 170);
-                        doc.text(lines, 25, yPosition);
-                        yPosition += lines.length * 5;
-                    } else {
-                        doc.text(value, 25, yPosition);
-                        yPosition += 5;
-                    }
-                }
-                yPosition += 5;
-            };
-            
-            addText('Motivo de Consulta', formData.get('motivoConsulta'), true);
-            addText('Síntomas Actuales', formData.get('sintomasActuales'), true);
-            addText('Examen Físico', formData.get('examenFisico'), true);
-            addText('Diagnóstico', formData.get('diagnostico'), true);
-            addText('Plan de Tratamiento', formData.get('planTratamiento'), true);
-            
-            // Firma
-            doc.text(`Médico: ${currentUser.name}`, 20, yPosition + 20);
-            doc.text(`Especialidad: ${currentUser.especialidad || 'Medicina General'}`, 20, yPosition + 30);
-            
-            doc.save(`historia-clinica-${selectedPatient.identificacion}-${new Date().toISOString().split('T')[0]}.pdf`);
-        }
-
-        // Función para ver lista de historias (IMPLEMENTACIÓN CORREGIDA)
-        function viewHistoryList() {
-            if (!selectedPatient) {
-                showNotification('Error', 'Seleccione una paciente primero', 'error');
-                return;
-            }
-
-            const historyDetails = document.getElementById('history-details');
-            historyDetails.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i><p>Cargando historial médico...</p></div>';
-            
-            console.log('=== DEBUG CARGA DE HISTORIAS (Frontend Completo) ===');
-            console.log('Paciente seleccionada:', selectedPatient);
-            console.log('Token disponible:', localStorage.getItem('authToken') ? 'SÍ' : 'NO');
-            console.log('URL que se va a consultar:', `/api/patients/${selectedPatient.id}/historias`);
-            
-            // Obtener historias clínicas de la paciente
-            fetch(`/api/patients/${selectedPatient.id}/historias`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-            })
-            .then(response => {
-                console.log('Estado de respuesta:', response.status);
-                console.log('URL llamada:', response.url);
-                
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        console.log('Error del servidor (texto):', text);
-                        throw new Error(`HTTP ${response.status}: ${text}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(historias => {
-                console.log('Historias recibidas del servidor:', historias);
-                console.log('Tipo de datos recibidos:', typeof historias);
-                console.log('Es array?:', Array.isArray(historias));
-                console.log('Número de historias:', historias.length);
-                
-                if (historias.length === 0) {
-                    console.log('No hay historias para mostrar');
-                    historyDetails.innerHTML = `
-                        <div class="text-center py-8">
-                            <i class="fas fa-clipboard-list text-4xl text-gray-400 mb-4"></i>
-                            <p class="text-gray-600">No hay historias clínicas registradas para esta paciente</p>
-                            <button onclick="createNewHistory()" class="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
-                                <i class="fas fa-plus mr-2"></i>Crear Primera Historia
-                            </button>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                console.log('Mostrando historias en la interfaz...');
-                // Mostrar las historias clínicas encontradas
-                displayHistoriasComplete(historias);
-            })
-            .catch(error => {
-                console.error('ERROR completo cargando historias:', error);
-                console.error('Stack trace:', error.stack);
-                historyDetails.innerHTML = `
-                    <div class="text-center py-8">
-                        <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-                        <p class="text-red-600">Error al cargar el historial médico:</p>
-                        <p class="text-sm text-gray-600 mt-2">${error.message}</p>
-                        <button onclick="viewHistoryList()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                            <i class="fas fa-redo mr-2"></i>Reintentar
-                        </button>
-                    </div>
-                `;
-            });
-        }
-
-        // Función para mostrar historias de manera completa en el dashboard
-        function displayHistoriasComplete(historias) {
-            console.log('=== MOSTRANDO HISTORIAS EN UI COMPLETA ===');
-            console.log('Historias a mostrar:', historias);
-            
-            const historyDetails = document.getElementById('history-details');
-            
-            historyDetails.innerHTML = `
-                <div class="space-y-6">
-                    <!-- Resumen -->
-                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 border border-blue-200">
-                        <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
-                            <i class="fas fa-chart-line mr-2"></i>Resumen del Historial Médico
-                        </h3>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div class="bg-white p-4 rounded-lg shadow-sm">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-2xl font-bold text-blue-600">${historias.length}</p>
-                                        <p class="text-sm text-gray-600">Consultas Totales</p>
-                                    </div>
-                                    <i class="fas fa-file-medical text-2xl text-blue-300"></i>
-                                </div>
+                        {/* Medicamentos */}
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="flex justify-between items-center mb-4">
+                                <h4 className="text-lg font-semibold text-gray-800">Medicamentos</h4>
+                                <button
+                                    type="button"
+                                    onClick={addMedicamento}
+                                    className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm transition duration-300"
+                                >
+                                    + Agregar medicamento
+                                </button>
                             </div>
                             
-                            <div class="bg-white p-4 rounded-lg shadow-sm">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-2xl font-bold text-green-600">${new Date(historias[historias.length - 1].fecha || historias[historias.length - 1].created_at).getFullYear()}</p>
-                                        <p class="text-sm text-gray-600">Última Consulta</p>
-                                    </div>
-                                    <i class="fas fa-calendar text-2xl text-green-300"></i>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-white p-4 rounded-lg shadow-sm">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-2xl font-bold text-purple-600">${calculateAge(selectedPatient.fechaNacimiento)}</p>
-                                        <p class="text-sm text-gray-600">Años</p>
-                                    </div>
-                                    <i class="fas fa-birthday-cake text-2xl text-purple-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Lista de Historias -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                            <i class="fas fa-history mr-2 text-purple-500"></i>Historial de Consultas
-                        </h3>
-                        
-                        ${historias.map(historia => `
-                            <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                                <div class="flex items-start justify-between">
-                                    <div class="flex-1">
-                                        <div class="flex items-center mb-3">
-                                            <i class="fas fa-calendar-day text-blue-500 mr-2"></i>
-                                            <span class="font-semibold text-gray-800">${new Date(historia.fecha || historia.created_at).toLocaleDateString('es-ES', { 
-                                                weekday: 'long', 
-                                                year: 'numeric', 
-                                                month: 'long', 
-                                                day: 'numeric' 
-                                            })}</span>
-                                        </div>
-                                        
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                            <div>
-                                                <h4 class="font-medium text-gray-700 mb-2">Motivo de Consulta</h4>
-                                                <p class="text-gray-600 text-sm">${historia.motivoConsulta || historia.motivo_consulta || 'No especificado'}</p>
-                                            </div>
-                                            <div>
-                                                <h4 class="font-medium text-gray-700 mb-2">Diagnóstico</h4>
-                                                <p class="text-gray-600 text-sm">${historia.diagnostico || 'No especificado'}</p>
-                                            </div>
-                                        </div>
-                                        
-                                        ${historia.tratamiento ? `
-                                            <div class="mb-4">
-                                                <h4 class="font-medium text-gray-700 mb-2">Tratamiento</h4>
-                                                <p class="text-gray-600 text-sm">${historia.tratamiento}</p>
-                                            </div>
-                                        ` : ''}
-                                        
-                                        ${historia.medicoNombre ? `
-                                            <div class="text-sm text-gray-500">
-                                                <i class="fas fa-user-md mr-1"></i>Médico: ${historia.medicoNombre}
-                                            </div>
-                                        ` : ''}
+                            {medicamentosList.map((medicamento, index) => (
+                                <div key={index} className="bg-white p-4 rounded-lg mb-3 border">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h5 className="font-medium text-gray-700">Medicamento {index + 1}</h5>
+                                        {medicamentosList.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeMedicamento(index)}
+                                                className="text-red-600 hover:text-red-800 text-sm"
+                                            >
+                                                ✕ Eliminar
+                                            </button>
+                                        )}
                                     </div>
                                     
-                                    <div class="ml-4">
-                                        <button onclick="viewHistoryDetail('${historia.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm">
-                                            <i class="fas fa-eye mr-1"></i>Ver Detalle
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-xs text-gray-600 mb-1">Nombre del medicamento:</label>
+                                            <input
+                                                type="text"
+                                                value={medicamento.nombre}
+                                                onChange={(e) => handleMedicamentoChange(index, 'nombre', e.target.value)}
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-purple-500 text-sm"
+                                                placeholder="Ej: Acetaminofén"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-600 mb-1">Dosis:</label>
+                                            <input
+                                                type="text"
+                                                value={medicamento.dosis}
+                                                onChange={(e) => handleMedicamentoChange(index, 'dosis', e.target.value)}
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-purple-500 text-sm"
+                                                placeholder="Ej: 500mg"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-600 mb-1">Frecuencia:</label>
+                                            <input
+                                                type="text"
+                                                value={medicamento.frecuencia}
+                                                onChange={(e) => handleMedicamentoChange(index, 'frecuencia', e.target.value)}
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-purple-500 text-sm"
+                                                placeholder="Ej: Cada 8 horas"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-600 mb-1">Duración:</label>
+                                            <input
+                                                type="text"
+                                                value={medicamento.duracion}
+                                                onChange={(e) => handleMedicamentoChange(index, 'duracion', e.target.value)}
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-purple-500 text-sm"
+                                                placeholder="Ej: 7 días"
+                                            />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs text-gray-600 mb-1">Indicaciones especiales:</label>
+                                            <input
+                                                type="text"
+                                                value={medicamento.indicaciones}
+                                                onChange={(e) => handleMedicamentoChange(index, 'indicaciones', e.target.value)}
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-purple-500 text-sm"
+                                                placeholder="Ej: Tomar con alimentos"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Indicaciones generales:
+                            </label>
+                            <textarea
+                                name="indicaciones"
+                                value={formData.indicaciones}
+                                onChange={handleChange}
+                                rows="3"
+                                placeholder="Instrucciones generales para el paciente..."
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Recomendaciones adicionales:
+                            </label>
+                            <textarea
+                                name="recomendaciones"
+                                value={formData.recomendaciones}
+                                onChange={handleChange}
+                                rows="3"
+                                placeholder="Recomendaciones de cuidado, dieta, ejercicio, etc..."
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center"
+                        >
+                            📄 Generar Prescripción y PDF
+                        </button>
+                    </form>
+                </div>
+            );
+        };
+
+        // Componente de Agenda/Citas
+
+        // Búsqueda de Pacientes
+        const BusquedaPacientes = ({ historias, formulas }) => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [selectedPatient, setSelectedPatient] = useState(null);
+            const [searchResults, setSearchResults] = useState([]);
+
+            const handleSearch = () => {
+                if (!searchTerm.trim()) {
+                    setSearchResults([]);
+                    return;
+                }
+
+                // Buscar en historias clínicas
+                const historiasEncontradas = historias.filter(h => 
+                    h.nombrePaciente.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                // Buscar en fórmulas
+                const formulasEncontradas = formulas.filter(f => 
+                    f.nombrePaciente.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                // Crear un mapa de pacientes únicos
+                const pacientesMap = new Map();
+
+                historiasEncontradas.forEach(h => {
+                    if (!pacientesMap.has(h.nombrePaciente)) {
+                        pacientesMap.set(h.nombrePaciente, {
+                            nombre: h.nombrePaciente,
+                            historias: [],
+                            formulas: []
+                        });
+                    }
+                    pacientesMap.get(h.nombrePaciente).historias.push(h);
+                });
+
+                formulasEncontradas.forEach(f => {
+                    if (!pacientesMap.has(f.nombrePaciente)) {
+                        pacientesMap.set(f.nombrePaciente, {
+                            nombre: f.nombrePaciente,
+                            historias: [],
+                            formulas: []
+                        });
+                    }
+                    pacientesMap.get(f.nombrePaciente).formulas.push(f);
+                });
+
+                setSearchResults(Array.from(pacientesMap.values()));
+            };
+
+            const viewPatientDetails = (patient) => {
+                setSelectedPatient(patient);
+            };
+
+            return (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Buscar Paciente</h3>
+                    
+                    <div className="flex gap-4 mb-6">
+                        <input
+                            type="text"
+                            placeholder="Nombre del paciente..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        />
+                        <button
+                            onClick={handleSearch}
+                            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-300"
+                        >
+                            🔍 Buscar
+                        </button>
+                    </div>
+
+                    {searchResults.length > 0 && (
+                        <div className="space-y-4">
+                            <h4 className="text-lg font-semibold text-gray-700">Resultados:</h4>
+                            {searchResults.map((patient, index) => (
+                                <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <h5 className="font-semibold text-gray-800">{patient.nombre}</h5>
+                                            <p className="text-sm text-gray-600">
+                                                {patient.historias.length} historias clínicas • {patient.formulas.length} fórmulas médicas
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => viewPatientDetails(patient)}
+                                            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm transition duration-300"
+                                        >
+                                            Ver Detalles
                                         </button>
                                     </div>
                                 </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {selectedPatient && (
+                        <div className="mt-8 border-t pt-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h4 className="text-xl font-bold text-gray-800">
+                                    Historial Médico: {selectedPatient.nombre}
+                                </h4>
+                                <button
+                                    onClick={() => setSelectedPatient(null)}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    ✕ Cerrar
+                                </button>
                             </div>
-                        `).join('')}
-                    </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div>
+                                    <h5 className="font-semibold text-gray-700 mb-3">Historias Clínicas ({selectedPatient.historias.length})</h5>
+                                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                                        {selectedPatient.historias.map((historia, index) => (
+                                            <div key={index} className="bg-purple-50 p-3 rounded-lg">
+                                                <p className="text-sm text-gray-600 mb-1">
+                                                    {new Date(historia.fechaCreacion).toLocaleDateString()}
+                                                </p>
+                                                <p className="font-medium text-gray-800">
+                                                    {historia.diagnostico}
+                                                </p>
+                                                <p className="text-sm text-gray-600 mt-1">
+                                                    Motivo: {historia.motivoConsulta}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h5 className="font-semibold text-gray-700 mb-3">Fórmulas Médicas ({selectedPatient.formulas.length})</h5>
+                                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                                        {selectedPatient.formulas.map((formula, index) => (
+                                            <div key={index} className="bg-green-50 p-3 rounded-lg">
+                                                <p className="text-sm text-gray-600 mb-1">
+                                                    {new Date(formula.fechaCreacion).toLocaleDateString()}
+                                                </p>
+                                                <p className="font-medium text-gray-800">
+                                                    {formula.medicamentos}
+                                                </p>
+                                                <p className="text-sm text-gray-600 mt-1">
+                                                    {formula.indicaciones}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
-            `;
-            
-            console.log('UI actualizada con las historias');
-        }
+            );
+        };
 
-        // Función para ver detalle de historia clínica
-        function viewHistoryDetail(historiaId) {
-            const API_BASE = '';
-            
-            fetch(`${API_BASE}/api/historias/${historiaId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(historia => {
-                const signos = typeof historia.signos === 'string' ? JSON.parse(historia.signos) : (historia.signos || {});
-                
-                const historyDetails = document.getElementById('history-details');
-                historyDetails.innerHTML = `
-                    <div class="print-area">
-                        <div class="bg-white border rounded-lg p-6">
-                            <div class="flex justify-between items-start mb-6">
-                                <h5 class="font-semibold text-gray-800">Detalle Historia Clínica</h5>
-                                <div class="flex gap-2">
-                                    <button onclick="viewHistoryList()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded">
-                                        <i class="fas fa-arrow-left mr-2"></i>Volver
-                                    </button>
-                                    <button onclick="printHistory(${historiaId})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded">
-                                        <i class="fas fa-print mr-2"></i>Imprimir
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <h6 class="font-medium text-gray-700">Paciente</h6>
-                                        <p>${selectedPatient.nombres} ${selectedPatient.apellidos}</p>
-                                    </div>
-                                    <div>
-                                        <h6 class="font-medium text-gray-700">Fecha</h6>
-                                        <p>${new Date(historia.created_at).toLocaleDateString()}</p>
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <h6 class="font-medium text-gray-700">Motivo de Consulta</h6>
-                                    <p class="bg-gray-50 p-3 rounded">${historia.motivoConsulta || 'No especificado'}</p>
-                                </div>
-                                
-                                ${historia.sintomasActuales ? `
-                                <div>
-                                    <h6 class="font-medium text-gray-700">Síntomas Actuales</h6>
-                                    <p class="bg-gray-50 p-3 rounded">${historia.sintomasActuales}</p>
-                                </div>
-                                ` : ''}
-                                
-                                <div>
-                                    <h6 class="font-medium text-gray-700">Signos Vitales</h6>
-                                    <div class="bg-blue-50 p-3 rounded grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                                        <div><strong>Presión:</strong> ${signos.presionArterial || 'N/A'}</div>
-                                        <div><strong>Pulso:</strong> ${signos.pulso || 'N/A'}</div>
-                                        <div><strong>Temperatura:</strong> ${signos.temperatura || 'N/A'}</div>
-                                        <div><strong>Peso:</strong> ${signos.peso || 'N/A'}</div>
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <h6 class="font-medium text-gray-700">Diagnóstico</h6>
-                                    <p class="bg-yellow-50 p-3 rounded">${historia.diagnostico || 'No especificado'}</p>
-                                </div>
-                                
-                                ${historia.tratamiento ? `
-                                <div>
-                                    <h6 class="font-medium text-gray-700">Tratamiento</h6>
-                                    <p class="bg-green-50 p-3 rounded">${historia.tratamiento}</p>
-                                </div>
-                                ` : ''}
-                                
-                                ${historia.planTratamiento ? `
-                                <div>
-                                    <h6 class="font-medium text-gray-700">Plan de Tratamiento</h6>
-                                    <p class="bg-blue-50 p-3 rounded">${historia.planTratamiento}</p>
-                                </div>
-                                ` : ''}
-                                
-                                ${historia.observaciones ? `
-                                <div>
-                                    <h6 class="font-medium text-gray-700">Observaciones</h6>
-                                    <p class="bg-gray-50 p-3 rounded">${historia.observaciones}</p>
-                                </div>
-                                ` : ''}
-                                
-                                ${historia.medicoNombre ? `
-                                <div>
-                                    <h6 class="font-medium text-gray-700">Médico</h6>
-                                    <p class="text-blue-600">${historia.medicoNombre}</p>
-                                </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            })
-            .catch(error => {
-                console.error('Error cargando detalle de historia:', error);
-                showNotification('Error', `No se pudo cargar el detalle de la historia clínica: ${error.message}`, 'error');
+        // Dashboard con Estadísticas Avanzadas
+        const Dashboard = ({ historias, formulas, citas }) => {
+            const [stats, setStats] = useState({
+                totalPacientes: 0,
+                totalHistorias: 0,
+                totalFormulas: 0,
+                totalCitas: 0,
+                topDiagnosticos: [],
+                topMedicamentos: [],
+                edadPromedio: 0,
+                tendenciaMensual: [],
+                distribucionGenero: { masculino: 0, femenino: 0, otro: 0 },
+                rangoEdades: { jovenes: 0, adultos: 0, mayores: 0 },
+                factorRiesgo: 'bajo',
+                indicadorCalidad: 85
             });
-        }
 
-        // Función para imprimir historia específica
-        function printHistory(historiaId) {
-            fetch(`/api/historias/${historiaId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(historia => {
-                // Crear ventana de impresión con el detalle de la historia
-                const printWindow = window.open('', '_blank');
-                const signos = typeof historia.signos === 'string' ? JSON.parse(historia.signos) : (historia.signos || {});
-                
-                printWindow.document.write(`
-                    <html>
-                    <head>
-                        <title>Historia Clínica - ${selectedPatient.nombres} ${selectedPatient.apellidos}</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 20px; }
-                            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
-                            .section { margin-bottom: 15px; }
-                            .label { font-weight: bold; color: #333; }
-                            .value { margin-left: 10px; }
-                            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="header">
-                            <h1>Historia Clínica</h1>
-                            <h2>YoSoy - Sistema Médico</h2>
-                        </div>
-                        
-                        <div class="section">
-                            <div class="grid">
-                                <div><span class="label">Paciente:</span><span class="value">${selectedPatient.nombres} ${selectedPatient.apellidos}</span></div>
-                                <div><span class="label">Identificación:</span><span class="value">${selectedPatient.identificacion}</span></div>
-                                <div><span class="label">Fecha:</span><span class="value">${new Date(historia.created_at).toLocaleDateString()}</span></div>
-                                <div><span class="label">Médico:</span><span class="value">${historia.medicoNombre || 'No especificado'}</span></div>
-                            </div>
-                        </div>
-                        
-                        <div class="section">
-                            <div class="label">Motivo de Consulta:</div>
-                            <div class="value">${historia.motivoConsulta || 'No especificado'}</div>
-                        </div>
-                        
-                        ${historia.sintomasActuales ? `
-                        <div class="section">
-                            <div class="label">Síntomas Actuales:</div>
-                            <div class="value">${historia.sintomasActuales}</div>
-                        </div>
-                        ` : ''}
-                        
-                        <div class="section">
-                            <div class="label">Signos Vitales:</div>
-                            <div class="grid" style="margin-left: 10px;">
-                                <div>Presión Arterial: ${signos.presionArterial || 'N/A'}</div>
-                                <div>Pulso: ${signos.pulso || 'N/A'}</div>
-                                <div>Temperatura: ${signos.temperatura || 'N/A'}</div>
-                                <div>Peso: ${signos.peso || 'N/A'}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="section">
-                            <div class="label">Diagnóstico:</div>
-                            <div class="value">${historia.diagnostico || 'No especificado'}</div>
-                        </div>
-                        
-                        ${historia.tratamiento ? `
-                        <div class="section">
-                            <div class="label">Tratamiento:</div>
-                            <div class="value">${historia.tratamiento}</div>
-                        </div>
-                        ` : ''}
-                        
-                        ${historia.planTratamiento ? `
-                        <div class="section">
-                            <div class="label">Plan de Tratamiento:</div>
-                            <div class="value">${historia.planTratamiento}</div>
-                        </div>
-                        ` : ''}
-                        
-                        ${historia.observaciones ? `
-                        <div class="section">
-                            <div class="label">Observaciones:</div>
-                            <div class="value">${historia.observaciones}</div>
-                        </div>
-                        ` : ''}
-                        
-                        <div style="margin-top: 50px; text-align: center; color: #666;">
-                            <p>Fecha de impresión: ${new Date().toLocaleString()}</p>
-                        </div>
-                    </body>
-                    </html>
-                `);
-                
-                printWindow.document.close();
-                printWindow.focus();
-                setTimeout(() => {
-                    printWindow.print();
-                    printWindow.close();
-                }, 500);
-            })
-            .catch(error => {
-                console.error('Error imprimiendo historia:', error);
-                showNotification('Error', `No se pudo imprimir la historia clínica: ${error.message}`, 'error');
-            });
-        }
+            const [selectedMetric, setSelectedMetric] = useState('consultas');
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
 
-        // Función para crear fórmula médica
-        function createFormula(patientId) {
-            selectedPatient = patients.find(p => p.id === patientId);
-            showTab('formula');
-            
-            const formulaContent = document.getElementById('formula-content');
-            formulaContent.innerHTML = `
-                <div class="space-y-6">
-                    <div class="bg-teal-50 p-6 rounded-lg">
-                        <h4 class="font-semibold text-teal-800 mb-4">Paciente Seleccionada</h4>
-                        <p><strong>Nombre:</strong> ${selectedPatient.nombres} ${selectedPatient.apellidos}</p>
-                        <p><strong>Identificación:</strong> ${selectedPatient.identificacion}</p>
-                        <p><strong>Edad:</strong> ${calculateAge(selectedPatient.fechaNacimiento)} años</p>
+            useEffect(() => {
+                // Calcular estadísticas avanzadas
+                const pacientesUnicos = new Set();
+                const diagnosticos = {};
+                const medicamentos = {};
+                const consultas_por_mes = {};
+                const generos = { masculino: 0, femenino: 0, otro: 0 };
+                const edades = { jovenes: 0, adultos: 0, mayores: 0 };
+                
+                let totalEdad = 0;
+                let pacientesConEdad = 0;
+
+                historias.forEach(h => {
+                    pacientesUnicos.add(h.nombrePaciente);
+                    
+                    if (h.diagnostico) {
+                        diagnosticos[h.diagnostico] = (diagnosticos[h.diagnostico] || 0) + 1;
+                    }
+                    
+                    if (h.edad) {
+                        const edad = parseInt(h.edad);
+                        totalEdad += edad;
+                        pacientesConEdad++;
+                        
+                        if (edad < 30) edades.jovenes++;
+                        else if (edad < 60) edades.adultos++;
+                        else edades.mayores++;
+                    }
+
+                    // Simulación de género (para demostración)
+                    const genero = Math.random() > 0.5 ? 'femenino' : 'masculino';
+                    generos[genero]++;
+
+                    // Tendencia mensual
+                    const fecha = new Date(h.fecha || Date.now());
+                    const mesAno = `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}`;
+                    consultas_por_mes[mesAno] = (consultas_por_mes[mesAno] || 0) + 1;
+                });
+
+                formulas.forEach(f => {
+                    pacientesUnicos.add(f.nombrePaciente);
+                    
+                    if (f.medicamentos) {
+                        const meds = f.medicamentos.split(',');
+                        meds.forEach(med => {
+                            const medName = med.trim().split(' ')[0];
+                            if (medName) {
+                                medicamentos[medName] = (medicamentos[medName] || 0) + 1;
+                            }
+                        });
+                    }
+                });
+
+                const topDiagnosticos = Object.entries(diagnosticos)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 5)
+                    .map(([diag, count]) => ({ name: diag, count }));
+
+                const topMedicamentos = Object.entries(medicamentos)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 5)
+                    .map(([med, count]) => ({ name: med, count }));
+
+                // Tendencia mensual (últimos 6 meses)
+                const tendenciaMensual = Object.entries(consultas_por_mes)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .slice(-6)
+                    .map(([mes, count]) => ({ mes, count }));
+
+                // Calcular factor de riesgo basado en datos
+                const avgConsultasPorPaciente = pacientesUnicos.size > 0 ? historias.length / pacientesUnicos.size : 0;
+                const factorRiesgo = avgConsultasPorPaciente > 3 ? 'alto' : avgConsultasPorPaciente > 1.5 ? 'medio' : 'bajo';
+
+                setStats({
+                    totalPacientes: pacientesUnicos.size,
+                    totalHistorias: historias.length,
+                    totalFormulas: formulas.length,
+                    totalCitas: citas.length,
+                    topDiagnosticos,
+                    topMedicamentos,
+                    edadPromedio: pacientesConEdad > 0 ? Math.round(totalEdad / pacientesConEdad) : 0,
+                    tendenciaMensual,
+                    distribucionGenero: generos,
+                    rangoEdades: edades,
+                    factorRiesgo,
+                    indicadorCalidad: Math.min(95, 70 + (pacientesUnicos.size * 2))
+                });
+            }, [historias, formulas, citas]);
+
+            // Crear/actualizar gráfico
+            useEffect(() => {
+                if (chartRef.current && stats.tendenciaMensual.length > 0) {
+                    const ctx = chartRef.current.getContext('2d');
+                    
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+
+                    chartInstance.current = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: stats.tendenciaMensual.map(item => item.mes),
+                            datasets: [{
+                                label: 'Consultas por Mes',
+                                data: stats.tendenciaMensual.map(item => item.count),
+                                borderColor: '#9333ea',
+                                backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.1)'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [stats.tendenciaMensual, selectedMetric]);
+
+            const exportarReporte = () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFontSize(18);
+                doc.text('Reporte Analítico - YoSoy Historia Clínica', 20, 20);
+                
+                doc.setFontSize(12);
+                doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 20, 35);
+                
+                doc.text('MÉTRICAS PRINCIPALES:', 20, 50);
+                doc.text(`• Total de Pacientes: ${stats.totalPacientes}`, 25, 60);
+                doc.text(`• Historias Clínicas: ${stats.totalHistorias}`, 25, 70);
+                doc.text(`• Fórmulas Médicas: ${stats.totalFormulas}`, 25, 80);
+                doc.text(`• Edad Promedio: ${stats.edadPromedio} años`, 25, 90);
+                doc.text(`• Indicador de Calidad: ${stats.indicadorCalidad}%`, 25, 100);
+                
+                doc.text('DIAGNÓSTICOS MÁS FRECUENTES:', 20, 120);
+                stats.topDiagnosticos.forEach((diag, index) => {
+                    doc.text(`${index + 1}. ${diag.name}: ${diag.count} casos`, 25, 130 + (index * 10));
+                });
+                
+                doc.save('reporte-analitico-yosoy.pdf');
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-2xl font-bold text-purple-800">Dashboard Analítico Avanzado</h3>
+                        <button
+                            onClick={exportarReporte}
+                            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center"
+                        >
+                            📊 Exportar Reporte
+                        </button>
                     </div>
                     
-                    <form id="formula-form" class="space-y-6">
-                        <div class="bg-white border rounded-lg p-6">
-                            <h5 class="font-semibold text-gray-800 mb-4">Nueva Fórmula Médica</h5>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Medicamentos y Dosis *</label>
-                                <textarea name="medicamentos" required rows="4" placeholder="Ej: Ibuprofeno 600mg - Tomar cada 8 horas por 5 días" 
-                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"></textarea>
-                            </div>
-                            
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Indicaciones Especiales</label>
-                                <textarea name="indicaciones" rows="3" placeholder="Instrucciones adicionales para la paciente" 
-                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"></textarea>
-                            </div>
-                            
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Duración del Tratamiento</label>
-                                <input type="text" name="duracion" placeholder="Ej: 7 días, 2 semanas, etc." 
-                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
-                            </div>
-                            
-                            <div class="flex gap-4 mt-6">
-                                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg">
-                                    <i class="fas fa-save mr-2"></i>Guardar Fórmula
-                                </button>
-                                <button type="button" onclick="generateFormulaPDF()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg">
-                                    <i class="fas fa-file-pdf mr-2"></i>Generar PDF
-                                </button>
-                                <button type="button" onclick="sendFormulaEmail()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
-                                    <i class="fas fa-envelope mr-2"></i>Enviar por Email
-                                </button>
+                    {/* Tarjetas de estadísticas mejoradas */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="stat-card text-white rounded-xl p-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-white bg-opacity-20 rounded-full -mr-8 -mt-8"></div>
+                            <h4 className="text-lg font-semibold mb-2">👥 Total Pacientes</h4>
+                            <p className="text-3xl font-bold">{stats.totalPacientes}</p>
+                            <p className="text-sm opacity-80 mt-1">+{Math.round(stats.totalPacientes * 0.15)} este mes</p>
+                        </div>
+                        <div className="stat-card text-white rounded-xl p-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-white bg-opacity-20 rounded-full -mr-8 -mt-8"></div>
+                            <h4 className="text-lg font-semibold mb-2">📋 Historias Clínicas</h4>
+                            <p className="text-3xl font-bold">{stats.totalHistorias}</p>
+                            <p className="text-sm opacity-80 mt-1">Promedio: {stats.totalPacientes > 0 ? (stats.totalHistorias / stats.totalPacientes).toFixed(1) : 0} por paciente</p>
+                        </div>
+                        <div className="stat-card text-white rounded-xl p-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-white bg-opacity-20 rounded-full -mr-8 -mt-8"></div>
+                            <h4 className="text-lg font-semibold mb-2">💊 Fórmulas Médicas</h4>
+                            <p className="text-3xl font-bold">{stats.totalFormulas}</p>
+                            <p className="text-sm opacity-80 mt-1">Factor de riesgo: {stats.factorRiesgo}</p>
+                        </div>
+                        <div className="stat-card text-white rounded-xl p-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-white bg-opacity-20 rounded-full -mr-8 -mt-8"></div>
+                            <h4 className="text-lg font-semibold mb-2">⭐ Calidad de Atención</h4>
+                            <p className="text-3xl font-bold">{stats.indicadorCalidad}%</p>
+                            <p className="text-sm opacity-80 mt-1">Excelente desempeño</p>
+                        </div>
+                    </div>
+
+                    {/* Gráfico de tendencias */}
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                        <h4 className="text-lg font-bold text-gray-800 mb-4">📈 Tendencia de Consultas</h4>
+                        <div className="h-64">
+                            <canvas ref={chartRef}></canvas>
+                        </div>
+                    </div>
+
+                    {/* Análisis demográfico */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="bg-white rounded-xl shadow-lg p-6">
+                            <h4 className="text-lg font-bold text-gray-800 mb-4">👫 Distribución por Género</h4>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-700">Femenino</span>
+                                    <div className="flex items-center">
+                                        <div className="w-24 h-2 bg-gray-200 rounded-full mr-2">
+                                            <div className="h-2 bg-purple-500 rounded-full" style={{width: `${(stats.distribucionGenero.femenino / (stats.distribucionGenero.femenino + stats.distribucionGenero.masculino) * 100) || 0}%`}}></div>
+                                        </div>
+                                        <span className="text-sm font-semibold">{stats.distribucionGenero.femenino}</span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-700">Masculino</span>
+                                    <div className="flex items-center">
+                                        <div className="w-24 h-2 bg-gray-200 rounded-full mr-2">
+                                            <div className="h-2 bg-purple-400 rounded-full" style={{width: `${(stats.distribucionGenero.masculino / (stats.distribucionGenero.femenino + stats.distribucionGenero.masculino) * 100) || 0}%`}}></div>
+                                        </div>
+                                        <span className="text-sm font-semibold">{stats.distribucionGenero.masculino}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </form>
+
+                        <div className="bg-white rounded-xl shadow-lg p-6">
+                            <h4 className="text-lg font-bold text-gray-800 mb-4">🎂 Rangos de Edad</h4>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-700">Jóvenes (18-30)</span>
+                                    <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                        {stats.rangoEdades.jovenes}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-700">Adultos (31-60)</span>
+                                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                        {stats.rangoEdades.adultos}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-700">Mayores (+60)</span>
+                                    <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                        {stats.rangoEdades.mayores}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow-lg p-6">
+                            <h4 className="text-lg font-bold text-gray-800 mb-4">🏥 Indicadores de Salud</h4>
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between mb-1">
+                                        <span className="text-sm text-gray-700">Calidad de Atención</span>
+                                        <span className="text-sm font-semibold">{stats.indicadorCalidad}%</span>
+                                    </div>
+                                    <div className="w-full h-2 bg-gray-200 rounded-full">
+                                        <div className="h-2 bg-green-500 rounded-full" style={{width: `${stats.indicadorCalidad}%`}}></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between mb-1">
+                                        <span className="text-sm text-gray-700">Eficiencia</span>
+                                        <span className="text-sm font-semibold">92%</span>
+                                    </div>
+                                    <div className="w-full h-2 bg-gray-200 rounded-full">
+                                        <div className="h-2 bg-purple-500 rounded-full" style={{width: '92%'}}></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Análisis de diagnósticos y medicamentos */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="bg-white rounded-xl shadow-lg p-6">
+                            <h4 className="text-lg font-bold text-gray-800 mb-4">🏥 Diagnósticos Más Frecuentes</h4>
+                            <div className="space-y-3">
+                                {stats.topDiagnosticos.map((diag, index) => (
+                                    <div key={index} className="flex justify-between items-center">
+                                        <span className="text-gray-700">{diag.name}</span>
+                                        <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                            {diag.count}
+                                        </span>
+                                    </div>
+                                ))}
+                                {stats.topDiagnosticos.length === 0 && (
+                                    <p className="text-gray-500 text-center py-4">No hay datos de diagnósticos disponibles</p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow-lg p-6">
+                            <h4 className="text-lg font-bold text-gray-800 mb-4">💊 Medicamentos Más Recetados</h4>
+                            <div className="space-y-3">
+                                {stats.topMedicamentos.map((med, index) => (
+                                    <div key={index} className="flex justify-between items-center">
+                                        <span className="text-gray-700">{med.name}</span>
+                                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                            {med.count}
+                                        </span>
+                                    </div>
+                                ))}
+                                {stats.topMedicamentos.length === 0 && (
+                                    <p className="text-gray-500 text-center py-4">No hay datos de medicamentos disponibles</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Predictor de salud mejorado */}
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                        <h4 className="text-lg font-bold text-gray-800 mb-4">🔮 Análisis Predictivo de Salud</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg">
+                                <h5 className="font-semibold text-purple-800 mb-2">Análisis Poblacional</h5>
+                                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                                    {stats.totalPacientes > 0 && (
+                                        <li>Promedio de {(stats.totalHistorias / stats.totalPacientes).toFixed(1)} consultas por paciente</li>
+                                    )}
+                                    {stats.topDiagnosticos.length > 0 && (
+                                        <li>Diagnóstico más común: {stats.topDiagnosticos[0]?.name}</li>
+                                    )}
+                                    {stats.edadPromedio > 0 && (
+                                        <li>Población principalmente {stats.edadPromedio < 30 ? 'joven' : stats.edadPromedio < 60 ? 'adulta' : 'mayor'} (Promedio: {stats.edadPromedio} años)</li>
+                                    )}
+                                    <li>Factor de riesgo general: <span className={`font-semibold ${stats.factorRiesgo === 'alto' ? 'text-red-600' : stats.factorRiesgo === 'medio' ? 'text-yellow-600' : 'text-green-600'}`}>{stats.factorRiesgo}</span></li>
+                                </ul>
+                            </div>
+                            <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg">
+                                <h5 className="font-semibold text-green-800 mb-2">Recomendaciones</h5>
+                                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                                    {stats.rangoEdades.mayores > stats.rangoEdades.jovenes && (
+                                        <li>Implementar programas preventivos para adultos mayores</li>
+                                    )}
+                                    {stats.distribucionGenero.femenino > stats.distribucionGenero.masculino && (
+                                        <li>Enfoque en salud femenina y programas especializados</li>
+                                    )}
+                                    {stats.topDiagnosticos.length > 0 && (
+                                        <li>Desarrollar protocolos específicos para {stats.topDiagnosticos[0]?.name}</li>
+                                    )}
+                                    <li>Mantener calidad de atención actual ({stats.indicadorCalidad}%)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            `;
-            
-            // Event listener para el formulario
-            document.getElementById('formula-form').addEventListener('submit', handleFormulaSubmit);
-        }
+            );
+        };
 
-        // Función para manejar envío de fórmula médica
-        async function handleFormulaSubmit(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const formulaData = {
-                pacienteId: selectedPatient.id,
-                medicamentos: formData.get('medicamentos'),
-                indicaciones: formData.get('indicaciones'),
-                duracion: formData.get('duracion')
+        // Agenda con videoconsultas mejoradas
+        const Agenda = ({ citas, onSaveCita }) => {
+            const [formData, setFormData] = useState({
+                paciente: '',
+                fecha: '',
+                hora: '',
+                motivo: '',
+                tipo: 'presencial',
+                duracion: '30',
+                recordatorio: '15',
+                notas: ''
+            });
+
+            const [meetRooms, setMeetRooms] = useState({});
+            const [activeCall, setActiveCall] = useState(null);
+            const [callStatus, setCallStatus] = useState('idle'); // 'idle', 'connecting', 'connected', 'ended'
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
             };
-            
-            try {
-                const token = localStorage.getItem('authToken');
-                const response = await fetch(`${API_BASE}/formulas`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(formulaData)
-                });
 
-                if (!response.ok) {
-                    throw new Error('Error al guardar fórmula médica');
-                }
-
-                showNotification('Éxito', 'Fórmula médica guardada exitosamente', 'success');
-                document.getElementById('formula-form').reset();
-            } catch (error) {
-                showNotification('Error', error.message, 'error');
-            }
-        }
-
-        // Función para generar PDF de fórmula médica
-        function generateFormulaPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // Encabezado
-            doc.setFontSize(18);
-            doc.text('FÓRMULA MÉDICA', 20, 20);
-            doc.setFontSize(12);
-            doc.text(`Paciente: ${selectedPatient.nombres} ${selectedPatient.apellidos}`, 20, 35);
-            doc.text(`Identificación: ${selectedPatient.identificacion}`, 20, 45);
-            doc.text(`Edad: ${calculateAge(selectedPatient.fechaNacimiento)} años`, 20, 55);
-            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 20, 65);
-            
-            // Contenido de la fórmula
-            const form = document.getElementById('formula-form');
-            const formData = new FormData(form);
-            
-            let yPosition = 80;
-            
-            doc.text('MEDICAMENTOS:', 20, yPosition);
-            yPosition += 10;
-            const medicamentos = formData.get('medicamentos');
-            if (medicamentos) {
-                const lines = doc.splitTextToSize(medicamentos, 170);
-                doc.text(lines, 25, yPosition);
-                yPosition += lines.length * 5 + 10;
-            }
-            
-            doc.text('INDICACIONES:', 20, yPosition);
-            yPosition += 10;
-            const indicaciones = formData.get('indicaciones');
-            if (indicaciones) {
-                const lines = doc.splitTextToSize(indicaciones, 170);
-                doc.text(lines, 25, yPosition);
-                yPosition += lines.length * 5 + 10;
-            }
-            
-            const duracion = formData.get('duracion');
-            if (duracion) {
-                doc.text(`DURACIÓN: ${duracion}`, 20, yPosition);
-                yPosition += 15;
-            }
-            
-            // Firma
-            doc.text(`Médico: ${currentUser.name}`, 20, yPosition + 20);
-            doc.text(`Especialidad: ${currentUser.especialidad || 'Medicina General'}`, 20, yPosition + 30);
-            doc.text(`Registro: ${currentUser.registro || 'N/A'}`, 20, yPosition + 40);
-            
-            doc.save(`formula-medica-${selectedPatient.identificacion}-${new Date().toISOString().split('T')[0]}.pdf`);
-        }
-
-        // Función para enviar fórmula por email
-        function sendFormulaEmail() {
-            if (!selectedPatient.email) {
-                showNotification('Error', 'La paciente no tiene email registrado', 'error');
-                return;
-            }
-            
-            // Simular envío de email
-            showNotification('Éxito', `Fórmula médica enviada a ${selectedPatient.email}`, 'success');
-        }
-
-        // Función para cargar estadísticas del dashboard
-        async function loadDashboardStats() {
-            try {
-                const token = localStorage.getItem('authToken');
+            const generateAdvancedMeetLink = (cita) => {
+                // Generar un ID más descriptivo y único
+                const cleanPatientName = cita.paciente.replace(/\s+/g, '-').toLowerCase();
+                const date = new Date(cita.fecha).toISOString().split('T')[0];
+                const time = cita.hora.replace(':', '');
+                const meetId = `yosoy-${cleanPatientName}-${date}-${time}`;
+                const fullMeetUrl = `https://meet.google.com/${meetId}`;
                 
-                // Cargar pacientes
-                const patientsResponse = await fetch(`${API_BASE}/patients`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
-                if (patientsResponse.ok) {
-                    const patientsData = await patientsResponse.json();
-                    document.getElementById('total-patients').textContent = patientsData.length;
-                }
-                
-                // Cargar historias del mes
-                const historiasResponse = await fetch(`${API_BASE}/historias`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
-                if (historiasResponse.ok) {
-                    const historiasData = await historiasResponse.json();
-                    const thisMonth = historiasData.filter(h => {
-                        const historyDate = new Date(h.created_at);
-                        const now = new Date();
-                        return historyDate.getMonth() === now.getMonth() && 
-                               historyDate.getFullYear() === now.getFullYear();
-                    });
-                    document.getElementById('monthly-consultations').textContent = thisMonth.length;
-                }
-                
-                // Simular pacientes por prioridad
-                const priorityContainer = document.getElementById('priority-patients');
-                priorityContainer.innerHTML = `
-                    <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                        <span class="text-red-800">Alta Prioridad</span>
-                        <span class="bg-red-600 text-white px-2 py-1 rounded-full text-sm">3</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-                        <span class="text-yellow-800">Media Prioridad</span>
-                        <span class="bg-yellow-600 text-white px-2 py-1 rounded-full text-sm">8</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                        <span class="text-green-800">Baja Prioridad</span>
-                        <span class="bg-green-600 text-white px-2 py-1 rounded-full text-sm">12</span>
-                    </div>
-                `;
-            } catch (error) {
-                console.error('Error cargando estadísticas:', error);
-            }
-        }
+                // Guardar información de la sala
+                setMeetRooms(prev => ({
+                    ...prev,
+                    [cita.id]: {
+                        url: fullMeetUrl,
+                        meetId: meetId,
+                        created: new Date().toISOString(),
+                        patient: cita.paciente,
+                        duration: cita.duracion || 30
+                    }
+                }));
 
-        // Función para logout
-        function logout() {
-            currentUser = null;
-            selectedPatient = null;
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('authUser');
-            userInfo.classList.add('hidden');
-            showScreen('login-form');
-            showNotification('Sesión cerrada', 'Has cerrado sesión correctamente', 'info');
-        }
-
-        // Función para verificar sesión existente
-        function checkExistingSession() {
-            const savedUser = localStorage.getItem('authUser');
-            const token = localStorage.getItem('authToken');
-            
-            if (savedUser && token) {
-                try {
-                    currentUser = JSON.parse(savedUser);
-                    welcomeText.textContent = `Dra. ${currentUser.name}`;
-                    userSpecialty.textContent = currentUser.especialidad || 'Medicina General';
-                    userInfo.classList.remove('hidden');
-                    showScreen('dashboard');
-                    showTab('registro');
-                    return true;
-                } catch (e) {
-                    localStorage.removeItem('authUser');
-                    localStorage.removeItem('authToken');
-                }
-            }
-            return false;
-        }
-
-        // Event listeners
-        document.getElementById('auth-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (username && password) {
-                handleLogin(username, password);
-            } else {
-                showNotification('Error', 'Por favor complete todos los campos', 'error');
-            }
-        });
-
-        document.getElementById('patient-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            const patientData = {
-                nombres: formData.get('nombres'),
-                apellidos: formData.get('apellidos'),
-                identificacion: formData.get('identificacion'),
-                fechaNacimiento: formData.get('fechaNacimiento'),
-                telefono: formData.get('telefono'),
-                email: formData.get('email'),
-                estadoCivil: formData.get('estadoCivil'),
-                ocupacion: formData.get('ocupacion'),
-                direccion: formData.get('direccion'),
-                ultimaMenstruacion: formData.get('ultimaMenstruacion'),
-                embarazosPrevios: formData.get('embarazosPrevios'),
-                partos: formData.get('partos'),
-                abortos: formData.get('abortos')
+                return fullMeetUrl;
             };
-            
-            registerPatient(patientData);
-        });
 
-        // Búsqueda en tiempo real
-        document.getElementById('search-input').addEventListener('input', function() {
-            if (this.value.length > 2) {
-                searchPatients();
-            }
-        });
+            const initiateVideoCall = (cita) => {
+                setActiveCall(cita);
+                setCallStatus('connecting');
+                
+                const meetUrl = generateAdvancedMeetLink(cita);
+                
+                // Abrir Google Meet en nueva ventana
+                const meetWindow = window.open(meetUrl, '_blank', 
+                    'width=1200,height=800,toolbar=no,menubar=no,location=no,status=no'
+                );
+                
+                setCallStatus('connected');
+                
+                // Simular seguimiento de la llamada
+                setTimeout(() => {
+                    if (meetWindow && meetWindow.closed) {
+                        setCallStatus('ended');
+                        setActiveCall(null);
+                    }
+                }, 1000);
+            };
 
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', function() {
-            loadingStatus.textContent = 'Verificando sesión...';
-            
-            setTimeout(() => {
-                if (!checkExistingSession()) {
-                    showScreen('login-form');
+            const sendMeetInvitation = (cita) => {
+                const meetUrl = generateAdvancedMeetLink(cita);
+                const subject = `Videoconsulta YoSoy - ${cita.paciente}`;
+                const body = `
+Estimado/a ${cita.paciente},
+
+Su cita médica virtual ha sido programada para:
+📅 Fecha: ${cita.fecha}
+🕒 Hora: ${cita.hora}
+👩‍⚕️ Doctor: Dra. Ana María Rodríguez
+💊 Motivo: ${cita.motivo}
+
+🎥 ENLACE DE VIDEOCONSULTA:
+${meetUrl}
+
+📱 INSTRUCCIONES:
+1. Haga clic en el enlace 5 minutos antes de la cita
+2. Permita el acceso a cámara y micrófono
+3. Tenga a mano su documento de identidad
+4. Prepare una lista de sus síntomas o preguntas
+
+📞 Soporte técnico: +57 310 643 3823
+📧 Email: anamariar@yo-soy.co
+
+Saludos cordiales,
+YoSoy Historia Clínica
+                `.trim();
+
+                const mailtoLink = `mailto:${cita.email || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                window.open(mailtoLink);
+            };
+
+            const getCallStatusColor = (status) => {
+                switch (status) {
+                    case 'connecting': return 'text-yellow-600 bg-yellow-100';
+                    case 'connected': return 'text-green-600 bg-green-100';
+                    case 'ended': return 'text-gray-600 bg-gray-100';
+                    default: return 'text-purple-600 bg-purple-100';
                 }
-            }, 1000);
-        });
+            };
 
-        // Log para debugging
-        console.log('YoSoy Historia Clínica - Sistema Médico para Mujeres iniciado');
-        console.log('Dominio:', window.location.hostname);
-        console.log('Protocolo:', window.location.protocol);
+            const getCallStatusText = (status) => {
+                switch (status) {
+                    case 'connecting': return '🔄 Conectando...';
+                    case 'connected': return '🟢 En llamada';
+                    case 'ended': return '✅ Finalizada';
+                    default: return '⏸️ Pendiente';
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                
+                const newCita = {
+                    ...formData,
+                    id: Date.now().toString(),
+                    createdAt: new Date().toISOString(),
+                    status: 'programada'
+                };
+
+                onSaveCita(newCita);
+                
+                // Si es videoconsulta, generar inmediatamente el enlace
+                if (formData.tipo === 'videoconsulta') {
+                    generateAdvancedMeetLink(newCita);
+                }
+                
+                setFormData({
+                    paciente: '',
+                    fecha: '',
+                    hora: '',
+                    motivo: '',
+                    tipo: 'presencial',
+                    duracion: '30',
+                    recordatorio: '15',
+                    notas: ''
+                });
+                
+                alert('Cita agendada exitosamente');
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                        <h3 className="text-2xl font-bold text-gray-800 mb-6">Agendar Cita</h3>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Paciente:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="paciente"
+                                        value={formData.paciente}
+                                        onChange={handleChange}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Tipo de cita:
+                                    </label>
+                                    <select
+                                        name="tipo"
+                                        value={formData.tipo}
+                                        onChange={handleChange}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                    >
+                                        <option value="presencial">Presencial</option>
+                                        <option value="videoconsulta">Videoconsulta (Google Meet)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Fecha:
+                                    </label>
+                                    <input
+                                        type="date"
+                                        name="fecha"
+                                        value={formData.fecha}
+                                        onChange={handleChange}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Hora:
+                                    </label>
+                                    <input
+                                        type="time"
+                                        name="hora"
+                                        value={formData.hora}
+                                        onChange={handleChange}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                        required
+                                    />
+                                </div>
+                                {formData.tipo === 'videoconsulta' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Duración (minutos):
+                                        </label>
+                                        <select
+                                            name="duracion"
+                                            value={formData.duracion}
+                                            onChange={handleChange}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                        >
+                                            <option value="15">15 minutos</option>
+                                            <option value="30">30 minutos</option>
+                                            <option value="45">45 minutos</option>
+                                            <option value="60">1 hora</option>
+                                        </select>
+                                    </div>
+                                )}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Recordatorio (minutos antes):
+                                    </label>
+                                    <select
+                                        name="recordatorio"
+                                        value={formData.recordatorio}
+                                        onChange={handleChange}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                    >
+                                        <option value="5">5 minutos</option>
+                                        <option value="15">15 minutos</option>
+                                        <option value="30">30 minutos</option>
+                                        <option value="60">1 hora</option>
+                                        <option value="1440">1 día</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Motivo:
+                                </label>
+                                <textarea
+                                    name="motivo"
+                                    value={formData.motivo}
+                                    onChange={handleChange}
+                                    rows="3"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                    required
+                                />
+                            </div>
+                            {formData.tipo === 'videoconsulta' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Notas para videoconsulta:
+                                    </label>
+                                    <textarea
+                                        name="notas"
+                                        value={formData.notas}
+                                        onChange={handleChange}
+                                        rows="2"
+                                        placeholder="Instrucciones especiales, preparación necesaria, etc."
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                    />
+                                </div>
+                            )}
+                            <button
+                                type="submit"
+                                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+                            >
+                                📅 Agendar Cita
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Lista de citas */}
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                        <h4 className="text-xl font-bold text-gray-800 mb-4">Citas Programadas</h4>
+                        <div className="space-y-3">
+                            {citas.map((cita, index) => (
+                                <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h5 className="font-semibold text-gray-800">{cita.paciente}</h5>
+                                            <p className="text-sm text-gray-600">
+                                                {cita.fecha} a las {cita.hora}
+                                            </p>
+                                            <p className="text-sm text-gray-600">{cita.motivo}</p>
+                                            <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold mt-2 ${
+                                                cita.tipo === 'videoconsulta' 
+                                                    ? 'bg-purple-100 text-purple-800' 
+                                                    : 'bg-green-100 text-green-800'
+                                            }`}>
+                                                {cita.tipo === 'videoconsulta' ? '📹 Videoconsulta' : '🏥 Presencial'}
+                                            </span>
+                                        </div>
+                                        {cita.tipo === 'videoconsulta' && (
+                                            <button
+                                                onClick={() => window.open(generateMeetLink(cita), '_blank')}
+                                                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition duration-300"
+                                            >
+                                                🚀 Iniciar Meet
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Componente principal
+        const MedicalApp = () => {
+            const { user, login, logout, loading, isOnline } = useAuth();
+            const { historias, formulas, citas, saveHistoria, saveFormula, saveCita, refresh } = useMedicalData();
+            const [activeTab, setActiveTab] = useState('dashboard');
+
+            if (loading) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto"></div>
+                            <p className="mt-4 text-gray-600">Cargando...</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (!user) {
+                return <LoginForm onLogin={login} />;
+            }
+
+            const menuItems = [
+                { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+                { id: 'historia', label: 'Historia Clínica', icon: '📋' },
+                { id: 'formula', label: 'Fórmula Médica', icon: '💊' },
+                { id: 'busqueda', label: 'Buscar Paciente', icon: '🔍' },
+                { id: 'agenda', label: 'Agenda', icon: '📅' }
+            ];
+
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm border-b">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center">
+                                        <span className="text-white font-bold text-lg">YS</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <h1 className="text-xl font-bold text-purple-800">YoSoy</h1>
+                                        <span className="text-sm text-purple-600">Historia Clínica Digital</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    {/* Indicador de estado de conexión */}
+                                    <div className="flex items-center space-x-2">
+                                        <div className={`w-3 h-3 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                        <span className={`text-xs font-medium ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
+                                            {isOnline ? 'En línea' : 'Sin conexión'}
+                                        </span>
+                                        {!isOnline && (
+                                            <button 
+                                                onClick={refresh}
+                                                className="text-xs text-purple-600 hover:text-purple-800 underline"
+                                            >
+                                                Reintentar
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="text-right">
+                                        <span className="block text-sm text-purple-700 font-medium">
+                                            {user.name}
+                                        </span>
+                                        {user.especialidad && (
+                                            <span className="block text-xs text-purple-500">
+                                                {user.especialidad}
+                                            </span>
+                                        )}
+                                        {user.registro && (
+                                            <span className="block text-xs text-purple-400">
+                                                {user.registro}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={logout}
+                                        className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition duration-300"
+                                    >
+                                        Cerrar Sesión
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                            {/* Sidebar */}
+                            <div className="lg:col-span-1">
+                                <div className="bg-white rounded-xl shadow-lg p-6">
+                                    <nav className="space-y-2">
+                                        {menuItems.map((item) => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => setActiveTab(item.id)}
+                                                className={`w-full text-left px-4 py-3 rounded-lg transition duration-300 ${
+                                                    activeTab === item.id
+                                                        ? 'bg-purple-600 text-white'
+                                                        : 'text-gray-700 hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                <span className="mr-3">{item.icon}</span>
+                                                {item.label}
+                                            </button>
+                                        ))}
+                                    </nav>
+                                </div>
+                            </div>
+
+                            {/* Main Content */}
+                            <div className="lg:col-span-3">
+                                {activeTab === 'dashboard' && (
+                                    <Dashboard historias={historias} formulas={formulas} citas={citas} />
+                                )}
+                                {activeTab === 'historia' && (
+                                    <HistoriaClinicaForm onSave={saveHistoria} />
+                                )}
+                                {activeTab === 'formula' && (
+                                    <FormulaMedicaForm onSave={saveFormula} currentUser={user} />
+                                )}
+                                {activeTab === 'busqueda' && (
+                                    <BusquedaPacientes historias={historias} formulas={formulas} />
+                                )}
+                                {activeTab === 'agenda' && (
+                                    <Agenda citas={citas} onSaveCita={saveCita} />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Renderizar la aplicación
+        const root = createRoot(document.getElementById('app'));
+        root.render(<MedicalApp />);
     </script>
 </body>
 </html>
