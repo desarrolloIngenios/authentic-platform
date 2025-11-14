@@ -1,3 +1,4 @@
+!secure-medical-system.html
 node_modules
 npm-debug.log
 .git
@@ -25,3 +26,4 @@ lib/
 k8s/
 gcp-deployment/
 argocd/
+!index.html
