@@ -55,11 +55,13 @@ RUN echo '* * * * * cd /var/www && php artisan schedule:run >> /dev/null 2>&1' >
     && chmod 0644 /etc/cron.d/laravel-cron \
     && crontab /etc/cron.d/laravel-cron
 
-# Ajustar permisos necesarios para Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
-    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-    # Agrega estas líneas para la optimización de producción
+# Ajustar permisos necesarios para Laravel (reforzado)
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && \
+    chmod -R 775 /var/www/storage && \
+    chmod -R 775 /var/www/bootstrap/cache
+
+# Agrega estas líneas para la optimización de producción
 # Skip cache durante build - se ejecutará en runtime
 # RUN php artisan config:cache
 # RUN php artisan route:cache
