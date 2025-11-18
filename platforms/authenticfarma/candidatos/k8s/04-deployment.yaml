@@ -18,12 +18,33 @@ spec:
         platform: authenticfarma
     spec:
       serviceAccountName: authenticfarma-candidatos-sa
+      initContainers:
+        - name: fix-permissions
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+          command: ['sh', '-c']
+          args:
+            - |
+              chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+              chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+              find /var/www/storage -type d -exec chmod 775 {} \;
+              find /var/www/storage -type f -exec chmod 664 {} \;
+          volumeMounts:
+            - name: storage
+              mountPath: /var/www/storage
+            - name: cache
+              mountPath: /var/www/bootstrap/cache
+          securityContext:
+            runAsUser: 0
       containers:
         - name: app
           image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
           ports:
             - containerPort: 80
               name: http
+          securityContext:
+            runAsUser: 33  # www-data user ID
+            runAsGroup: 33  # www-data group ID
+            fsGroup: 33
           resources:
             requests:
               cpu: "100m"
@@ -165,6 +186,10 @@ spec:
                   name: laravel-secrets
                   key: APP_KEY
           volumeMounts:
+            - name: storage
+              mountPath: /var/www/storage
+            - name: cache
+              mountPath: /var/www/bootstrap/cache
             - mountPath: /var/www/storage/app/credentials
               name: vertex-ai-credentials
               readOnly: true
@@ -184,6 +209,10 @@ spec:
               cpu: "200m"
               memory: "256Mi"
       volumes:
+        - name: storage
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
         - name: vertex-ai-credentials
           secret:
             secretName: vertex-ai-secrets
