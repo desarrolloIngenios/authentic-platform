@@ -31,8 +31,8 @@ build_job:
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_DRIVER: overlay2
   script:
-    - docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$CI_COMMIT_SHORT_SHA .
-    - echo "Built image $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$CI_COMMIT_SHORT_SHA"
+    - docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest4 .
+    - echo "Built image $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest4"
 
 publish_job:
   stage: publish
@@ -41,7 +41,7 @@ publish_job:
     - echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp_key.json
     - gcloud auth activate-service-account --key-file=/tmp/gcp_key.json
     - gcloud auth configure-docker $REGION-docker.pkg.dev -q
-    - docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest4
   only:
     - main
 
@@ -51,8 +51,8 @@ update_manifests:
   script:
     - git clone $GITOPS_REPO_URL gitops
     - cd gitops/infra/k8s-manifests/apps/APP_NAME
-    - sed -i "s/IMAGE_TAG/$CI_COMMIT_SHORT_SHA/g" deployment.yaml
-    - git add deployment.yaml && git commit -m "ci: update image APP_NAME to $CI_COMMIT_SHORT_SHA" || echo "no changes"
+    - sed -i "s/IMAGE_TAG/latest4/g" deployment.yaml
+    - git add deployment.yaml && git commit -m "ci: update image APP_NAME to latest4" || echo "no changes"
     - git push origin main
   only:
     - main
