@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moodle
+  namespace: moodle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: moodle
+  template:
+    metadata:
+      labels:
+        app: moodle
+    spec:
+      containers:
+        - name: moodle
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/e-learning/moodle:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MOODLE_USERNAME
+              value: "admin"
+            - name: MOODLE_PASSWORD
+              value: "admin123"
+            - name: MOODLE_EMAIL
+              value: "admin@example.com"
+            - name: MOODLE_DATABASE_TYPE
+              value: "mysqli"
+            - name: MOODLE_DATABASE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: moodle-db
+                  key: host
+            - name: MOODLE_DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: moodle-db
+                  key: database
+            - name: MOODLE_DATABASE_USER
+              value: "moodle_user"
+            - name: MOODLE_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: moodle-db
+                  key: password

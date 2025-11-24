@@ -23,7 +23,8 @@ spec:
         fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: app
-          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+          image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:IMAGE_TAG
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: http
@@ -161,6 +162,9 @@ spec:
                   key: GOOGLE_CLIENT_SECRET
             - name: GOOGLE_REDIRECT
               value: "https://candidatos.authenticfarma.com/google-auth/callback"
+            # --- LARAVEL CUSTOM CACHE PATH ---
+            - name: VIEW_COMPILED_PATH
+              value: "/var/www/storage/framework/views"
             # --- SECRET REFERENCES ---
             - name: APP_KEY
               valueFrom:

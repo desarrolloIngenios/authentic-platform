@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moodle-elearning
+  namespace: moodle-elearning
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: moodle-elearning
+  template:
+    metadata:
+      labels:
+        app: moodle-elearning
+    spec:
+      containers:
+        - name: moodle
+          image: bitnami/moodle:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MOODLE_USERNAME
+              value: "admin"
+            - name: MOODLE_PASSWORD
+              value: "admin123"
+            - name: MOODLE_EMAIL
+              value: "admin@example.com"
