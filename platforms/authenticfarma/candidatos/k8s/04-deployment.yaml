@@ -24,6 +24,7 @@ spec:
       containers:
         - name: app
           image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: http

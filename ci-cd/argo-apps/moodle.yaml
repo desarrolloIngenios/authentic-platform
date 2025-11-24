@@ -1,18 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: moodle-elearning
+  name: moodle
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/desarrolloIngenios/authentic-platform.git
     targetRevision: dev
-    path: platforms/authenticfarma/moodle-elearning/k8s
+    path: platforms/e-learning/moodle/k8s
   destination:
     server: https://kubernetes.default.svc
-    namespace: moodle-elearning
+    namespace: moodle
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+  revisionHistoryLimit: 3
