@@ -56,11 +56,16 @@ RUN echo '* * * * * cd /var/www && php artisan schedule:run >> /dev/null 2>&1' >
     && crontab /etc/cron.d/laravel-cron
 
 
-# Ajustar permisos necesarios para Laravel (reforzado)
-RUN find /var/www/storage -type d -exec chmod 775 {} \; && \
+
+# Garantiza que los directorios de storage y views existen y tienen permisos correctos
+RUN mkdir -p \
+    /var/www/storage/framework/views \
+    /var/www/storage/framework/cache/data \
+    /var/www/bootstrap/cache && \
+    find /var/www/storage -type d -exec chmod 775 {} \; && \
     find /var/www/storage -type f -exec chmod 664 {} \; && \
     chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && \
-    chmod -R 775 /var/www/bootstrap/cache
+    chmod -R 775 /var/www/bootstrap/
 
 # Agrega estas líneas para la optimización de producción
 # Skip cache durante build - se ejecutará en runtime
