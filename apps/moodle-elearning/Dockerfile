@@ -42,6 +42,11 @@ RUN git clone -b MOODLE_405_STABLE https://github.com/moodle/moodle.git . \
     && mkdir -p /var/www/moodledata \
     && chown -R www-data:www-data /var/www/html /var/www/moodledata
 
+    # Garantiza permisos correctos para storage y cache en cada build
+RUN mkdir -p /var/www/storage /var/www/bootstrap/cache && \
+    chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && \
+    chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
 # Copiar configuración de nginx
 COPY ./nginx.conf /etc/nginx/nginx.conf
 

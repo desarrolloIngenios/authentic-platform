@@ -19,7 +19,7 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=true
 
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -34,7 +34,7 @@ spec:
   source:
     repoURL: https://github.com/gcp-projects-deployment/authentic-farma-deployment.git
     targetRevision: HEAD
-  path: platforms/authenticfarma/candidatos/k8s
+    path: platforms/authenticfarma/candidatos/k8s
   destination:
     server: https://kubernetes.default.svc
     namespace: authenticfarma-candidatos
@@ -43,4 +43,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=truecd..

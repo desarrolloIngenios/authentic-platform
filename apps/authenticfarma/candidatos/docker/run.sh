@@ -1,8 +1,10 @@
 #!/bin/sh
 
+
 cd /var/www
 
-# Asegurar permisos en directorios críticos
+# Asegurar que los directorios de cache existen y tienen permisos correctos
+mkdir -p storage/framework/views storage/framework/cache/data bootstrap/cache
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
