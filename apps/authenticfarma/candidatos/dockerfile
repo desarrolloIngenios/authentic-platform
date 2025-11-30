@@ -1,3 +1,10 @@
+# Crear directorios de logs para nginx y supervisord
+RUN mkdir -p /var/log/nginx /var/log/supervisor /var/log/php && \
+    touch /var/log/nginx/access.log /var/log/nginx/error.log && \
+    touch /var/log/supervisor/supervisord.log && \
+    touch /var/log/php/errors.log && \
+    chown -R www-data:www-data /var/log/nginx /var/log/supervisor /var/log/php && \
+    chmod -R 775 /var/log/nginx /var/log/supervisor /var/log/php
 FROM --platform=linux/amd64 php:8.2-fpm
 
 # Set working directory
@@ -20,13 +27,13 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     nginx \
     cron \
+    mariadb-client-compat \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Crear usuario Laravel
-RUN groupadd -g 1000 www && useradd -u 1000 -ms /bin/bash -g www www
+
 
 # Copiar composer.json y composer.lock
 COPY composer.json composer.lock ./
@@ -36,7 +43,7 @@ RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-plugins --no
     (cat /var/www/composer.json && cat /var/www/composer.lock && exit 1)
 
 # Copiar el resto del código
-COPY --chown=www:www . /var/www
+COPY --chown=www-data:www-data . /var/www
 
 # Permisos
 RUN chmod -R ug+w /var/www/storage /var/www/bootstrap/cache
@@ -46,9 +53,11 @@ RUN cp docker/supervisor.conf /etc/supervisord.conf
 RUN cp docker/php.ini /usr/local/etc/php/conf.d/app.ini
 RUN cp docker/nginx.conf /etc/nginx/sites-enabled/default
 
-# Logs PHP
-RUN mkdir -p /var/log/php && \
-    touch /var/log/php/errors.log && chmod 777 /var/log/php/errors.log
+# Logs supervisord y PHP, y permisos para /var/run
+RUN mkdir -p /var/log/php /var/log /var/run && \
+    touch /var/log/php/errors.log /var/log/supervisord.log /var/run/supervisord.pid && \
+    chmod 777 /var/log/php/errors.log /var/log/supervisord.log /var/run/supervisord.pid && \
+    chown www-data:www-data /var/log/supervisord.log /var/run /var/run/supervisord.pid
 
 # Cron Laravel
 RUN echo '* * * * * cd /var/www && php artisan schedule:run >> /dev/null 2>&1' > /etc/cron.d/laravel-cron \
@@ -65,7 +74,8 @@ RUN mkdir -p \
     find /var/www/storage -type d -exec chmod 775 {} \; && \
     find /var/www/storage -type f -exec chmod 664 {} \; && \
     chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && \
-    chmod -R 775 /var/www/bootstrap/
+    chmod -R 775 /var/www/bootstrap/ && \
+    chmod -R 0777 /var/www/storage
 
 # Agrega estas líneas para la optimización de producción
 # Skip cache durante build - se ejecutará en runtime
@@ -73,8 +83,11 @@ RUN mkdir -p \
 # RUN php artisan route:cache
 # RUN php artisan view:cache
 
+
+
 EXPOSE 80
 
 ENTRYPOINT ["bash", "/var/www/docker/run.sh"]
+
 
 
