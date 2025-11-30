@@ -153,11 +153,6 @@ spec:
               value: "vertex"
             - name: GEMINI_MODEL
               value: "gemini-2.0-flash-lite"
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              valueFrom:
-                secretKeyRef:
-                  name: vertex-ai-secrets
-                  key: credentials-json
             - name: GOOGLE_CLOUD_PROJECT
               value: "authentic-prod-464216"
             - name: GOOGLE_CLOUD_LOCATION
@@ -193,9 +188,6 @@ spec:
               mountPath: /var/www/storage
             - name: cache
               mountPath: /var/www/bootstrap/cache
-            - mountPath: /var/www/storage/app/credentials
-              name: vertex-ai-credentials
-              readOnly: true
             - name: mysql-ssl-certs
               mountPath: /var/www/ssl
               readOnly: true
@@ -225,12 +217,6 @@ spec:
           emptyDir: {}
         - name: logs
           emptyDir: {}
-        - name: vertex-ai-credentials
-          secret:
-            secretName: vertex-ai-secrets
-            items:
-              - key: credentials-json
-                path: vertex-ai-production.json
         - name: mysql-ssl-certs
           secret:
             secretName: mysql-ssl-certs

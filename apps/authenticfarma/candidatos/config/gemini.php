@@ -10,5 +10,5 @@ return [
     'project_id' => env('GOOGLE_CLOUD_PROJECT'),
     'location' => env('GOOGLE_CLOUD_LOCATION', 'us-central1'),
     'model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
-    'credentials' => env('GOOGLE_APPLICATION_CREDENTIALS', storage_path('app/credentials/vertex-ai-production.json')),
+        'credentials' => env('GOOGLE_APPLICATION_CREDENTIALS'),
 ];
