@@ -30,23 +30,10 @@ spec:
             - sh
             - -c
             - |
-              echo "Fixing permissions for Laravel storage and logs..."
-              chown -R 33:33 /var/www/storage
-              chmod -R 775 /var/www/storage
-              chown -R 33:33 /var/www/bootstrap/cache
-              chmod -R 775 /var/www/bootstrap/cache
-              chown -R 33:33 /var/log
-              chmod -R 775 /var/log
-              # Ensure Laravel log file is group-writable if present
-              if [ -f /var/www/storage/logs/laravel.log ]; then
-                chown 33:33 /var/www/storage/logs/laravel.log || true
-                chmod 664 /var/www/storage/logs/laravel.log || true
-              fi
+              echo "Creating log directories..."
+              mkdir -p /var/log/nginx /var/log/supervisor /var/log/php
+              echo "Permissions will be handled by fsGroup"
           volumeMounts:
-            - name: storage
-              mountPath: /var/www/storage
-            - name: cache
-              mountPath: /var/www/bootstrap/cache
             - name: logs
               mountPath: /var/log
       containers:
