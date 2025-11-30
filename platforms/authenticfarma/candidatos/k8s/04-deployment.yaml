@@ -19,8 +19,23 @@ spec:
     spec:
       serviceAccountName: authenticfarma-candidatos-sa
       securityContext:
-        fsGroup: 33
+        runAsUser: 33       # www-data
+        runAsGroup: 33
+        fsGroup: 33         # da permisos de escritura en volúmenes
         fsGroupChangePolicy: "OnRootMismatch"
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Creating log directories..."
+              mkdir -p /var/log/nginx /var/log/supervisor /var/log/php
+              echo "Permissions will be handled by fsGroup"
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log
       containers:
         - name: app
           image: us-central1-docker.pkg.dev/authentic-prod-464216/authenticfarma-repo/authentic-candidatos:latest
@@ -67,7 +82,7 @@ spec:
                   name: laravel-secrets
                   key: APP_KEY
             - name: LOG_CHANNEL
-              value: "stack"
+              value: "stderr"
             - name: DB_CONNECTION
               value: "mysql"
             - name: DB_HOST
@@ -181,6 +196,11 @@ spec:
             - mountPath: /var/www/storage/app/credentials
               name: vertex-ai-credentials
               readOnly: true
+            - name: mysql-ssl-certs
+              mountPath: /var/www/ssl
+              readOnly: true
+            - name: logs
+              mountPath: /var/log
 
         - name: cloud-sql-proxy
           image: us-central1-docker.pkg.dev/authentic-prod-464216/shared-images-repo/cloud-sql-proxy:2.8.0
@@ -203,9 +223,14 @@ spec:
           emptyDir: {}
         - name: cache
           emptyDir: {}
+        - name: logs
+          emptyDir: {}
         - name: vertex-ai-credentials
           secret:
             secretName: vertex-ai-secrets
             items:
               - key: credentials-json
                 path: vertex-ai-production.json
+        - name: mysql-ssl-certs
+          secret:
+            secretName: mysql-ssl-certs
