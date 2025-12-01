@@ -63,6 +63,7 @@ RUN echo '* * * * * cd /var/www && php artisan schedule:run >> /dev/null 2>&1' >
 RUN mkdir -p \
     /var/www/storage/framework/views \
     /var/www/storage/framework/cache/data \
+    /var/www/storage/framework/sessions \
     /var/www/bootstrap/cache && \
     find /var/www/storage -type d -exec chmod 775 {} \; && \
     find /var/www/storage -type f -exec chmod 664 {} \; && \
