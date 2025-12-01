@@ -30,10 +30,16 @@ class ExperienceLaboralService
 
             try {
                 // === IA para el cargo ===
-                $promptCargo = "Tengo este cargo laboral: \"$puestoOriginal\".\n";
-                $promptCargo .= "De la siguiente lista de cargos válidos, dime cuál es el más parecido o equivalente. ";
-                $promptCargo .= "Responde solo con uno de los nombres exactos de la lista, sin explicación.\n\n";
-                $promptCargo .= implode(", ", $cargosValidos);
+                $listaCargos = implode(", ", $cargosValidos);
+                $promptCargo = <<<PROMPT
+Tengo este cargo laboral: "$puestoOriginal".
+
+De la siguiente lista de cargos válidos, dime cuál es el más parecido o equivalente.
+Responde solo con uno de los nombres exactos de la lista, sin explicación.
+
+Lista de cargos válidos:
+{$listaCargos}
+PROMPT;
 
                 $cargoMatch = $this->geminiService->generateContent($promptCargo, [
                     'temperature' => 0.1,
@@ -44,9 +50,16 @@ class ExperienceLaboralService
                 $exp['puesto_normalizado'] = $cargoMatch ?: $puestoOriginal;
 
                 // === IA para el área ===
-                $promptArea = "Según esta descripción laboral: \"$descripcion\".\n";
-                $promptArea .= "¿Cuál de estas áreas es la más relacionada? Responde solo con un nombre exacto de la lista. Si no encuentras ninguno escoge 'Otros'\n\n";
-                $promptArea .= implode(", ", $areasValidas);
+                $listaAreas = implode(", ", $areasValidas);
+                $promptArea = <<<PROMPT
+Según esta descripción laboral: "$descripcion".
+
+¿Cuál de estas áreas es la más relacionada?
+Responde solo con un nombre exacto de la lista. Si no encuentras ninguno escoge 'Otros'
+
+Lista de áreas válidas:
+{$listaAreas}
+PROMPT;
 
                 $areaMatch = $this->geminiService->generateContent($promptArea, [
                     'temperature' => 0.1,
@@ -57,9 +70,16 @@ class ExperienceLaboralService
                 $exp['area_deducida'] = $areaMatch ?: 'Otros';
 
                 // === IA para el sector ===
-                $promptSector = "Según esta descripción laboral: \"$descripcion\".\n";
-                $promptSector .= "¿Cuál de estos sectores es el más relacionado? Responde solo con un nombre exacto de la lista. Si no encuentras ninguno escoge 'Otras Industrias'\n\n";
-                $promptSector .= implode(", ", $sectoresValidos);
+                $listaSectores = implode(", ", $sectoresValidos);
+                $promptSector = <<<PROMPT
+Según esta descripción laboral: "$descripcion".
+
+¿Cuál de estos sectores es el más relacionado?
+Responde solo con un nombre exacto de la lista. Si no encuentras ninguno escoge 'Otras Industrias'
+
+Lista de sectores válidos:
+{$listaSectores}
+PROMPT;
 
                 $sectorMatch = $this->geminiService->generateContent($promptSector, [
                     'temperature' => 0.1,
