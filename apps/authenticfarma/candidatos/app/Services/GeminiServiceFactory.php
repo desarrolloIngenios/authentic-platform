@@ -190,12 +190,28 @@ class GeminiVertexService implements GeminiServiceInterface
             ])->timeout(60)->post($url, $payload);
 
             if ($response->failed()) {
-                throw new \Exception('Error HTTP: ' . $response->status() . ' - ' . $response->body());
+                $errorBody = $response->body();
+                Log::error('Error en Vertex AI API', [
+                    'status' => $response->status(),
+                    'body' => $errorBody,
+                    'url' => $url
+                ]);
+                throw new \Exception('Error HTTP: ' . $response->status() . ' - ' . $errorBody);
             }
 
             $data = $response->json();
+            
+            if (!isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+                Log::error('Respuesta inesperada de Vertex AI', ['response' => $data]);
+                throw new \Exception('Respuesta inesperada del servicio de IA');
+            }
+            
             return $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
         } catch (\Exception $e) {
+            Log::error('Excepción en generateContent', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             throw new \Exception('Error en Vertex AI: ' . $e->getMessage());
         }
     }
@@ -204,21 +220,30 @@ class GeminiVertexService implements GeminiServiceInterface
     {
         $credentialsPath = config('gemini.credentials') ?? env('GOOGLE_APPLICATION_CREDENTIALS');
 
+        // Si credentialsPath está vacío, usar ADC (Application Default Credentials) vía metadata server
+        // Esto es lo correcto cuando usamos Workload Identity en GKE
+        if (empty($credentialsPath)) {
+            Log::info('Usando Application Default Credentials (Workload Identity)');
+            return $this->getAccessTokenFromMetadataServer();
+        }
+
         // Convertir ruta relativa a absoluta si es necesario
-        if ($credentialsPath && !file_exists($credentialsPath)) {
+        if (!file_exists($credentialsPath)) {
             $absolutePath = base_path($credentialsPath);
             if (file_exists($absolutePath)) {
                 $credentialsPath = $absolutePath;
+            } else {
+                // Si el archivo no existe, intentar usar ADC como fallback
+                Log::warning('Archivo de credenciales no encontrado, usando ADC como fallback', [
+                    'path' => $credentialsPath
+                ]);
+                return $this->getAccessTokenFromMetadataServer();
             }
-        }
-
-        if (!file_exists($credentialsPath)) {
-            throw new \Exception("Credenciales no encontradas: {$credentialsPath}");
         }
 
         $credentials = json_decode(file_get_contents($credentialsPath), true);
 
-        // Usar Google OAuth2 para obtener access token
+        // Usar Google OAuth2 para obtener access token desde archivo de credenciales
         $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
             'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
             'assertion' => $this->createJWT($credentials)
@@ -229,6 +254,39 @@ class GeminiVertexService implements GeminiServiceInterface
         }
 
         return $response->json()['access_token'];
+    }
+
+    /**
+     * Obtiene el access token desde el metadata server de GCP (Workload Identity)
+     */
+    private function getAccessTokenFromMetadataServer(): string
+    {
+        try {
+            $response = Http::withHeaders([
+                'Metadata-Flavor' => 'Google'
+            ])->timeout(10)->get('http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token');
+
+            if ($response->failed()) {
+                Log::error('Error obteniendo token desde metadata server', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                throw new \Exception('Error obteniendo access token desde metadata server: ' . $response->body());
+            }
+
+            $data = $response->json();
+            
+            if (!isset($data['access_token'])) {
+                throw new \Exception('Token no encontrado en respuesta del metadata server');
+            }
+
+            return $data['access_token'];
+        } catch (\Exception $e) {
+            Log::error('Excepción al obtener token desde metadata server', [
+                'message' => $e->getMessage()
+            ]);
+            throw new \Exception('No se pudo obtener access token: ' . $e->getMessage());
+        }
     }
 
     private function createJWT(array $credentials): string
