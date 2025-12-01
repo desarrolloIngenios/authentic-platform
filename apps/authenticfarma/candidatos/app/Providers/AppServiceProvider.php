@@ -22,8 +22,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Carbon::setLocale('es');
+        
+        // Forzar HTTPS en producción, excepto para el health check endpoint
         if ($this->app->environment('production')) {
-            URL::forceScheme('https');
+            $request = $this->app['request'];
+            
+            // No forzar HTTPS para /healthz (usado por Kubernetes probes)
+            if ($request && $request->path() !== 'healthz') {
+                URL::forceScheme('https');
+            }
         }
     }
 }
