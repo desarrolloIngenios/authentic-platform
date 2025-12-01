@@ -64,11 +64,12 @@ RUN mkdir -p \
     /var/www/storage/framework/views \
     /var/www/storage/framework/cache/data \
     /var/www/storage/framework/sessions \
-    /var/www/bootstrap/cache && \
+    /var/www/bootstrap/cache \
+    /var/www/.config/psysh && \
     find /var/www/storage -type d -exec chmod 775 {} \; && \
     find /var/www/storage -type f -exec chmod 664 {} \; && \
-    chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && \
-    chmod -R 775 /var/www/bootstrap/ && \
+    chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/.config && \
+    chmod -R 775 /var/www/bootstrap/ /var/www/.config && \
     chmod -R 0777 /var/www/storage
 
 # Crear directorios de logs para nginx y supervisord
