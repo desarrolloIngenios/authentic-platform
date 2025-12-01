@@ -116,9 +116,15 @@ spec:
             - name: QUEUE_CONNECTION
               value: "sync"
             - name: SESSION_DRIVER
-              value: "file"
+              value: "database"
             - name: SESSION_LIFETIME
-              value: "120"
+              value: "1440"
+            - name: SESSION_SECURE_COOKIE
+              value: "true"
+            - name: SESSION_SAME_SITE
+              value: "lax"
+            - name: SESSION_DOMAIN
+              value: ".authenticfarma.com"
 
             # MAIL CONFIG
             - name: MAIL_MAILER
