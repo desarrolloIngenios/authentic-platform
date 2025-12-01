@@ -255,7 +255,18 @@ class CandidateController extends Controller
 
                             $experiencia = new HvCanExpLab();
                             // Mapear claves alternativas para compatibilidad
-                            $experiencia->empresa = $exp['empresa'] ?? $exp['nombre_empresa'] ?? null;
+                            $empresa = $exp['empresa'] ?? $exp['nombre_empresa'] ?? null;
+                            
+                            // Validar que empresa no sea null (columna NOT NULL en BD)
+                            if (empty($empresa)) {
+                                Log::warning('Experiencia laboral sin empresa, usando valor por defecto', [
+                                    'experiencia' => $exp,
+                                    'candidato_id' => $candidato->id_candidato
+                                ]);
+                                $empresa = 'Empresa no especificada';
+                            }
+                            
+                            $experiencia->empresa = $empresa;
                             $experiencia->descripcion_cargo = $exp['descripcion'] ?? 'Descripción no encontrada';
                             $experiencia->fecha_inicio = $exp['fecha_inicio'] ?? now();
                             $experiencia->fecha_fin = $exp['fecha_fin'] ?? null;
