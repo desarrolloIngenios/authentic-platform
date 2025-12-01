@@ -142,7 +142,9 @@ class GeminiVertexService implements GeminiServiceInterface
             }
         }
 
-        if (!file_exists($credentialsPath)) {
+        // Con Workload Identity, no hay archivo de credenciales.
+        // Si $credentialsPath es null o vacío, usamos ADC (metadata server) automáticamente.
+        if (!empty($credentialsPath) && !file_exists($credentialsPath)) {
             throw new \Exception("Credenciales no encontradas: {$credentialsPath}");
         }
 
